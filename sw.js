@@ -1,4 +1,4 @@
-const CACHE = "bf2026-v2";
+const CACHE = "bf2026-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -7,7 +7,20 @@ const SHELL = [
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/apple-touch-icon.png",
+  "./images/ravennaschlucht.jpg",
+  "./images/titisee.jpg",
+  "./images/badeparadies.jpg",
+  "./images/europapark.jpg",
+  "./images/freiburg.jpg",
+  "./images/todtnau-falls.jpg",
+  "./images/blackforestline.jpg",
+  "./images/rulantica.jpg",
+  "./images/triberg.jpg",
+  "./images/vogelpark.jpg",
+  "./images/rheinfall.jpg",
+  "./images/lindt.jpg",
+  "./images/zurich-airport.jpg"
 ];
 
 self.addEventListener("install", event => {
