@@ -1,6 +1,6 @@
 /* ============================================================
-   Black Forest 2026 — trip data
-   Everything hardcoded, no network calls needed after first load.
+   היער השחור 2026 — נתוני הטיול
+   הכל מוטמע בקוד, אין קריאות רשת אחרי הטעינה הראשונה.
    ============================================================ */
 
 const TRIP = {
@@ -10,83 +10,85 @@ const TRIP = {
     name: "Hotel Schlehdorn",
     address: "Am Sommerberg 1, 79868 Feldberg (Schwarzwald)-Altglashütten, Germany"
   },
-  flightIn: { city: "Zürich", date: "2026-08-17", time: "12:30", note: "Drive to hotel: ~1h15–1h30" },
-  flightOut: { city: "Zürich", date: "2026-08-24", time: "22:00", note: "Confirm exact time against your actual ticket" }
+  flightIn: { city: "ציריך", date: "2026-08-17", time: "12:30", note: "נסיעה למלון: כשעה ורבע עד שעה וחצי" },
+  flightOut: { city: "ציריך", date: "2026-08-24", time: "22:00", note: "לוודא את השעה המדויקת מול הכרטיס בפועל" }
 };
 
-// Pre-trip checklist — persisted with localStorage so ticks stick on-device.
+// רשימת לפני-הטיול — נשמרת ב-localStorage כך שהסימונים נשארים במכשיר.
 const CHECKLIST = [
-  "Book Rulantica tickets in advance — fills up almost every day",
-  "Book Europa-Park tickets in advance (linked to a specific date, can't change) — buying at the gate costs 10€ more/person",
-  "Download the Europa-Park app, mark favorites, plan Virtual Line (VL) for key rides",
-  "Book Lindt chocolate workshop in advance, if doing it on the last day",
-  "Book Lindt Home of Chocolate museum ticket + time slot in advance (very high demand)",
-  "Bring towels from the hotel for Rulantica (or plan to rent there)",
-  "Pack closed shoes / water sandals for the Gutach sensory trail (mud, stones, streams)",
-  "Plan Sunday's meals ahead — many restaurants in Germany are closed on Sundays"
+  "להזמין מראש כרטיסי Rulantica — הפארק מתמלא כמעט כל יום",
+  "להזמין מראש כרטיסי Europa-Park (מקושר לתאריך ספציפי, אי אפשר להחליף) — קנייה בקופה עולה 10€ יותר לאדם",
+  "להוריד את אפליקציית Europa-Park, לסמן מועדפים ולתכנן Virtual Line (VL) למתקנים המרכזיים",
+  "להזמין מראש סדנת שוקולד בלינדט, אם עושים אותה ביום האחרון",
+  "להזמין מראש כרטיס + חלון זמן למוזיאון לינדט (ביקוש גבוה מאוד)",
+  "להביא מגבות מהמלון לרולנטיקה (או לשכור במקום)",
+  "לקחת נעליים סגורות / סנדלי מים לשביל החושים בגוטאך (בוץ, אבנים, נחלים)",
+  "לתכנן מראש את ארוחות יום ראשון — הרבה מסעדות בגרמניה סגורות בימי ראשון"
 ];
 
 const GENERAL_TIPS = [
-  "Many restaurants in Germany close on Sundays — plan Sunday (23 Aug) meals ahead.",
-  "The FIFA Museum in Zürich is closed on Mondays — since 24 Aug is a Monday, it's Lindt or nothing that day.",
-  "Towns/trails with stream crossings (Gutach) — bring water shoes or sandals."
+  "הרבה מסעדות בגרמניה סגורות בימי ראשון — לתכנן מראש את הארוחות ליום ראשון (23.8).",
+  "מוזיאון ה-FIFA בציריך סגור בימי שני — ומכיוון שה-24.8 הוא יום שני, באותו יום זה לינדט או כלום.",
+  "במסלולים עם מעברי נחל (כמו בגוטאך) — לקחת נעלי מים או סנדלים."
 ];
 
 function mapLink(address) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
 }
 
-/* Each day: blocks are chronological. start/end are 24h "HH:MM" local time.
-   approx:true means the doc didn't give an exact time — it's a sensible estimate,
-   shown with a "~" so nobody mistakes it for a booked time. */
+const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
+
+/* לכל יום — blocks כרונולוגי. start/end בפורמט "HH:MM" (שעון מקומי).
+   approx:true אומר שהמסמך המקורי לא נתן שעה מדויקת — זו הערכה סבירה,
+   מוצגת עם "~" כדי שאף אחד לא יתבלבל שזו שעה קבועה. */
 const DAYS = [
   {
     date: "2026-08-17",
-    title: "Arrival",
-    place: "Zürich → Hotel Schlehdorn",
-    driveNote: "Land 12:30, ~1h15–1h30 drive to the hotel",
+    title: "הגעה",
+    place: "ציריך → Hotel Schlehdorn",
+    driveNote: "נחיתה 12:30, נסיעה של כשעה ורבע עד שעה וחצי למלון",
     blocks: [
       {
         start: "12:30", end: "14:00", approx: false,
-        title: "Land in Zürich",
-        desc: "Drive from the airport to the hotel, roughly 1h15–1h30.",
+        title: "נחיתה בציריך",
+        desc: "נסיעה מהשדה למלון, כשעה ורבע עד שעה וחצי.",
       },
       {
         start: "14:30", end: "18:00", approx: true,
-        title: "Pandorena, or just rest",
-        desc: "Trampolines, ropes course, climbing wall — 15 min from the hotel. Or skip it and just settle in after a travel day.",
+        title: "מתחם פאנדורנה, או פשוט מנוחה",
+        desc: "טרמפולינות, מתחם חבלים, קיר טיפוס — 15 דקות נסיעה מהמלון. או פשוט להתארגן ולנוח במלון אחרי יום נסיעה.",
         address: "Pandorena, Feldberg (Schwarzwald)",
-        tips: [{ text: "First day — no shame in doing nothing but unpacking." }]
+        tips: [{ text: "יום ראשון של הטיול — אין שום בעיה לא לעשות כלום חוץ מלהתארגן." }]
       }
     ]
   },
   {
     date: "2026-08-18",
-    title: "Titisee",
-    place: "Titisee-Neustadt",
-    driveNote: "~20 min drive from the hotel",
+    title: "טיטיזה",
+    place: "טיטיזה-נוישטט",
+    driveNote: "כ-20 דקות נסיעה מהמלון",
     blocks: [
       {
         start: "09:00", end: "12:00", approx: true,
-        title: "Ravenna Gorge (Ravennaschlucht)",
-        desc: "Start at Hofgut Sternen — worth seeing before the trail: the Ravenna Viaduct (37m stone railway bridge you walk under), a giant cuckoo clock that opens on the hour, and a cuckoo-clock shop with glass-blowing. The gorge trail itself is shaded, narrow, with small waterfalls — anywhere from 30 min to ~3 hours depending on pace.",
-        tips: [{ text: "Flexible length — good for a tired-legs day, just turn back early." }]
+        title: "שביל רוואנהשלוכט (Ravennaschlucht)",
+        desc: "מתחילים ב-Hofgut Sternen — שווה לראות לפני השביל: גשר הרכבת (Ravenna Viaduct, גובה 37 מ׳) שעוברים מתחתיו, שעון קוקייה ענק שנפתח בכל שעה עגולה, וחנות שעוני קוקייה עם סדנת ניפוח זכוכית. השביל עצמו: קניון צר ומיוער, מוצל כמעט כולו, עם מפלים קטנים לאורך הדרך — בין 30 דקות לכ-3 שעות, תלוי בקצב.",
+        tips: [{ text: "אורך גמיש — טוב ליום עם רגליים עייפות, פשוט חוזרים מוקדם." }]
       },
       {
         start: "12:00", end: "13:30", approx: true,
-        title: "Titisee lake",
-        desc: "The most famous touristy lake in the Black Forest — paddle/electric boats, lakeside promenade, ice cream.",
-        tips: [{ text: "Pretty, but a tourist trap — 1–2 hours is plenty, don't linger.", warn: false }]
+        title: "אגם טיטיזי",
+        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה.",
+        tips: [{ text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." }]
       },
       {
         start: "14:00", end: "18:00", approx: true,
         title: "Badeparadies Schwarzwald",
-        desc: "Best water park in the area. Galaxy area has dozens of slides, good for kids and teens; there's a spa zone for adults too. 4 hours is enough — open until 22:00.",
+        desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. 4 שעות מספיקות — פתוח עד 22:00.",
         address: "Am Badeparadies 1, 79822 Titisee-Neustadt",
-        price: "~22€ (4hr) / ~30€ (day) per person",
-        hours: "9:00–22:00 daily (incl. Tue) in summer holidays",
+        price: "כ-22€ (4 שעות) / כ-30€ (יום) לנפש",
+        hours: "9:00–22:00 בכל יום (כולל שלישי) בחופשת הקיץ",
         tips: [
-          { text: "Must book online in advance, including seat/sunbed assignment — no walk-up entry at the box office.", warn: true }
+          { text: "חובה להזמין מראש באתר, כולל שיבוץ מקום/מיטת שיזוף — אי אפשר פשוט להגיע ולהיכנס בקופה.", warn: true }
         ]
       }
     ]
@@ -95,166 +97,166 @@ const DAYS = [
     date: "2026-08-19",
     title: "Europa-Park",
     place: "Rust",
-    driveNote: "~1h10–1h20 drive from the hotel",
+    driveNote: "כ-1:10–1:20 שעות נסיעה מהמלון",
     blocks: [
       {
         start: "09:00", end: "18:00", approx: false,
-        title: "Full day at Europa-Park",
-        desc: "Wednesday was picked on purpose — along with Friday, it's the least crowded day (weekends are worst). Arrive right at opening.",
+        title: "יום מלא ב-Europa-Park",
+        desc: "יום רביעי נבחר בכוונה — יחד עם יום שישי, זה היום הכי פחות עמוס בפארק (סופ\"ש הכי צפוף). טיפ: להגיע בפתיחה.",
         address: "Europa-Park-Straße 2, 77977 Rust",
-        price: "~34–38€/day (2026 est., varies by date)",
-        hours: "9:00–18:00 (at least, in summer)",
+        price: "כ-34–38€ ליום (הערכה 2026, תלוי בתאריך)",
+        hours: "9:00–18:00 (לפחות) בקיץ",
         tips: [
-          { text: "Ticket is locked to this specific date — buying at the gate (if space left) costs 10€ more per person, and peak days sell out.", warn: true },
-          { text: "Download the app ahead of time, mark favorites, and book Virtual Line (VL) for key rides." }
+          { text: "הכרטיס מקושר לתאריך ספציפי — קנייה בקופה (אם יש מקום) עולה 10€ יותר לאדם, וימי שיא נגמרים בכרטיסים.", warn: true },
+          { text: "להוריד את האפליקציה מראש, לסמן מועדפים, ולהזמין Virtual Line (VL) למתקנים המרכזיים." }
         ]
       },
       {
         start: null, end: null, approx: true,
-        title: "Must-ride coasters",
+        title: "רכבות שחובה",
         desc: "Voltron · Blue Fire · Wodan · Silver Star"
       },
       {
         start: null, end: null, approx: true,
-        title: "Also worth it",
-        desc: "Voletarium (flight simulator, near entrance), Cancan, Pegasus, Euro-Mir, Fjord (family raft ride), Pirates in Batavia (boat ride), Arthur."
+        title: "עוד שווה",
+        desc: "Voletarium (סימולטור טיסה, ליד הכניסה), Cancan, Pegasus, Euro-Mir, Fjord (אבובים למשפחה), Pirates in Batavia (שיט), Arthur."
       }
     ]
   },
   {
     date: "2026-08-20",
-    title: "Freiburg + Todtnau",
-    place: "Freiburg (morning) · Todtnau (afternoon)",
-    driveNote: "Freiburg ~45 min from hotel · Todtnau ~20 min from Freiburg",
+    title: "פרייבורג + טודנאו",
+    place: "פרייבורג (בוקר) · טודנאו (אחה\"צ)",
+    driveNote: "פרייבורג כ-45 דקות מהמלון · טודנאו כ-20 דקות מפרייבורג",
     blocks: [
       {
         start: "09:00", end: "12:00", approx: true,
-        title: "Freiburg — Münstermarkt",
-        desc: "Cathedral market at Münsterplatz — runs every morning except Sunday. North side: farmers' market (local produce, berries, honey, flowers). South side: spices, wooden crafts, souvenirs, street food. Then a walk around the Münster square and the Bächle water channels; shopping on Kaiser-Joseph-Straße (\"Ka-Jo\") if there's time.",
-        tips: [{ text: "Do Freiburg in the morning — the market doesn't run in the afternoon, and it's closed Sundays anyway." }]
+        title: "פרייבורג — שוק הקתדרלה",
+        desc: "שוק הקתדרלה (\"מינסטרמארקט\") בכיכר Münsterplatz — פועל כל בוקר חוץ מיום ראשון. צד צפוני: שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים). צד דרומי: תבלינים, כלי עץ, מזכרות, אוכל רחוב. אחר כך טיול בכיכר המונסטר ותעלות המים (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\") אם נשאר זמן.",
+        tips: [{ text: "פרייבורג בבוקר — השוק לא פועל אחה\"צ, וגם ככה סגור בימי ראשון." }]
       },
       {
         start: "13:00", end: "17:00", approx: true,
-        title: "Todtnau Falls + hanging bridge",
-        desc: "Two entrances: the LOWER one (recommended with small kids) is off road L126 — an easy, gentle \"red trail\", ~10 min to the main waterfall, simple there-and-back. The UPPER entrance, near Todtnauberg, reaches the hanging bridge but is a steep descent to the falls — the climb back up can be tough for little legs. Tip with two cars: leave one below, drive everyone up, and walk the whole route downhill only. The Blackforestline hanging bridge has its own separate entrance — panoramic views, adrenaline rush.",
+        title: "מפלי טודנאו והגשר התלוי",
+        desc: "שתי כניסות: התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. העליונה, ליד טודנאוברג, מגיעה לגשר התלוי אבל בירידה תלולה למפלים — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד. לגשר התלוי Blackforestline יש כניסה נפרדת משלו — נוף פנורמי וחוויית אדרנלין.",
         address: "Außer Ort 38, 79674 Todtnauberg",
-        price: "Combo ticket (bridge + falls): ~12€ adult, ~9€ child",
-        hours: "8:00–20:30 in summer, last entry 19:00. Staffed ticket counter/discounts only 10:00–16:00 — outside that, machines only, no discounts.",
+        price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
+        hours: "8:00–20:30 בקיץ, כניסה אחרונה 19:00. קופה מאוישת/הנחות רק 10:00–16:00 — מעבר לזה רק מכונות, בלי הנחות.",
       }
     ]
   },
   {
     date: "2026-08-21",
-    title: "Rulantica",
+    title: "רולנטיקה",
     place: "Rust",
-    driveNote: "Same area as Europa-Park",
+    driveNote: "אותו אזור כמו Europa-Park",
     blocks: [
       {
         start: "10:00", end: "18:00", approx: true,
-        title: "Rulantica water park",
-        desc: "Friday was picked on purpose, like Wednesday — one of the least crowded days. Separate ticket from Europa-Park.",
-        hours: "Usually 09:30/10:00–22:00 (check official site for the exact date)",
-        price: "Day: child ~38–54€, adult ~41–54€ · \"Moonlight\" (19:00–22:00) cheapest, child ~28–34€ · under 4 free · 0–3 free",
+        title: "פארק המים רולנטיקה",
+        desc: "יום שישי נבחר בכוונה, כמו רביעי — אחד הימים הפחות עמוסים. כרטיס נפרד מ-Europa-Park.",
+        hours: "בד\"כ 09:30/10:00–22:00 (לבדוק באתר הרשמי לפי התאריך)",
+        price: "יום: ילד כ-38–54€, מבוגר כ-41–54€ · \"Moonlight\" (19:00–22:00) הכי זול, ילד כ-28–34€ · מתחת לגיל 4 חינם · 0–3 חינם",
         tips: [
-          { text: "Book tickets in advance — the park fills up almost every day.", warn: true },
-          { text: "Lockers are free via the Rula-Band wristband, which also works for in-park payment." },
-          { text: "Parking is paid — pay ahead via the website/app." },
-          { text: "No glass bottles or big coolers; water, reusable bottles, and light snacks are fine." },
-          { text: "Bring towels from the hotel, or rent on site." },
-          { text: "Water temp is 30–32°C." },
-          { text: "Kids up to 12 get in free on their actual birthday (bring ID)." }
+          { text: "להזמין כרטיסים מראש — הפארק מתמלא כמעט כל יום.", warn: true },
+          { text: "הלוקרים חינם דרך צמיד Rula-Band, שמשמש גם לתשלום בפארק." },
+          { text: "החניה בתשלום — לשלם מראש באתר/אפליקציה." },
+          { text: "אסור בקבוקי זכוכית או צידניות גדולות; מים, בקבוק רב-פעמי וחטיפים קלים מותר." },
+          { text: "להביא מגבות מהמלון, או לשכור במקום." },
+          { text: "טמפרטורת המים 30–32°C." },
+          { text: "ילדים עד גיל 12 נכנסים חינם ביום ההולדת שלהם (עם דרכון)." }
         ]
       }
     ]
   },
   {
     date: "2026-08-22",
-    title: "Triberg + Gutach",
-    place: "Triberg · Gutach",
-    driveNote: "~55–60 min drive from the hotel",
+    title: "טריברג + גוטאך",
+    place: "טריברג · גוטאך",
+    driveNote: "כ-55–60 דקות נסיעה מהמלון",
     blocks: [
       {
         start: "09:30", end: "12:00", approx: true,
-        title: "Triberg",
-        desc: "Triberg Falls — the most famous in the Black Forest — plus giant cuckoo clocks and a classic town center.",
-        price: "Falls entry: adult 7–8€, family ticket ~20€, kids under 6 free (usually cash only). Same ticket also covers the Schwarzwaldmuseum and Triberg-Land.",
-        hours: "Ticket booth staffed ~9:00–19:00",
-        tips: [{ text: "Outside booth hours (early morning or evening), entry to the falls is free — and less crowded too." }]
+        title: "טריברג",
+        desc: "מפלי טריברג — המפורסמים ביער השחור — פלוס שעוני קוקייה ענקיים ומרכז עיירה קלאסי.",
+        price: "כניסה למפלים: מבוגר 7–8€, כרטיס משפחתי כ-20€, ילדים עד גיל 6 חינם (בד\"כ מזומן בלבד). אותו כרטיס מזכה גם בכניסה ל-Schwarzwaldmuseum ול-Triberg-Land.",
+        hours: "הקופה מאוישת כ-9:00–19:00",
+        tips: [{ text: "מחוץ לשעות הקופה (בוקר מוקדם או ערב) הכניסה למפלים חופשית — וגם פחות עמוס." }]
       },
       {
         start: "13:00", end: "16:00", approx: true,
-        title: "Gutach — sensory trail",
-        desc: "Circular trail, 1–3 hours depending on pace. Walking on grass, mud, stones and sand, mostly shaded, with touch/smell/sight stations. Worth doing even with older kids.",
+        title: "גוטאך — שביל החושים",
+        desc: "מסלול מעגלי, בין שעה לשלוש שעות לפי קצב. הליכה על דשא, בוץ, אבנים וחול, מוצל ברובו, עם תחנות חוש (מישוש, ריח, ראייה). שווה גם עם ילדים גדולים יותר.",
         tips: [
-          { text: "Bring water shoes/sandals for anyone who doesn't want to go barefoot on stones." },
-          { text: "Bring water — it's not a short trail." },
-          { text: "Greek restaurant \"Alexandros\" is 3 min away and recommended." }
+          { text: "קחו נעלי מים/סנדלים למי שלא נוח לו ללכת יחף על אבנים." },
+          { text: "קחו מים — לא מסלול קצר." },
+          { text: "מסעדה יוונית מומלצת, \"אלכסנדרוס\", 3 דקות נסיעה משם." }
         ]
       },
       {
         start: null, end: null, approx: true,
-        title: "Optional: Sommerrodelbahn Gutach",
-        desc: "Summer toboggan run, usually quieter than the one at Todtnau. Free entry, pay per ride.",
-        hours: "From 10:00 (9:00 during summer holidays)",
-        tips: [{ text: "Minimum age to ride alone is 8. Our 5-year-old can only ride as a passenger, seated with an adult on the same sled — not solo.", warn: true }]
+        title: "אופציה: Sommerrodelbahn גוטאך",
+        desc: "מגלשת קיץ נוספת, בד\"כ פחות עמוסה מזו שבטודנאו. כניסה חופשית, משלמים רק לפי נסיעה.",
+        hours: "פתוח מ-10:00 (מ-9:00 בחופשת הקיץ)",
+        tips: [{ text: "גיל מינימום לנסיעה לבד הוא 8 — הילד בן ה-5 יכול לנסוע רק כנוסע צמוד למבוגר על אותה מזחלת, לא לבד.", warn: true }]
       }
     ],
-    dayNote: "Consider trimming this day — 3 stops plus ~2h of driving round-trip. If time's tight, an hour on the Gutach trail is enough."
+    dayNote: "שקלו לקצר את היום — 3 עצירות וכ-2 שעות נסיעה הלוך-חזור. אם הזמן לוחץ, שעה בשביל גוטאך מספיקה."
   },
   {
     date: "2026-08-23",
-    title: "Vogelpark Steinen",
-    place: "Steinen (bird park)",
-    driveNote: "A deliberately light day after six busy ones",
+    title: "פארק הציפורים בשטיינן",
+    place: "Vogelpark Steinen",
+    driveNote: "יום קליל בכוונה, אחרי שישה ימים עמוסים",
     blocks: [
       {
         start: "10:00", end: "17:00", approx: true,
-        title: "Vogelpark Steinen (bird park)",
-        desc: "Not too big, one of the nicer surprises of the trip. Bird-of-prey show at 11:00 and 15:00; monkeys roam free with feedings at 12:00 and 16:00 — there's a morning and an afternoon round, so plan around whatever's convenient.",
-        price: "Adult 20€, child (4–11) 10€",
-        hours: "10:00–18:00 in summer holidays",
+        title: "פארק הציפורים בשטיינן",
+        desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מופע עופות דורסים ב-11:00 וב-15:00; קופים מסתובבים חופשי עם האכלה ב-12:00 וב-16:00 — יש גם סבב בוקר וגם סבב אחה\"צ, אז אפשר לתכנן לפי מה שנוח.",
+        price: "מבוגר 20€, ילד (4–11) 10€",
+        hours: "10:00–18:00 בחופשת הקיץ",
       },
       {
         start: null, end: null, approx: true,
-        title: "If there's energy left",
-        desc: "Options: Vita Classica spa, Steinwasen Park (rides + animals), or Pandorena (trampolines/ropes/climbing, 15 min from hotel)."
+        title: "אם נשארה אנרגיה",
+        desc: "אופציות: ויטה קלאסיקה (ספא), פארק שטיינווטסן (מתקנים וחיות), או פאנדורנה (טרמפולינות/חבלים/טיפוס, 15 דקות מהמלון)."
       }
     ]
   },
   {
     date: "2026-08-24",
-    title: "Rhine Falls + fly home",
-    place: "Schaffhausen → Kilchberg → Zürich Airport",
-    driveNote: "~55 min hotel→Schaffhausen, then ~30 min on to Zürich airport",
+    title: "מפלי הריין + טיסה הביתה",
+    place: "שפהאוזן ← קילכברג ← נתב\"ג ציריך",
+    driveNote: "כ-55 דקות מהמלון לשפהאוזן, ועוד כ-30 דקות לנתב\"ג ציריך",
     blocks: [
       {
         start: "09:00", end: "12:00", approx: true,
-        title: "Rhine Falls",
-        desc: "The largest waterfall in Europe — genuinely impressive. The must-do is the boat out to the rock in the middle of the falls. There's a ropes park nearby, probably not for the little ones.",
-        tips: [{ text: "The boat to the rock can be intense for a 5-year-old — worth checking with him before getting on. Parking near the falls is paid, a few CHF/hour." }]
+        title: "מפלי הריין",
+        desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
+        tips: [{ text: "השיט לסלע יכול להיות עוצמתי/מפחיד לילד בן 5 — שווה לבדוק מולו לפני שעולים. החניה ליד המפל בתשלום, כמה פרנקים שוויצריים לשעה." }]
       },
       {
         start: "12:30", end: "16:00", approx: true,
         title: "Lindt Home of Chocolate",
-        desc: "Chocolate fountain, shop and café are open to everyone, even without a museum ticket.",
+        desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
         address: "Schokoladenplatz 1, 8802 Kilchberg",
         tips: [
-          { text: "FIFA Museum is closed on Mondays, and 24 Aug is a Monday — so today it's Lindt, no real choice.", warn: true },
-          { text: "High demand — book museum ticket + time slot in advance." },
-          { text: "If doing the chocolate-making workshop, that also needs advance booking." }
+          { text: "מוזיאון ה-FIFA סגור בימי שני, וה-24.8 הוא יום שני — אז היום זה לינדט, אין ברירה אחרת.", warn: true },
+          { text: "ביקוש גבוה מאוד — להזמין כרטיס וחלון זמן מראש." },
+          { text: "אם עושים גם סדנת שוקולד — גם אותה צריך להזמין מראש." }
         ]
       },
       {
         start: "22:00", end: null, approx: false,
-        title: "Flight home from Zürich",
-        desc: "Confirm the exact time against the actual ticket closer to the date."
+        title: "טיסה הביתה מציריך",
+        desc: "לוודא את השעה המדויקת מול הכרטיס בפועל, קרוב יותר לתאריך."
       }
     ]
   }
 ];
 
 /* ============================================================
-   Rendering helpers
+   פונקציות עזר לרינדור
    ============================================================ */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -266,21 +268,14 @@ function toMinutes(hhmm) {
   return h * 60 + m;
 }
 
-function fmtTime(hhmm) {
-  return hhmm || "";
+function hebWeekday(dateStr) {
+  const d = new Date(dateStr + "T12:00:00");
+  return HEB_WEEKDAYS[d.getDay()];
 }
 
-function weekdayShort(dateStr) {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-GB", { weekday: "short" });
-}
-function weekdayLong(dateStr) {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-GB", { weekday: "long" });
-}
 function dayMonth(dateStr) {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const day = Number(dateStr.slice(8, 10));
+  return `${day} באוגוסט`;
 }
 
 function localDateStr(date) {
@@ -294,7 +289,7 @@ function chipsHTML(block) {
   const chips = [];
   if (block.price) chips.push(`<span class="chip">💶 ${escapeHTML(block.price)}</span>`);
   if (block.hours) chips.push(`<span class="chip">🕐 ${escapeHTML(block.hours)}</span>`);
-  if (block.address) chips.push(`<a class="chip map" href="${mapLink(block.address)}" target="_blank" rel="noopener">📍 Map</a>`);
+  if (block.address) chips.push(`<a class="chip map" href="${mapLink(block.address)}" target="_blank" rel="noopener">📍 מפה</a>`);
   if (!chips.length) return "";
   return `<div class="chips">${chips.join("")}</div>`;
 }
@@ -316,14 +311,8 @@ function timeLabel(block) {
   return "";
 }
 
-function blockRange(block, dayEndMinutes) {
-  const s = toMinutes(block.start);
-  const e = toMinutes(block.end);
-  return { s, e };
-}
-
 /* ============================================================
-   Itinerary view
+   תצוגת המסלול המלא
    ============================================================ */
 
 function renderItinerary() {
@@ -346,10 +335,10 @@ function renderItinerary() {
       <details class="day" data-date="${day.date}" ${isToday ? "open" : ""}>
         <summary>
           <span class="day-summary-left">
-            <span class="day-date">${weekdayShort(day.date)}, ${dayMonth(day.date)}${isToday ? '<span class="day-today-dot"></span>' : ""}</span>
+            <span class="day-date">${hebWeekday(day.date)}, ${dayMonth(day.date)}${isToday ? '<span class="day-today-dot"></span>' : ""}</span>
             <span class="day-title">${escapeHTML(day.title)}</span>
           </span>
-          <span class="day-chevron">▶</span>
+          <span class="day-chevron">⌄</span>
         </summary>
         <div class="day-body">
           <div class="day-meta">${escapeHTML(day.place)} · ${escapeHTML(day.driveNote)}</div>
@@ -360,11 +349,11 @@ function renderItinerary() {
     `;
   }).join("");
 
-  $("#view-itinerary").innerHTML = `<h2 class="mini-list-title" style="margin-top:0">Full itinerary</h2>${html}`;
+  $("#view-itinerary").innerHTML = `<h2 class="mini-list-title" style="margin-top:0">המסלול המלא</h2>${html}`;
 }
 
 /* ============================================================
-   Now view
+   תצוגת "עכשיו"
    ============================================================ */
 
 function renderNow() {
@@ -376,17 +365,18 @@ function renderNow() {
 
   if (todayStr < TRIP.start) {
     const daysToGo = Math.ceil((new Date(TRIP.start + "T00:00:00") - new Date(todayStr + "T00:00:00")) / 86400000);
+    const daysLabel = daysToGo === 1 ? "יום אחד" : daysToGo === 2 ? "יומיים" : `${daysToGo} ימים`;
     view.innerHTML = `
       <div class="countdown">
         <div class="num">${daysToGo}</div>
-        <div class="label">day${daysToGo === 1 ? "" : "s"} until the Black Forest</div>
+        <div class="label">${daysLabel} עד היער השחור</div>
       </div>
       <div class="card">
-        <strong>${TRIP.hotel.name}</strong><br>
+        <strong>${escapeHTML(TRIP.hotel.name)}</strong><br>
         <span style="color:var(--ink-soft);font-size:14px">${escapeHTML(TRIP.hotel.address)}</span>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 Map</a></div>
+        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 מפה</a></div>
       </div>
-      <h2 class="mini-list-title">Before you go</h2>
+      <h2 class="mini-list-title">לפני שנוסעים</h2>
       ${renderChecklistHTML()}
     `;
     bindChecklist();
@@ -397,9 +387,9 @@ function renderNow() {
     view.innerHTML = `
       <div class="countdown">
         <div class="num">🌲</div>
-        <div class="label">Trip's done — hope it was a good one.</div>
+        <div class="label">הטיול נגמר — מקווים שהיה כיף!</div>
       </div>
-      <div class="empty-note">The full itinerary is still here under "Itinerary" if you want to look back.</div>
+      <div class="empty-note">המסלול המלא עדיין כאן, תחת "מסלול", אם בא לכם להיזכר.</div>
     `;
     return;
   }
@@ -407,16 +397,15 @@ function renderNow() {
   const dayIndex = DAYS.findIndex(d => d.date === todayStr);
   const day = DAYS[dayIndex];
   if (!day) {
-    view.innerHTML = `<div class="empty-note">No plan found for today — check the Itinerary tab.</div>`;
+    view.innerHTML = `<div class="empty-note">לא נמצאה תוכנית להיום — בדקו בלשונית "מסלול".</div>`;
     return;
   }
 
-  // classify blocks as done / current / upcoming
+  // סיווג הבלוקים ל: הסתיים / קורה עכשיו / בקרוב
   const timed = day.blocks.map((b, i) => {
     const s = toMinutes(b.start);
     let e = toMinutes(b.end);
     if (e == null) {
-      // extend to next timed block's start, or end of day
       const next = day.blocks.slice(i + 1).find(nb => toMinutes(nb.start) != null);
       e = next ? toMinutes(next.start) : 23 * 60 + 59;
     }
@@ -430,7 +419,6 @@ function renderNow() {
     if (nowMinutes >= s && nowMinutes < e) { currentIdx = i; break; }
   }
   if (currentIdx === -1) {
-    // find next upcoming
     const upcoming = timed.findIndex(t => t.s != null && t.s > nowMinutes);
     currentIdx = upcoming;
   }
@@ -438,7 +426,7 @@ function renderNow() {
   const dayNum = dayIndex + 1;
   let heroHTML = `
     <div class="hero">
-      <p class="hero-eyebrow">Day ${dayNum} of ${DAYS.length} · ${weekdayLong(day.date)}, ${dayMonth(day.date)}</p>
+      <p class="hero-eyebrow">יום ${dayNum} מתוך ${DAYS.length} · ${hebWeekday(day.date)}, ${dayMonth(day.date)}</p>
       <h1 class="hero-title">${escapeHTML(day.title)}</h1>
       <p class="hero-sub">${escapeHTML(day.place)} · ${escapeHTML(day.driveNote)}</p>
     </div>
@@ -450,7 +438,7 @@ function renderNow() {
     const isNow = s != null && nowMinutes >= s;
     currentHTML = `
       <div class="now-current">
-        <div class="kicker"><span class="pulse"></span>${isNow ? "Right now" : "Up next"}${timeLabel(b) ? " · " + timeLabel(b) : ""}</div>
+        <div class="kicker"><span class="pulse"></span>${isNow ? "עכשיו" : "בקרוב"}${timeLabel(b) ? " · " + timeLabel(b) : ""}</div>
         <h2>${escapeHTML(b.title)}</h2>
         <p>${escapeHTML(b.desc)}</p>
         ${chipsHTML(b)}
@@ -460,9 +448,9 @@ function renderNow() {
   } else {
     currentHTML = `
       <div class="now-current">
-        <div class="kicker"><span class="pulse"></span>Free time</div>
-        <h2>Nothing scheduled right now</h2>
-        <p>Check "Later today" below, or just enjoy the downtime.</p>
+        <div class="kicker"><span class="pulse"></span>זמן פנוי</div>
+        <h2>אין כרגע שום דבר מתוכנן</h2>
+        <p>אפשר לבדוק את "המשך היום" למטה, או פשוט ליהנות מהזמן הפנוי.</p>
       </div>
     `;
   }
@@ -485,7 +473,7 @@ function renderNow() {
   view.innerHTML = `
     ${heroHTML}
     ${currentHTML}
-    ${restHTML ? `<h2 class="mini-list-title">Rest of today</h2><div class="card">${restHTML}</div>` : ""}
+    ${restHTML ? `<h2 class="mini-list-title">המשך היום</h2><div class="card">${restHTML}</div>` : ""}
     <div class="chips" style="margin-top:16px">
       <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 ${escapeHTML(TRIP.hotel.name)}</a>
     </div>
@@ -493,7 +481,7 @@ function renderNow() {
 }
 
 /* ============================================================
-   Info view
+   תצוגת מידע
    ============================================================ */
 
 function renderChecklistHTML() {
@@ -527,30 +515,30 @@ function renderInfo() {
   const view = $("#view-info");
   view.innerHTML = `
     <div class="info-section">
-      <h2>Hotel</h2>
+      <h2>המלון</h2>
       <div class="card">
-        <div class="info-row"><span class="k">Name</span><span class="v">${escapeHTML(TRIP.hotel.name)}</span></div>
-        <div class="info-row"><span class="k">Address</span><span class="v">${escapeHTML(TRIP.hotel.address)}</span></div>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 Open in Maps</a></div>
+        <div class="info-row"><span class="k">שם</span><span class="v">${escapeHTML(TRIP.hotel.name)}</span></div>
+        <div class="info-row"><span class="k">כתובת</span><span class="v">${escapeHTML(TRIP.hotel.address)}</span></div>
+        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 פתיחה במפות</a></div>
       </div>
     </div>
 
     <div class="info-section">
-      <h2>Flights</h2>
+      <h2>טיסות</h2>
       <div class="card">
-        <div class="info-row"><span class="k">Arrival — ${weekdayLong(TRIP.flightIn.date)} ${dayMonth(TRIP.flightIn.date)}</span><span class="v">${TRIP.flightIn.city}, ${TRIP.flightIn.time}</span></div>
-        <div class="info-row"><span class="k">Departure — ${weekdayLong(TRIP.flightOut.date)} ${dayMonth(TRIP.flightOut.date)}</span><span class="v">${TRIP.flightOut.city}, ${TRIP.flightOut.time}</span></div>
+        <div class="info-row"><span class="k">נחיתה — ${hebWeekday(TRIP.flightIn.date)}, ${dayMonth(TRIP.flightIn.date)}</span><span class="v">${TRIP.flightIn.city}, ${TRIP.flightIn.time}</span></div>
+        <div class="info-row"><span class="k">טיסת חזרה — ${hebWeekday(TRIP.flightOut.date)}, ${dayMonth(TRIP.flightOut.date)}</span><span class="v">${TRIP.flightOut.city}, ${TRIP.flightOut.time}</span></div>
         <div class="tip">💡 ${escapeHTML(TRIP.flightOut.note)}</div>
       </div>
     </div>
 
     <div class="info-section">
-      <h2>Before you go</h2>
+      <h2>לפני שנוסעים</h2>
       ${renderChecklistHTML()}
     </div>
 
     <div class="info-section">
-      <h2>Good to know</h2>
+      <h2>כדאי לדעת</h2>
       <div class="card">
         ${GENERAL_TIPS.map(t => `<div class="tip">💡 ${escapeHTML(t)}</div>`).join("")}
       </div>
@@ -560,7 +548,7 @@ function renderInfo() {
 }
 
 /* ============================================================
-   Tabs + init
+   טאבים + אתחול
    ============================================================ */
 
 function showView(name) {
@@ -587,8 +575,8 @@ function init() {
     });
   }
 
-  // Refresh the "Now" view periodically so "current activity" stays accurate
-  // if the app is left open.
+  // רענון תצוגת "עכשיו" מדי דקה, כדי שהפעילות הנוכחית תישאר מדויקת
+  // אם האפליקציה נשארת פתוחה.
   setInterval(renderNow, 60000);
 }
 

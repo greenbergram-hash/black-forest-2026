@@ -1,4 +1,4 @@
-const CACHE = "bf2026-v1";
+const CACHE = "bf2026-v2";
 const SHELL = [
   "./",
   "./index.html",

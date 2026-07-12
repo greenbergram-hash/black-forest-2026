@@ -263,8 +263,8 @@ details.day summary::-webkit-details-marker { display: none; }
 .day-summary-left { display: flex; flex-direction: column; gap: 2px; }
 .day-date { font-size: 12px; color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .day-title { font-size: 16.5px; }
-.day-chevron { color: var(--ink-soft); transition: transform .15s ease; font-size: 13px; }
-details.day[open] .day-chevron { transform: rotate(90deg); }
+.day-chevron { color: var(--ink-soft); transition: transform .15s ease; font-size: 13px; display: inline-block; }
+details.day[open] .day-chevron { transform: rotate(180deg); }
 .day-today-dot {
   display: inline-block;
   width: 7px; height: 7px;
