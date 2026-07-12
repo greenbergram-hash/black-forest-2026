@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Black Forest 2026</title>
+
+<meta name="theme-color" content="#1c3a2e">
+<meta name="description" content="Family trip plan: Black Forest, Aug 17–24 2026">
+
+<!-- iOS "Add to Home Screen" -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Black Forest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+  <span class="topbar-icon">🌲</span>
+  <div class="topbar-text">
+    <strong>Black Forest</strong>
+    <span id="topbarSub">17–24 Aug 2026</span>
+  </div>
+</header>
+
+<main id="app">
+  <section id="view-now" class="view"></section>
+  <section id="view-itinerary" class="view"></section>
+  <section id="view-info" class="view"></section>
+</main>
+
+<nav class="tabbar">
+  <button class="tab" data-view="now">
+    <span class="tab-icon">🕐</span><span>Now</span>
+  </button>
+  <button class="tab" data-view="itinerary">
+    <span class="tab-icon">📅</span><span>Itinerary</span>
+  </button>
+  <button class="tab" data-view="info">
+    <span class="tab-icon">ℹ️</span><span>Info</span>
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
