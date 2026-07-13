@@ -423,7 +423,8 @@ const RED_CARD_INFO = {
   ],
   links: [
     { label: "האתר הרשמי של הכרטיס", url: "https://www.hochschwarzwald.de/en/red-card" },
-    { label: "פורטל ההרשמה וההזמנות", url: "https://mein.hochschwarzwald.de" }
+    { label: "פורטל ההרשמה וההזמנות", url: "https://mein.hochschwarzwald.de" },
+    { label: "כל ההטבות באתר הרשמי (כולל תמונות ומפה)", url: "https://www.hochschwarzwald.de/en/red-card/red-card-attractions" }
   ]
 };
 
@@ -484,110 +485,113 @@ const CATEGORY_LABELS = {
 // כל שאר הטבות הכרטיס (קיץ + כל השנה) שלא נכללות כבר ב-RED_CARD_PLANNED.
 // תגית family=false ניתנה רק כשהטקסט הרשמי מציין גיל 18+ במפורש, או שמדובר
 // במגרש גולף/יין/אלכוהול — בכל שאר המקרים ברירת המחדל היא family=true.
+// setting: "indoor" | "outdoor" | "mixed" — לפי אופי הפעילות.
+// reservation: true כשההטבה עצמה או ההערה מציינות הזמנה/הרשמה/תיאום מראש כתנאי.
+// desc: תיאור קצר של המקום עצמו (לא של ההטבה) — לתצוגת ה-drill-down.
 const RED_CARD_CATALOG = [
   // --- פנאי וספורט ---
-  { name: "Funny-World פארק שעשועים", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Allmendstr. 1, 77966 Kappel-Grafenhausen, Germany", postal: "77966", phone: "+49 7822 445990", site: "https://www.funny-world.de/", family: true },
-  { name: "Spielscheune Unterkirnach — אסם משחקים מקורה", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Schlossbergweg 4, 78089 Unterkirnach, Germany", postal: "78089", phone: "+49 7721 800855", site: "https://www.spielscheune-unterkirnach.de/", family: true },
-  { name: "Blattert Mühle — Schnitzeljagd (ציד אוצרות בטחנה)", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם, בלי הרשמה מראש — בשעות הפתיחה של הקורנhaus.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", phone: "+49 7703 318", site: "https://www.blattert-muehle.de/", family: true },
-  { name: "Lasertag Base טיטיזה", cat: "leisure-sport", type: "free", benefit: "15 דקות חינם, פעם אחת — הזמנה מקוונת בלבד.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 9331170", family: true },
-  { name: "Tatzmania — פארק חיות והרפתקאות", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Wildpark 3, 79843 Löffingen, Germany", postal: "79843", phone: "+49 7654 8068144", site: "https://www.tatzmania.com/", family: true },
-  { name: "Brauereigasthof Rothaus", cat: "leisure-sport", type: "free", benefit: "כניסה חינם ל-\"Zäpfle Heimat\" כולל משקה 0.33 ליטר (בירה או חלופה אחרת).", address: "Rothaus 1, 79865 Grafenhausen, Germany", postal: "79865", phone: "+49 7748 522-0", site: "https://www.rothaus.de/", family: true },
-  { name: "Spaßpark Hochschwarzwald", cat: "leisure-sport", type: "free", benefit: "כרטיס Card-Gaudi חינם ל-3 שעות בקיץ, כולל Loopy-Ball ופוטבול-גולף/ביליארד.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 9882916", site: "https://www.spasspark.de/", family: true },
-  { name: "Abenteuer Golfpark Hochschwarzwald (מיני-גולף הרפתקאות)", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", address: "Am Kurgarten 1, 79853 Lenzkirch-Kappel, Germany", postal: "79853", phone: "+49 7641 6588", site: "https://www.abenteuergolfpark.de/", family: true },
-  { name: "תיאטרון ב-Kurhaus טיטיזה", cat: "leisure-sport", type: "free", benefit: "כרטיס חינם למופע לבחירה — לפי מקום פנוי בקופת הערב, בלי הזמנה מראש.", address: "Strandbadstr. 4, 79822 Titisee-Neustadt, Germany", postal: "79822", phone: "+49 7652 1206 8125", family: true },
-  { name: "Krone Theater Kino נוישטט", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם (פרקט), פעם אחת — לא כולל אירועים מיוחדים.", address: "Hirschenbuckel 2, 79822 Titisee-Neustadt, Germany", postal: "79822", phone: "+49 7651 1387", site: "https://www.krone-theater.de/", family: true },
-  { name: "Kino im Höfle לנצקירך", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם, פעם אחת.", address: "Im Höfle 11, 79853 Lenzkirch, Germany", postal: "79853", phone: "+49 7653 962220", family: true },
-  { name: "Feldbergbahn — הרכבל", cat: "leisure-sport", type: "free", benefit: "עלייה וירידה חינם ברכבל, כולל כניסה למגדל פלדברג.", address: "Dr.-Pilet-Spur, 79868 Feldberg, Germany", postal: "79868", site: "https://www.feldberg-erlebnis.de/", note: "לא בתוכנית הנוכחית — קל לשלב ביום קליל, כמו יום פארק הציפורים.", family: true },
-  { name: "SUP בחוף Windgfällweiher", cat: "leisure-sport", type: "free", benefit: "60 דקות גלישת SUP חינם, פעם אחת — תלוי מזג אוויר.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
-  { name: "Rothaus-Express — רכבת פנורמה", cat: "leisure-sport", type: "free", benefit: "סיור פנורמה חינם, פעם אחת — לפי מקום פנוי.", address: "Sonnhalde 14, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 152 03441239", site: "https://www.rothausexpress.de/", family: true },
-  { name: "מיני-גולף St. Georgen", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", address: "Spittelbergstr. 19d, 78112 St. Georgen, Germany", postal: "78112", phone: "+49 7724 870", family: true },
-  { name: "מיני-גולף Schönwald", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", address: "Ludwig-van-Beethoven-Str., 78141 Schönwald, Germany", postal: "78141", phone: "+49 1525 1092775", family: true },
-  { name: "מיני-גולף Schonach", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", address: "Hauptstraße 6, 78136 Schonach, Germany", postal: "78136", phone: "+49 7722 9650050", family: true },
-  { name: "מיני-גולף Schluchsee", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", address: "Auf der Wacht 1, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 988 2916", family: true },
-  { name: "Schwarzwaldzoo Waldkirch", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Am Buchenbühl 8a, 79183 Waldkirch, Germany", postal: "79183", phone: "+49 7681 8961", site: "https://www.schwarzwaldzoo.de/", note: "קרוב לפרייבורג — אפשר לשלב ביום פרייבורג/טודנאו אם נשאר זמן.", family: true },
-  { name: "Action Forest Offroad Park טיטיזה", cat: "leisure-sport", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 82560", family: true },
-  { name: "Action Forest Kletterwald (פארק חבלים)", cat: "leisure-sport", type: "free", benefit: "3 שעות חינם בפארק החבלים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 9331170", family: true },
-  { name: "סדנת שעון קוקייה עצמאית — stattMuseum פורטוואנגן", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם בהכנת שעון קוקייה, בהרשמה מראש (מגיל 16, ילדים עד 10 עם מלווה).", address: "Friedrichstr. 3, 78120 Furtwangen, Germany", postal: "78120", phone: "+49 7723 9202 800", note: "טלפון/מייל להרשמה מראש, ב-Mo-Fr 9:00-14:30.", family: true },
-  { name: "Bogensportzentrum — קשתות", cat: "leisure-sport", type: "free", benefit: "2 שעות קשתות חינם באולם, כולל הדרכה וציוד — לא כולל מסלול חוץ.", address: "Hauptstr. 55, 79871 Eisenbach, Germany", postal: "79871", phone: "+49 7657 471", note: "הרשמה טלפונית מראש, שעות ירי 10:00 / 12:00 / 14:00.", family: true },
+  { name: "Funny-World פארק שעשועים", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "פארק שעשועים משפחתי עם מתקנים, קרוסלות ופעילויות מקורות ובחוץ, מתאים לילדים בכל הגילאים.", address: "Allmendstr. 1, 77966 Kappel-Grafenhausen, Germany", postal: "77966", town: "קאפל-גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7822 445990", site: "https://www.funny-world.de/", family: true },
+  { name: "Spielscheune Unterkirnach — אסם משחקים מקורה", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "אסם משחקים מקורה גדול לילדים קטנים, עם מתקני טיפוס, מגלשות ופינות משחק.", address: "Schlossbergweg 4, 78089 Unterkirnach, Germany", postal: "78089", town: "אונטרקירנאך", setting: "indoor", reservation: false, phone: "+49 7721 800855", site: "https://www.spielscheune-unterkirnach.de/", family: true },
+  { name: "Blattert Mühle — Schnitzeljagd (ציד אוצרות בטחנה)", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם, בלי הרשמה מראש — בשעות הפתיחה של הקורנhaus.", desc: "ציד אוצרות משפחתי בשטח טחנת הקמח ההיסטורית של בונדורף.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "outdoor", reservation: false, phone: "+49 7703 318", site: "https://www.blattert-muehle.de/", family: true },
+  { name: "Lasertag Base טיטיזה", cat: "leisure-sport", type: "free", benefit: "15 דקות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "מתחם לייזר-טאג מקורה בטיטיזה, פעילות אקשן קבוצתית לילדים גדולים יותר ומבוגרים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: true, phone: "+49 7651 9331170", family: true },
+  { name: "Tatzmania — פארק חיות והרפתקאות", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "פארק חיות והרפתקאות בלופינגן עם בעלי חיים, מתקני שעשועים ומופעים.", address: "Wildpark 3, 79843 Löffingen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 8068144", site: "https://www.tatzmania.com/", family: true },
+  { name: "Brauereigasthof Rothaus", cat: "leisure-sport", type: "free", benefit: "כניסה חינם ל-\"Zäpfle Heimat\" כולל משקה 0.33 ליטר (בירה או חלופה אחרת).", desc: "מרכז מבקרים ומסעדה של מבשלת הבירה המפורסמת רוטהאוס.", address: "Rothaus 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 522-0", site: "https://www.rothaus.de/", family: true },
+  { name: "Spaßpark Hochschwarzwald", cat: "leisure-sport", type: "free", benefit: "כרטיס Card-Gaudi חינם ל-3 שעות בקיץ, כולל Loopy-Ball ופוטבול-גולף/ביליארד.", desc: "פארק פנאי בשלוכזה עם פעילויות קיץ כמו כדור-ענק (Loopy-Ball) ופוטבול-גולף.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 9882916", site: "https://www.spasspark.de/", family: true },
+  { name: "Abenteuer Golfpark Hochschwarzwald (מיני-גולף הרפתקאות)", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מיני-גולף הרפתקאות בלנצקירך-קאפל, מסלול חוץ צבעוני למשפחות.", address: "Am Kurgarten 1, 79853 Lenzkirch-Kappel, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 7641 6588", site: "https://www.abenteuergolfpark.de/", family: true },
+  { name: "תיאטרון ב-Kurhaus טיטיזה", cat: "leisure-sport", type: "free", benefit: "כרטיס חינם למופע לבחירה — לפי מקום פנוי בקופת הערב, בלי הזמנה מראש.", desc: "אולם תיאטרון קטן בבית הקורהאוס של טיטיזה, עם הצגות ומופעים מתחלפים.", address: "Strandbadstr. 4, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7652 1206 8125", family: true },
+  { name: "Krone Theater Kino נוישטט", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם (פרקט), פעם אחת — לא כולל אירועים מיוחדים.", desc: "בית קולנוע עצמאי במרכז טיטיזה-נוישטט.", address: "Hirschenbuckel 2, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7651 1387", site: "https://www.krone-theater.de/", family: true },
+  { name: "Kino im Höfle לנצקירך", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם, פעם אחת.", desc: "בית קולנוע קטן ומקומי בלנצקירך.", address: "Im Höfle 11, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "indoor", reservation: false, phone: "+49 7653 962220", family: true },
+  { name: "Feldbergbahn — הרכבל", cat: "leisure-sport", type: "free", benefit: "עלייה וירידה חינם ברכבל, כולל כניסה למגדל פלדברג.", desc: "רכבל העולה לפסגת הפלדברג, ההר הגבוה ביותר ביער השחור, עם נוף פנורמי ומגדל תצפית.", address: "Dr.-Pilet-Spur, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "outdoor", reservation: false, site: "https://www.feldberg-erlebnis.de/", note: "לא בתוכנית הנוכחית — קל לשלב ביום קליל, כמו יום פארק הציפורים.", family: true },
+  { name: "SUP בחוף Windgfällweiher", cat: "leisure-sport", type: "free", benefit: "60 דקות גלישת SUP חינם, פעם אחת — תלוי מזג אוויר.", desc: "חוף אגם קטן בלנצקירך עם אפשרות לגלישת SUP.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
+  { name: "Rothaus-Express — רכבת פנורמה", cat: "leisure-sport", type: "free", benefit: "סיור פנורמה חינם, פעם אחת — לפי מקום פנוי.", desc: "רכבת תיירותית פתוחה שמסתובבת בנוף שסביב מבשלת רוטהאוס.", address: "Sonnhalde 14, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 152 03441239", site: "https://www.rothausexpress.de/", family: true },
+  { name: "מיני-גולף St. Georgen", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בסנט גאורגן.", address: "Spittelbergstr. 19d, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "outdoor", reservation: false, phone: "+49 7724 870", family: true },
+  { name: "מיני-גולף Schönwald", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשנוואלד.", address: "Ludwig-van-Beethoven-Str., 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: false, phone: "+49 1525 1092775", family: true },
+  { name: "מיני-גולף Schonach", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשונאך.", address: "Hauptstraße 6, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "outdoor", reservation: false, phone: "+49 7722 9650050", family: true },
+  { name: "מיני-גולף Schluchsee", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשלוכזה.", address: "Auf der Wacht 1, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 988 2916", family: true },
+  { name: "Schwarzwaldzoo Waldkirch", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "גן חיות קטן ונעים בוולדקירך, ליד פרייבורג.", address: "Am Buchenbühl 8a, 79183 Waldkirch, Germany", postal: "79183", town: "וולדקירך", setting: "outdoor", reservation: false, phone: "+49 7681 8961", site: "https://www.schwarzwaldzoo.de/", note: "קרוב לפרייבורג — אפשר לשלב ביום פרייבורג/טודנאו אם נשאר זמן.", family: true },
+  { name: "Action Forest Offroad Park טיטיזה", cat: "leisure-sport", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד.", desc: "מסלול רכבי שטח (Offroad) בטיטיזה, לילדים ומבוגרים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", family: true },
+  { name: "Action Forest Kletterwald (פארק חבלים)", cat: "leisure-sport", type: "free", benefit: "3 שעות חינם בפארק החבלים.", desc: "פארק חבלים בחוץ בטיטיזה, עם מסלולים בגבהים שונים בין העצים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 9331170", family: true },
+  { name: "סדנת שעון קוקייה עצמאית — stattMuseum פורטוואנגן", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם בהכנת שעון קוקייה, בהרשמה מראש (מגיל 16, ילדים עד 10 עם מלווה).", desc: "סדנה עצמאית להרכבת שעון קוקייה משלכם, ב-stattMuseum בפורטוואנגן.", address: "Friedrichstr. 3, 78120 Furtwangen, Germany", postal: "78120", town: "פורטוואנגן", setting: "indoor", reservation: true, phone: "+49 7723 9202 800", note: "טלפון/מייל להרשמה מראש, ב-Mo-Fr 9:00-14:30.", family: true },
+  { name: "Bogensportzentrum — קשתות", cat: "leisure-sport", type: "free", benefit: "2 שעות קשתות חינם באולם, כולל הדרכה וציוד — לא כולל מסלול חוץ.", desc: "אולם קשתות מקצועי באייזנבך, עם הדרכה לכל הרמות.", address: "Hauptstr. 55, 79871 Eisenbach, Germany", postal: "79871", town: "אייזנבך", setting: "indoor", reservation: true, phone: "+49 7657 471", note: "הרשמה טלפונית מראש, שעות ירי 10:00 / 12:00 / 14:00.", family: true },
 
   // --- בריכות ואגמים ---
-  { name: "Hallenbad Breitnau (בריכה מקורה + סאונה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם לבריכה ולסאונה, פעם אחת.", address: "Dorfstr. 3, 79874 Breitnau, Germany", postal: "79874", phone: "+49 7652 910950", family: true },
-  { name: "Hallenbad Löffingen-Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Taborstr. 33, 79843 Löffingen-Dittishausen, Germany", postal: "79843", phone: "+49 7654 493", family: true },
-  { name: "Hallenbad St. Georgen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Im Hochwald 6, 78112 St. Georgen, Germany", postal: "78112", phone: "+49 7724 87358", family: true },
-  { name: "Hallenbad Schluchsee-Schönenbach", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Weiherstr. 4, 79859 Schluchsee-Schönenbach, Germany", postal: "79859", phone: "+49 7747 511", family: true },
-  { name: "בריכת חוץ עירונית בונדורף", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — מתחילת הקיץ עד סוף חופשת הקיץ.", address: "Schwimmbadstr. 11, 79848 Bonndorf, Germany", postal: "79848", phone: "+49 7703 8034", family: true },
-  { name: "Waldbad Löffingen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Welschland, 79843 Löffingen, Germany", postal: "79843", phone: "+49 7654 8266", family: true },
-  { name: "Freibad Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Schwimmbadstr. 30, 79843 Löffingen-Dittishausen, Germany", postal: "79843", phone: "+49 7654 808801", family: true },
-  { name: "Freibad Lenzkirch", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Friedhofstr. 11, 79853 Lenzkirch, Germany", postal: "79853", phone: "+49 7653 400", family: true },
-  { name: "Freibad נוישטט (טיטיזה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Gutachstraße 33, 79822 Titisee-Neustadt, Germany", postal: "79822", phone: "+49 7651 9331121", family: true },
-  { name: "Naturena-Badesee", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Im Tal 1, 79777 Ühlingen-Birkendorf, Germany", postal: "79777", phone: "+49 7743 919727", family: true },
-  { name: "Naturfreibad Klosterweiher (סנט גאורגן)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Brigachstr. 2, 78112 St. Georgen, Germany", postal: "78112", phone: "+49 7724 87386", family: true },
-  { name: "Naturfreibad סנט מרגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Sportplatz 4, 79274 St. Märgen, Germany", postal: "79274", phone: "+49 7669 91180", family: true },
-  { name: "Naturfreibad שנוואלד", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Ludwig-van-Beethoven-Str. 15, 78141 Schönwald, Germany", postal: "78141", phone: "+49 173 2874525", family: true },
-  { name: "Bregtalbad פורטוואנגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Jahnstraße 11, 78120 Furtwangen, Germany", postal: "78120", phone: "+49 7723 9149709", family: true },
-  { name: "aqua fun שלוכזה", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Freiburger Str. 16, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 7731", family: true },
-  { name: "חוף רחצה Windgfällweiher", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
+  { name: "Hallenbad Breitnau (בריכה מקורה + סאונה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם לבריכה ולסאונה, פעם אחת.", desc: "בריכה מקורה קטנה בברייטנאו, עם סאונה.", address: "Dorfstr. 3, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: false, phone: "+49 7652 910950", family: true },
+  { name: "Hallenbad Löffingen-Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה קהילתית בשכונת דיטישאוזן שבלפינגן.", address: "Taborstr. 33, 79843 Löffingen-Dittishausen, Germany", postal: "79843", town: "לפינגן", setting: "indoor", reservation: false, phone: "+49 7654 493", family: true },
+  { name: "Hallenbad St. Georgen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה עירונית בסנט גאורגן.", address: "Im Hochwald 6, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "indoor", reservation: false, phone: "+49 7724 87358", family: true },
+  { name: "Hallenbad Schluchsee-Schönenbach", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה קטנה בשכונת שנבך שבשלוכזה.", address: "Weiherstr. 4, 79859 Schluchsee-Schönenbach, Germany", postal: "79859", town: "שלוכזה", setting: "indoor", reservation: false, phone: "+49 7747 511", family: true },
+  { name: "בריכת חוץ עירונית בונדורף", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — מתחילת הקיץ עד סוף חופשת הקיץ.", desc: "בריכת חוץ קהילתית בלב בונדורף, פתוחה בקיץ.", address: "Schwimmbadstr. 11, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "outdoor", reservation: false, phone: "+49 7703 8034", family: true },
+  { name: "Waldbad Löffingen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ בטבע, בשולי היער ליד לפינגן.", address: "Welschland, 79843 Löffingen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 8266", family: true },
+  { name: "Freibad Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ שכונתית קטנה בדיטישאוזן.", address: "Schwimmbadstr. 30, 79843 Löffingen-Dittishausen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 808801", family: true },
+  { name: "Freibad Lenzkirch", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בלנצקירך.", address: "Friedhofstr. 11, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 7653 400", family: true },
+  { name: "Freibad נוישטט (טיטיזה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בטיטיזה-נוישטט.", address: "Gutachstraße 33, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: false, phone: "+49 7651 9331121", family: true },
+  { name: "Naturena-Badesee", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "אגם רחצה טבעי באילינגן-בירקנדורף.", address: "Im Tal 1, 79777 Ühlingen-Birkendorf, Germany", postal: "79777", town: "אילינגן-בירקנדורף", setting: "outdoor", reservation: false, phone: "+49 7743 919727", family: true },
+  { name: "Naturfreibad Klosterweiher (סנט גאורגן)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע קטנה בסנט גאורגן.", address: "Brigachstr. 2, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "outdoor", reservation: false, phone: "+49 7724 87386", family: true },
+  { name: "Naturfreibad סנט מרגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע כפרית בסנט מרגן.", address: "Sportplatz 4, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "outdoor", reservation: false, phone: "+49 7669 91180", family: true },
+  { name: "Naturfreibad שנוואלד", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע כפרית בשנוואלד.", address: "Ludwig-van-Beethoven-Str. 15, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: false, phone: "+49 173 2874525", family: true },
+  { name: "Bregtalbad פורטוואנגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ לאורך נהר הברג, בפורטוואנגן.", address: "Jahnstraße 11, 78120 Furtwangen, Germany", postal: "78120", town: "פורטוואנגן", setting: "outdoor", reservation: false, phone: "+49 7723 9149709", family: true },
+  { name: "aqua fun שלוכזה", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בשלוכזה, ליד האגם.", address: "Freiburger Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 7731", family: true },
+  { name: "חוף רחצה Windgfällweiher", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "חוף רחצה טבעי על אגם קטן בלנצקירך.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
 
   // --- טבע ואופניים ---
-  { name: "טיול/ליטוף אלפקות — Haberjockelshof", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בטיול אלפקות או ליטוף אלפקות, לפי זמינות — הרשמה בפורטל הכרטיס.", address: "Schwärzenbach 24, 79822 Titisee-Neustadt, Germany", postal: "79822", site: "https://www.haberjockelshof.de/", note: "נקודת מפגש 10:00, רק לפי זמינות.", family: true },
-  { name: "סיור עשבי בר עם טעימה", cat: "nature-bike", type: "free", benefit: "השתתפות חינם, מיקומים משתנים.", address: "מיקומים משתנים, Hochschwarzwald, Germany", postal: "79868", note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
-  { name: "סדנת משחות טבעיות", cat: "nature-bike", type: "free", benefit: "השתתפות חינם — מתקיים בשנוואלד.", address: "Schönwald, 78141, Germany", postal: "78141", note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
-  { name: "Tannenmühle — סיור בטחנה + חיות מחמד", cat: "nature-bike", type: "free", benefit: "כניסה חינם לסיור בטחנה ולפינת החיות ללטיפה, פעם אחת.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", phone: "+49 7748 215", site: "https://www.tannenmuehle.de/", family: true },
-  { name: "סיורי E-MTB", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסיור E-MTB מודרך, פעם אחת.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "Kids Bike Basics", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסדנת רכיבה לילדים, פעם אחת.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "Bikepark Todtnau — קורס טעימה", cat: "nature-bike", type: "free", benefit: "קורס טעימה חינם בפארק האופניים.", address: "Brandenbergstr. 2, 79674 Todtnau, Germany", postal: "79674", phone: "+49 7671 959 9999", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "השכרת אופניים חשמליים — Tannenmühle (גרפנהאוזן)", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 12, לפי זמינות.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", phone: "+49 7748 215", family: true },
-  { name: "השכרת אופניים חשמליים — פלדברג", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", address: "Dr.-Pilet-Spur 1, 79868 Feldberg, Germany", postal: "79868", phone: "+49 7676 422", family: true },
-  { name: "השכרת אופניים חשמליים — Sport Lehr טודנאו", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", address: "Friedrichstraße 7, 79674 Todtnau, Germany", postal: "79674", phone: "+49 7671 317", family: true },
-  { name: "השכרת אופניים חשמליים — Thoma Sports טיטיזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", address: "Seestraße 2, 79822 Titisee-Neustadt, Germany", postal: "79822", phone: "+49 7651 9724967", family: true },
-  { name: "השכרת אופניים חשמליים — Spaßpark שלוכזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", address: "Fischbacher Straße 16, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7656 9882878", family: true },
-  { name: "השכרת אופניים חשמליים — שנוואלד", cat: "nature-bike", type: "free", benefit: "השכרה ליום שלם, חינם, מגיל 16 — בהרשמה מראש בלבד.", address: "Franz-Schubert-Straße 3, 78141 Schönwald, Germany", postal: "78141", phone: "+49 7652 12067400", family: true },
-  { name: "השכרת סירת פדלים — Müllers Bootsvermietung שלוכזה", cat: "nature-bike", type: "free", benefit: "30 דקות חינם, עד 4 אנשים בסירה — תלוי מזג אוויר.", address: "An der Staumauer 1, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 170 3803299", note: "זה באגם שלוכזה, לא טיטיזה — אופציה נוספת אם רוצים גם השכרת סירת פדלים עצמאית.", family: true },
+  { name: "טיול/ליטוף אלפקות — Haberjockelshof", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בטיול אלפקות או ליטוף אלפקות, לפי זמינות — הרשמה בפורטל הכרטיס.", desc: "חוות אלפקות בטיטיזה-נוישטט, עם טיולים מודרכים או ליטוף בחצר.", address: "Schwärzenbach 24, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, site: "https://www.haberjockelshof.de/", note: "נקודת מפגש 10:00, רק לפי זמינות.", family: true },
+  { name: "סיור עשבי בר עם טעימה", cat: "nature-bike", type: "free", benefit: "השתתפות חינם, מיקומים משתנים.", desc: "סיור רגלי מודרך ללימוד צמחי בר אכילים ברחבי האזור, כולל טעימה.", address: "מיקומים משתנים, Hochschwarzwald, Germany", postal: "79868", town: "פלדברג (ואזור)", setting: "outdoor", reservation: true, note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
+  { name: "סדנת משחות טבעיות", cat: "nature-bike", type: "free", benefit: "השתתפות חינם — מתקיים בשנוואלד.", desc: "סדנת הכנת משחות טבעיות מצמחי מרפא, בשנוואלד.", address: "Schönwald, 78141, Germany", postal: "78141", town: "שנוואלד", setting: "indoor", reservation: true, note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
+  { name: "Tannenmühle — סיור בטחנה + חיות מחמד", cat: "nature-bike", type: "free", benefit: "כניסה חינם לסיור בטחנה ולפינת החיות ללטיפה, פעם אחת.", desc: "טחנת קמח היסטורית בגרפנהאוזן, עם סיור וגם פינת חיות ללטיפה.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "mixed", reservation: false, phone: "+49 7748 215", site: "https://www.tannenmuehle.de/", family: true },
+  { name: "סיורי E-MTB", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסיור E-MTB מודרך, פעם אחת.", desc: "סיור אופניים חשמליים מודרך באזור שלוכזה.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
+  { name: "Kids Bike Basics", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסדנת רכיבה לילדים, פעם אחת.", desc: "סדנת יסודות רכיבה על אופניים לילדים, בשלוכזה.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
+  { name: "Bikepark Todtnau — קורס טעימה", cat: "nature-bike", type: "free", benefit: "קורס טעימה חינם בפארק האופניים.", desc: "קורס טעימה בפארק האופניים ההררי של טודנאו.", address: "Brandenbergstr. 2, 79674 Todtnau, Germany", postal: "79674", town: "טודנאו", setting: "outdoor", reservation: true, phone: "+49 7671 959 9999", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
+  { name: "השכרת אופניים חשמליים — Tannenmühle (גרפנהאוזן)", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 12, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בגרפנהאוזן.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "outdoor", reservation: false, phone: "+49 7748 215", family: true },
+  { name: "השכרת אופניים חשמליים — פלדברג", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בפלדברג.", address: "Dr.-Pilet-Spur 1, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "outdoor", reservation: false, phone: "+49 7676 422", family: true },
+  { name: "השכרת אופניים חשמליים — Sport Lehr טודנאו", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בטודנאו.", address: "Friedrichstraße 7, 79674 Todtnau, Germany", postal: "79674", town: "טודנאו", setting: "outdoor", reservation: false, phone: "+49 7671 317", family: true },
+  { name: "השכרת אופניים חשמליים — Thoma Sports טיטיזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בטיטיזה-נוישטט.", address: "Seestraße 2, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: false, phone: "+49 7651 9724967", family: true },
+  { name: "השכרת אופניים חשמליים — Spaßpark שלוכזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בשלוכזה.", address: "Fischbacher Straße 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 9882878", family: true },
+  { name: "השכרת אופניים חשמליים — שנוואלד", cat: "nature-bike", type: "free", benefit: "השכרה ליום שלם, חינם, מגיל 16 — בהרשמה מראש בלבד.", desc: "השכרת אופני חשמל ליום שלם בשנוואלד.", address: "Franz-Schubert-Straße 3, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: true, phone: "+49 7652 12067400", family: true },
+  { name: "השכרת סירת פדלים — Müllers Bootsvermietung שלוכזה", cat: "nature-bike", type: "free", benefit: "30 דקות חינם, עד 4 אנשים בסירה — תלוי מזג אוויר.", desc: "השכרת סירות פדלים על אגם שלוכזה, ליד הסכר.", address: "An der Staumauer 1, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 170 3803299", note: "זה באגם שלוכזה, לא טיטיזה — אופציה נוספת אם רוצים גם השכרת סירת פדלים עצמאית.", family: true },
 
   // --- מוזיאונים וסיורים ---
-  { name: "Blattert Mühle — סדנת פרצלה קטנה", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בהכנת פרצל, בהרשמה מראש חובה.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", phone: "+49 7703 318", note: "הזמנה מראש חובה דרך mein.hochschwarzwald.de.", family: true },
-  { name: "מוזיאון Le Petit Salon Winterhalter", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Hinterdorfstraße 15, 79837 Menzenschwand, Germany", postal: "79837", phone: "+49 7675 9296988", family: true },
-  { name: "Kloster Museum סנט מרגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Rathausplatz 1, 79274 St. Märgen, Germany", postal: "79274", phone: "+49 7669 91180", family: true },
-  { name: "Oldtimer Museum Lafette", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — ה'-ב', 10:30-18:30.", address: "Heiligbrunnenstr. 10, 79822 Titisee-Neustadt, Germany", postal: "79822", phone: "+49 7652 360", family: true },
-  { name: "Schwarzwälder Skimuseum הינטרצרטן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", phone: "+49 7652 982192", family: true },
-  { name: "Deutsches Phonomuseum סנט גאורגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Bärenplatz 1, 78112 St. Georgen, Germany", postal: "78112", phone: "+49 7724 87320", family: true },
-  { name: "Kreismuseum סנט בלאזין", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Am Kurgarten 1-3, 79837 St. Blasien, Germany", postal: "79837", phone: "+49 7672 41437", family: true },
-  { name: "Volkskundemuseum Hüsli", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Am Hüsli 1, 79865 Grafenhausen, Germany", postal: "79865", phone: "+49 7748 212", family: true },
-  { name: "Haus der Natur — פלדברג", cat: "museums-tours", type: "free", benefit: "כניסה חינם לתערוכה, פעם אחת.", address: "Dr.-Pilet-Spur 4, 79868 Feldberg, Germany", postal: "79868", phone: "+49 7676 933630", family: true },
-  { name: "Schwarzwaldhaus der Sinne — מוזיאון חוויתי", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Schulstr. 1, 79865 Grafenhausen, Germany", postal: "79865", phone: "+49 7748 52048", family: true },
-  { name: "סיור בקתדרלת סנט בלאזין", cat: "museums-tours", type: "free", benefit: "סיור מודרך חינם, פעם אחת — הרשמה במשרד התיירות המקומי.", address: "Fürstabt-Gerber-Str. 16, 79837 St. Blasien, Germany", postal: "79837", phone: "+49 7672 41437", family: true },
-  { name: "Freilichtmuseum Klausenhof הרישריד", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", address: "Lindenweg 3, 79737 Herrischried, Germany", postal: "79737", family: true },
-  { name: "מוזיאון טבע Kalchreuter — Glashütte", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — רק בשבת הראשונה בחודש, 14:00-16:00.", address: "Glashütte 4, 79848 Bonndorf, Germany", postal: "79848", phone: "+49 7653 6660", note: "שעות פתיחה מצומצמות — לוודא תאריך לפני שיוצאים.", family: true },
-  { name: "תערוכת זכוכית ב-Kurhaus שלוכזה", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — יש להירשם במשרד התיירות המקומי.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7562 1206 0", family: true },
-  { name: "סיורי תיאטרון רחוב — Freiburg Living History", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בסיור שחקנים בפרייבורג — ו' 18:00 (\"מכשפת פרייבורג\"), ש' 18:00 (\"הנוודת\").", address: "Hinter-den-Eichen 12/1, 79276 Reute, Germany", postal: "79276", phone: "+49 176 432 114 19", note: "תוכן מיועד למבוגרים יותר (עלילות מימי הביניים) — לשקול לפי גיל הילדים.", family: false },
+  { name: "Blattert Mühle — סדנת פרצלה קטנה", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בהכנת פרצל, בהרשמה מראש חובה.", desc: "סדנה להכנת פרצל קטן בטחנת בונדורף ההיסטורית.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: true, phone: "+49 7703 318", note: "הזמנה מראש חובה דרך mein.hochschwarzwald.de.", family: true },
+  { name: "מוזיאון Le Petit Salon Winterhalter", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון קטן במנצנשוואנד, המציג אוסף פרטי.", address: "Hinterdorfstraße 15, 79837 Menzenschwand, Germany", postal: "79837", town: "מנצנשוואנד", setting: "indoor", reservation: false, phone: "+49 7675 9296988", family: true },
+  { name: "Kloster Museum סנט מרגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון המנזר של סנט מרגן, על ההיסטוריה הדתית של האזור.", address: "Rathausplatz 1, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "indoor", reservation: false, phone: "+49 7669 91180", family: true },
+  { name: "Oldtimer Museum Lafette", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — ה'-ב', 10:30-18:30.", desc: "אוסף מכוניות עתיקות (אולדטיימרים) בטיטיזה-נוישטט.", address: "Heiligbrunnenstr. 10, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7652 360", family: true },
+  { name: "Schwarzwälder Skimuseum הינטרצרטן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון ההיסטוריה של ספורט הסקי ביער השחור, בהינטרצרטן.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", town: "הינטרצרטן", setting: "indoor", reservation: false, phone: "+49 7652 982192", family: true },
+  { name: "Deutsches Phonomuseum סנט גאורגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון גרמני להיסטוריית הפונוגרף ומכשירי ההשמעה, בסנט גאורגן.", address: "Bärenplatz 1, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "indoor", reservation: false, phone: "+49 7724 87320", family: true },
+  { name: "Kreismuseum סנט בלאזין", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון מחוזי על היסטוריית האזור, בסנט בלאזין.", address: "Am Kurgarten 1-3, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: false, phone: "+49 7672 41437", family: true },
+  { name: "Volkskundemuseum Hüsli", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון פולקלור בבית איכרים היסטורי בגרפנהאוזן.", address: "Am Hüsli 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 212", family: true },
+  { name: "Haus der Natur — פלדברג", cat: "museums-tours", type: "free", benefit: "כניסה חינם לתערוכה, פעם אחת.", desc: "מרכז מבקרים ותערוכת טבע על שמורת הטבע של הפלדברג.", address: "Dr.-Pilet-Spur 4, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: false, phone: "+49 7676 933630", family: true },
+  { name: "Schwarzwaldhaus der Sinne — מוזיאון חוויתי", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון חוויתי לחושים בגרפנהאוזן, מתאים לילדים.", address: "Schulstr. 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 52048", family: true },
+  { name: "סיור בקתדרלת סנט בלאזין", cat: "museums-tours", type: "free", benefit: "סיור מודרך חינם, פעם אחת — הרשמה במשרד התיירות המקומי.", desc: "סיור מודרך בקתדרלה הבארוקית המרשימה של סנט בלאזין.", address: "Fürstabt-Gerber-Str. 16, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: true, phone: "+49 7672 41437", family: true },
+  { name: "Freilichtmuseum Klausenhof הרישריד", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון פתוח (חוץ) עם חוות ובתים היסטוריים, בהרישריד.", address: "Lindenweg 3, 79737 Herrischried, Germany", postal: "79737", town: "הרישריד", setting: "outdoor", reservation: false, family: true },
+  { name: "מוזיאון טבע Kalchreuter — Glashütte", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — רק בשבת הראשונה בחודש, 14:00-16:00.", desc: "אוסף מינרלים פרטי קטן בגלאסהיטה שליד בונדורף.", address: "Glashütte 4, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: false, phone: "+49 7653 6660", note: "שעות פתיחה מצומצמות — לוודא תאריך לפני שיוצאים.", family: true },
+  { name: "תערוכת זכוכית ב-Kurhaus שלוכזה", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — יש להירשם במשרד התיירות המקומי.", desc: "תערוכת זכוכית אמנותית בבית הקורהאוס של שלוכזה.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "indoor", reservation: true, phone: "+49 7562 1206 0", family: true },
+  { name: "סיורי תיאטרון רחוב — Freiburg Living History", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בסיור שחקנים בפרייבורג — ו' 18:00 (\"מכשפת פרייבורג\"), ש' 18:00 (\"הנוודת\").", desc: "סיור שחקנים תיאטרלי ברחובות פרייבורג העתיקה, בערבי שישי ושבת.", address: "Hinter-den-Eichen 12/1, 79276 Reute, Germany", postal: "79276", town: "רויטה (פרייבורג)", setting: "outdoor", reservation: false, phone: "+49 176 432 114 19", note: "תוכן מיועד למבוגרים יותר (עלילות מימי הביניים) — לשקול לפי גיל הילדים.", family: false },
 
   // --- משחקי בריחה ו-VR ---
-  { name: "Outdoor-Escape — Die doppelte Biergit (Brauerei Rothaus)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", address: "Hauptstr. 38a, 79199 Kirchzarten, Germany", postal: "79199", phone: "+49 7661 98 93 790", note: "המיקום בפועל: Brauerei Rothaus. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Das verlorene Dorf (שלוכזה)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", phone: "+49 7661 98 93 790", note: "נקודת יציאה: משרד התיירות שלוכזה. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Das Rätsel der Zeit (לנצקירך)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", address: "Am Kurgarten 1, 79853 Lenzkirch, Germany", postal: "79853", phone: "+49 7661 98 93 790", note: "נקודת יציאה: Abenteuer Golfpark לנצקירך. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Die vier Tode des falschen Mönchs (סנט מרגן)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", address: "79274 St. Märgen, Germany", postal: "79274", phone: "+49 7661 98 93 790", note: "נקודת יציאה: Hotel \"Der Hirschen\", סנט מרגן. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Explor Games — Tico & Itza (הרפתקת משפחות)", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
-  { name: "Explor Games — Lenofi und die Legende von Guta", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
-  { name: "Lasertag Base — 15 דקות חינם", cat: "escape-vr", type: "free", benefit: "15 דקות לייזר-טאג חינם, פעם אחת — הזמנה מקוונת בלבד.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", phone: "+49 7651 9331170", family: true },
-  { name: "Operation Mindfall — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", phone: "+49 7652 9010", family: true },
-  { name: "Magic Portal — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", phone: "+49 7652 9010", family: true },
-  { name: "Anni's Schwarzwaldgeheimnis — טיול-בריחה", cat: "escape-vr", type: "free", benefit: "טיול-בריחה בטבע, חינם — בתיאום מראש בלבד.", address: "Franz-Schubert-Str. 3, 78141 Schönwald, Germany", postal: "78141", phone: "+49 7652 12067400", family: true },
-  { name: "VR Point Mr. Modicap — חוויית VR", cat: "escape-vr", type: "free", benefit: "25 דקות מציאות מדומה חינם — רק בתיאום טלפוני, ימי ו'/ש'.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", phone: "+49 7722 868 9968", note: "בזמן זה החדר-הצג הזמני נמצא ב-VR Arena Triberg.", family: true },
-  { name: "VR-Experience קפיצת סקי — מוזיאון הסקי הינטרצרטן", cat: "escape-vr", type: "free", benefit: "שימוש חינם, פעם אחת.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", phone: "+49 7652 982192", family: true },
-  { name: "VR קפיצת סקי — מגדל הקפיצה בשונאך", cat: "escape-vr", type: "free", benefit: "השתתפות חינם — רק בתיאום מראש, ימי ו' 15:00.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", family: true },
+  { name: "Outdoor-Escape — Die doppelte Biergit (Brauerei Rothaus)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב מבשלת רוטהאוס.", address: "Hauptstr. 38a, 79199 Kirchzarten, Germany", postal: "79199", town: "קירכצרטן", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "המיקום בפועל: Brauerei Rothaus. הזמנה דרך berggeheimnis.com.", family: true },
+  { name: "Outdoor-Escape — Das verlorene Dorf (שלוכזה)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב שלוכזה.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: משרד התיירות שלוכזה. הזמנה דרך berggeheimnis.com.", family: true },
+  { name: "Outdoor-Escape — Das Rätsel der Zeit (לנצקירך)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב לנצקירך.", address: "Am Kurgarten 1, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: Abenteuer Golfpark לנצקירך. הזמנה דרך berggeheimnis.com.", family: true },
+  { name: "Outdoor-Escape — Die vier Tode des falschen Mönchs (סנט מרגן)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב סנט מרגן.", address: "79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: Hotel \"Der Hirschen\", סנט מרגן. הזמנה דרך berggeheimnis.com.", family: true },
+  { name: "Explor Games — Tico & Itza (הרפתקת משפחות)", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", desc: "משחק הרפתקה דיגיטלי מודרך טאבלט, לכל המשפחה, יוצא מטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
+  { name: "Explor Games — Lenofi und die Legende von Guta", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", desc: "משחק הרפתקה דיגיטלי מודרך טאבלט נוסף, יוצא מטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
+  { name: "Lasertag Base — 15 דקות חינם", cat: "escape-vr", type: "free", benefit: "15 דקות לייזר-טאג חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "מתחם לייזר-טאג מקורה בטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: true, phone: "+49 7651 9331170", family: true },
+  { name: "Operation Mindfall — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "חדר בריחה מקורה בהופגוט שטרנן שליד ברייטנאו.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: true, phone: "+49 7652 9010", family: true },
+  { name: "Magic Portal — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "חדר בריחה נוסף בהופגוט שטרנן, נושא קסם.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: true, phone: "+49 7652 9010", family: true },
+  { name: "Anni's Schwarzwaldgeheimnis — טיול-בריחה", cat: "escape-vr", type: "free", benefit: "טיול-בריחה בטבע, חינם — בתיאום מראש בלבד.", desc: "טיול-בריחה בטבע סביב שנוואלד, פתרון חידות תוך כדי הליכה.", address: "Franz-Schubert-Str. 3, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: true, phone: "+49 7652 12067400", family: true },
+  { name: "VR Point Mr. Modicap — חוויית VR", cat: "escape-vr", type: "free", benefit: "25 דקות מציאות מדומה חינם — רק בתיאום טלפוני, ימי ו'/ש'.", desc: "חוויית מציאות מדומה (VR) בשונאך.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "indoor", reservation: true, phone: "+49 7722 868 9968", note: "בזמן זה החדר-הצג הזמני נמצא ב-VR Arena Triberg.", family: true },
+  { name: "VR-Experience קפיצת סקי — מוזיאון הסקי הינטרצרטן", cat: "escape-vr", type: "free", benefit: "שימוש חינם, פעם אחת.", desc: "סימולטור VR לקפיצות סקי, בתוך מוזיאון הסקי בהינטרצרטן.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", town: "הינטרצרטן", setting: "indoor", reservation: false, phone: "+49 7652 982192", family: true },
+  { name: "VR קפיצת סקי — מגדל הקפיצה בשונאך", cat: "escape-vr", type: "free", benefit: "השתתפות חינם — רק בתיאום מראש, ימי ו' 15:00.", desc: "חוויית VR נוספת לקפיצות סקי, במגדל הקפיצה של שונאך.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "indoor", reservation: true, family: true },
 
   // --- אוכל ושתייה ---
-  { name: "Heinz Wagner Sekt Manufaktur", cat: "culinary", type: "free", benefit: "סיור מודרך + טעימת שמפניה חינם, כולל שובר קנייה בשווי 5€.", address: "Albtalstr. 14, 79837 St. Blasien, Germany", postal: "79837", phone: "+49 7672 922 663 0", note: "יין תוסס — הרשמה טלפונית מראש חובה.", family: false },
-  { name: "בירה עם אומני הבירה", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת בירה, לפי זמינות והרשמה מראש.", address: "Feldbergstr. 5, 79868 Feldberg, Germany", postal: "79868", phone: "+49 151 44626615", note: "אלכוהול — הרשמה מראש חובה דרך mein.hochschwarzwald.de.", family: false },
-  { name: "Gscheiter Beck — מוזיאון שנאפס", cat: "culinary", type: "free", benefit: "כניסה חינם למוזיאון + טעימת שנאפס, מגיל 18 בלבד.", address: "Bahnhofstraße 3, 79868 Feldberg, Germany", postal: "79868", phone: "+49 7655 341", note: "מגבלת גיל 18+ מפורשת.", family: false },
-  { name: "Café Zimmermann — סדנת עוגת יער שחור", cat: "culinary", type: "free", benefit: "השתתפות חינם בהכנת עוגת דובדבנים שחורה, כולל פרוסה וקפה — כל שבועיים בימי ג'.", address: "Kurparkweg 2, 79682 Todtmoos, Germany", postal: "79682", phone: "+49 7674 90570", note: "הרשמה חובה עד יום ב' 17:30.", family: true },
-  { name: "Schwarzwaldimkerei und Brennerei Herb", cat: "culinary", type: "free", benefit: "סיור מזקקה + טעימה חינם, מגיל 18 בלבד — כל שבועיים בימי ו' 16:00.", address: "Tiroler Str. 8, 79848 Bonndorf, Germany", postal: "79848", phone: "+49 7653 6660", note: "מגבלת גיל 18+ מפורשת.", family: false },
-  { name: "טעימת תה — סנט מרגן", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת תה, פעם אחת.", address: "Feldbergstraße 2, 79274 St. Märgen, Germany", postal: "79274", phone: "+49 7669 939826", note: "הרשמה חובה יום לפני — ג'/ה' מ-15:00, ש' מ-10:00.", family: true },
+  { name: "Heinz Wagner Sekt Manufaktur", cat: "culinary", type: "free", benefit: "סיור מודרך + טעימת שמפניה חינם, כולל שובר קנייה בשווי 5€.", desc: "יקב שמפניה משפחתי בסנט בלאזין, עם סיורים וטעימות.", address: "Albtalstr. 14, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: true, phone: "+49 7672 922 663 0", note: "יין תוסס — הרשמה טלפונית מראש חובה.", family: false },
+  { name: "בירה עם אומני הבירה", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת בירה, לפי זמינות והרשמה מראש.", desc: "מפגש טעימת בירה עם אומנים מקומיים, בפלדברג.", address: "Feldbergstr. 5, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: true, phone: "+49 151 44626615", note: "אלכוהול — הרשמה מראש חובה דרך mein.hochschwarzwald.de.", family: false },
+  { name: "Gscheiter Beck — מוזיאון שנאפס", cat: "culinary", type: "free", benefit: "כניסה חינם למוזיאון + טעימת שנאפס, מגיל 18 בלבד.", desc: "מוזיאון שנאפס קטן בפלדברג, עם טעימה למבוגרים.", address: "Bahnhofstraße 3, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: false, phone: "+49 7655 341", note: "מגבלת גיל 18+ מפורשת.", family: false },
+  { name: "Café Zimmermann — סדנת עוגת יער שחור", cat: "culinary", type: "free", benefit: "השתתפות חינם בהכנת עוגת דובדבנים שחורה, כולל פרוסה וקפה — כל שבועיים בימי ג'.", desc: "בית קפה בטודמוס, עם סדנת הכנת עוגת יער שחור מסורתית.", address: "Kurparkweg 2, 79682 Todtmoos, Germany", postal: "79682", town: "טודמוס", setting: "indoor", reservation: true, phone: "+49 7674 90570", note: "הרשמה חובה עד יום ב' 17:30.", family: true },
+  { name: "Schwarzwaldimkerei und Brennerei Herb", cat: "culinary", type: "free", benefit: "סיור מזקקה + טעימה חינם, מגיל 18 בלבד — כל שבועיים בימי ו' 16:00.", desc: "מזקקה ודבוראות משפחתית בבונדורף.", address: "Tiroler Str. 8, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: true, phone: "+49 7653 6660", note: "מגבלת גיל 18+ מפורשת. הרשמה מראש חובה.", family: false },
+  { name: "טעימת תה — סנט מרגן", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת תה, פעם אחת.", desc: "טעימת תה בסנט מרגן.", address: "Feldbergstraße 2, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "indoor", reservation: true, phone: "+49 7669 939826", note: "הרשמה חובה יום לפני — ג'/ה' מ-15:00, ש' מ-10:00.", family: true },
 
   // --- גולף ---
-  { name: "Freiburger Golfplatz", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", address: "Krüttweg 1, 79199 Kirchzarten, Germany", postal: "79199", phone: "+49 7661 98470", family: false },
-  { name: "Golfclub Königsfeld", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", address: "Angelmoos 20, 78126 Königsfeld, Germany", postal: "78126", phone: "+49 7725 9396-0", family: false },
-  { name: "Golfclub Obere Alp (שטילינגן)", cat: "golf", type: "free", benefit: "גרין-פי חינם, פעם אחת — אפשרויות ל-18 חורים, 9 חורים, או 18 חורים על מגרש 9 החורים.", address: "Am Golfplatz 1-3, 79780 Stühlingen, Germany", postal: "79780", phone: "+49 7703 92030", family: false }
+  { name: "Freiburger Golfplatz", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", desc: "מגרש גולף 18 חורים ליד קירכצרטן, קרוב לפרייבורג.", address: "Krüttweg 1, 79199 Kirchzarten, Germany", postal: "79199", town: "קירכצרטן", setting: "outdoor", reservation: false, phone: "+49 7661 98470", family: false },
+  { name: "Golfclub Königsfeld", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", desc: "מגרש גולף 18 חורים בקניגספלד.", address: "Angelmoos 20, 78126 Königsfeld, Germany", postal: "78126", town: "קניגספלד", setting: "outdoor", reservation: false, phone: "+49 7725 9396-0", family: false },
+  { name: "Golfclub Obere Alp (שטילינגן)", cat: "golf", type: "free", benefit: "גרין-פי חינם, פעם אחת — אפשרויות ל-18 חורים, 9 חורים, או 18 חורים על מגרש 9 החורים.", desc: "מגרש גולף בשטילינגן, עם אפשרות ל-9 או 18 חורים.", address: "Am Golfplatz 1-3, 79780 Stühlingen, Germany", postal: "79780", town: "שטילינגן", setting: "outdoor", reservation: false, phone: "+49 7703 92030", family: false }
 ];
 
 /* ============================================================
@@ -972,10 +976,26 @@ function renderInfo() {
 
 let redCardSortMode = localStorage.getItem("bf2026-redcard-sort") || "hotel";
 let redCardFilterMode = localStorage.getItem("bf2026-redcard-filter") || "all";
+let redCardCategory = localStorage.getItem("bf2026-redcard-category") || "all";
+let redCardTown = localStorage.getItem("bf2026-redcard-town") || "all";
+let redCardSetting = localStorage.getItem("bf2026-redcard-setting") || "all";
+let redCardReservation = localStorage.getItem("bf2026-redcard-reservation") || "all";
+let redCardSearchQuery = "";
+let redCardSearchDebounce = null;
 let redCardLiveCoords = null;
 let redCardLiveError = null;
 
 const REDCARD_CATEGORY_ORDER = ["leisure-sport", "pools-lakes", "nature-bike", "museums-tours", "escape-vr", "culinary", "golf"];
+
+function redCardTownOptions() {
+  return Array.from(new Set(RED_CARD_CATALOG.map(i => i.town))).sort((a, b) => a.localeCompare(b, "he"));
+}
+
+function redCardMatchesSearch(item, query) {
+  if (!query) return true;
+  const hay = `${item.name} ${item.desc} ${item.town} ${CATEGORY_LABELS[item.cat]}`.toLowerCase();
+  return hay.includes(query.toLowerCase());
+}
 
 function benefitBadgeHTML(item) {
   return item.type === "free"
@@ -1003,18 +1023,29 @@ function redCardPlannedItemHTML(item) {
 }
 
 function redCardCatalogItemHTML(item, dist) {
+  const distLabel = redCardSortMode === "live" && redCardLiveCoords ? "מהמיקום שלי" : "מהמלון";
   return `
-    <div class="card redcard-item">
-      ${benefitBadgeHTML(item)}
-      <h3>${escapeHTML(item.name)}</h3>
-      <p>${escapeHTML(item.benefit)}</p>
-      ${item.note ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(item.note)}</span></div>` : ""}
-      <div class="chips">
-        ${dist != null ? `<span class="chip distance-tag">${ICON.route} ${formatDistance(dist)} ${redCardSortMode === "live" && redCardLiveCoords ? "מהמיקום שלי" : "מהמלון"}</span>` : ""}
-        <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
-        ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
+    <details class="redcard-item">
+      <summary>
+        <span class="redcard-item-summary-left">
+          ${benefitBadgeHTML(item)}
+          <span class="redcard-item-name">${escapeHTML(item.name)}</span>
+        </span>
+        <span class="redcard-item-summary-right">
+          ${dist != null ? `<span class="redcard-item-dist">${ICON.route} ${formatDistance(dist)} ${distLabel}</span>` : ""}
+          <span class="day-chevron">${ICON.chevron}</span>
+        </span>
+      </summary>
+      <div class="redcard-item-body">
+        <p>${escapeHTML(item.desc)}</p>
+        <p class="redcard-item-benefit">${item.type === "free" ? "מה מקבלים עם הכרטיס" : "ההנחה עם הכרטיס"}: ${escapeHTML(item.benefit)}</p>
+        ${item.note ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(item.note)}</span></div>` : ""}
+        <div class="chips">
+          <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
+          ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
+        </div>
       </div>
-    </div>
+    </details>
   `;
 }
 
@@ -1024,6 +1055,11 @@ function renderRedCardCatalog() {
 
   let items = RED_CARD_CATALOG.slice();
   if (redCardFilterMode === "family") items = items.filter(i => i.family);
+  if (redCardCategory !== "all") items = items.filter(i => i.cat === redCardCategory);
+  if (redCardTown !== "all") items = items.filter(i => i.town === redCardTown);
+  if (redCardSetting !== "all") items = items.filter(i => i.setting === redCardSetting || i.setting === "mixed");
+  if (redCardReservation === "no-reservation") items = items.filter(i => !i.reservation);
+  if (redCardSearchQuery) items = items.filter(i => redCardMatchesSearch(i, redCardSearchQuery));
 
   const refPoint = (redCardSortMode === "live" && redCardLiveCoords) ? redCardLiveCoords : HOTEL_COORDS;
   const withDist = items.map(item => {
@@ -1033,13 +1069,17 @@ function renderRedCardCatalog() {
   withDist.sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
 
   let html = "";
-  for (const cat of REDCARD_CATEGORY_ORDER) {
-    const catItems = withDist.filter(x => x.item.cat === cat);
-    if (!catItems.length) continue;
-    html += `<h3 class="mini-list-title">${escapeHTML(CATEGORY_LABELS[cat])}</h3>`;
-    html += catItems.map(x => redCardCatalogItemHTML(x.item, x.dist)).join("");
+  if (redCardCategory === "all") {
+    for (const cat of REDCARD_CATEGORY_ORDER) {
+      const catItems = withDist.filter(x => x.item.cat === cat);
+      if (!catItems.length) continue;
+      html += `<h3 class="mini-list-title">${escapeHTML(CATEGORY_LABELS[cat])}</h3>`;
+      html += catItems.map(x => redCardCatalogItemHTML(x.item, x.dist)).join("");
+    }
+  } else {
+    html = withDist.map(x => redCardCatalogItemHTML(x.item, x.dist)).join("");
   }
-  container.innerHTML = html || `<div class="empty-note">אין תוצאות עם הסינון הנוכחי.</div>`;
+  container.innerHTML = html || `<div class="empty-note">אין תוצאות עם הסינון הנוכחי — נסו לרוקן חלק מהמסננים.</div>`;
 }
 
 function renderRedCard() {
@@ -1059,8 +1099,20 @@ function renderRedCard() {
     ${RED_CARD_PLANNED.map(redCardPlannedItemHTML).join("")}
   `;
 
+  const townOptions = redCardTownOptions();
   const controlsHTML = `
     <div class="redcard-controls">
+      <input type="search" id="redcard-search" class="redcard-search" placeholder="חיפוש — שם, עיר או קטגוריה…" value="${escapeHTML(redCardSearchQuery)}">
+      <div class="redcard-select-row">
+        <select id="redcard-category-select" class="redcard-select">
+          <option value="all" ${redCardCategory === "all" ? "selected" : ""}>כל הקטגוריות</option>
+          ${REDCARD_CATEGORY_ORDER.map(cat => `<option value="${cat}" ${redCardCategory === cat ? "selected" : ""}>${escapeHTML(CATEGORY_LABELS[cat])}</option>`).join("")}
+        </select>
+        <select id="redcard-town-select" class="redcard-select">
+          <option value="all" ${redCardTown === "all" ? "selected" : ""}>כל הערים</option>
+          ${townOptions.map(t => `<option value="${escapeHTML(t)}" ${redCardTown === t ? "selected" : ""}>${escapeHTML(t)}</option>`).join("")}
+        </select>
+      </div>
       <div class="toggle-group" id="redcard-sort-group">
         <button class="toggle-btn ${redCardSortMode === "hotel" ? "active" : ""}" data-sort="hotel">מרחק מהמלון</button>
         <button class="toggle-btn ${redCardSortMode === "live" ? "active" : ""}" data-sort="live">${ICON.target}<span>המיקום שלי עכשיו</span></button>
@@ -1068,6 +1120,17 @@ function renderRedCard() {
       <div class="toggle-group" id="redcard-filter-group">
         <button class="toggle-btn ${redCardFilterMode === "all" ? "active" : ""}" data-filter="all">הכל</button>
         <button class="toggle-btn ${redCardFilterMode === "family" ? "active" : ""}" data-filter="family">מתאים למשפחות</button>
+      </div>
+      <div class="redcard-group-label">סוג מקום</div>
+      <div class="toggle-group" id="redcard-setting-group">
+        <button class="toggle-btn ${redCardSetting === "all" ? "active" : ""}" data-setting="all">הכל</button>
+        <button class="toggle-btn ${redCardSetting === "indoor" ? "active" : ""}" data-setting="indoor">מקורה</button>
+        <button class="toggle-btn ${redCardSetting === "outdoor" ? "active" : ""}" data-setting="outdoor">בחוץ</button>
+      </div>
+      <div class="redcard-group-label">הזמנה מראש</div>
+      <div class="toggle-group" id="redcard-reservation-group">
+        <button class="toggle-btn ${redCardReservation === "all" ? "active" : ""}" data-reservation="all">הכל</button>
+        <button class="toggle-btn ${redCardReservation === "no-reservation" ? "active" : ""}" data-reservation="no-reservation">בלי הזמנה מראש</button>
       </div>
       ${redCardLiveError ? `<div class="empty-note" style="padding:6px 0;font-size:12.5px">${escapeHTML(redCardLiveError)}</div>` : ""}
     </div>
@@ -1086,6 +1149,36 @@ function renderRedCard() {
 }
 
 function bindRedCard() {
+  const searchInput = $("#redcard-search");
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      clearTimeout(redCardSearchDebounce);
+      const val = searchInput.value;
+      redCardSearchDebounce = setTimeout(() => {
+        redCardSearchQuery = val;
+        renderRedCardCatalog();
+      }, 150);
+    });
+  }
+
+  const categorySelect = $("#redcard-category-select");
+  if (categorySelect) {
+    categorySelect.addEventListener("change", () => {
+      redCardCategory = categorySelect.value;
+      localStorage.setItem("bf2026-redcard-category", redCardCategory);
+      renderRedCard();
+    });
+  }
+
+  const townSelect = $("#redcard-town-select");
+  if (townSelect) {
+    townSelect.addEventListener("change", () => {
+      redCardTown = townSelect.value;
+      localStorage.setItem("bf2026-redcard-town", redCardTown);
+      renderRedCard();
+    });
+  }
+
   $$("#redcard-sort-group .toggle-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const mode = btn.dataset.sort;
@@ -1125,6 +1218,22 @@ function bindRedCard() {
     btn.addEventListener("click", () => {
       redCardFilterMode = btn.dataset.filter;
       localStorage.setItem("bf2026-redcard-filter", redCardFilterMode);
+      renderRedCard();
+    });
+  });
+
+  $$("#redcard-setting-group .toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      redCardSetting = btn.dataset.setting;
+      localStorage.setItem("bf2026-redcard-setting", redCardSetting);
+      renderRedCard();
+    });
+  });
+
+  $$("#redcard-reservation-group .toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      redCardReservation = btn.dataset.reservation;
+      localStorage.setItem("bf2026-redcard-reservation", redCardReservation);
       renderRedCard();
     });
   });
