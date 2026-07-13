@@ -33,6 +33,25 @@ const GENERAL_TIPS = [
   "זמני הנסיעה בכל האפליקציה הם הערכות שנבדקו מול Google Maps מראש — כדאי לפתוח את \"מסלול הנסיעה של היום\" בפועל לפני היציאה, אם יש קליטה, לזמן מדויק בזמן אמת."
 ];
 
+/* ============================================================
+   אייקונים (SVG קווי, יורשים צבע מהטקסט הסובב)
+   ============================================================ */
+const ICON = {
+  clock: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`,
+  calendar: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>`,
+  info: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/></svg>`,
+  pin: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>`,
+  link: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14 20 4"/><path d="M20 4h-5"/><path d="M20 4v5"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>`,
+  camera: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5Z"/><circle cx="12" cy="13" r="3.3"/></svg>`,
+  route: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a4 4 0 0 0 4-4v-1a4 4 0 0 0-4-4H9a4 4 0 0 1-4-4v-.5"/></svg>`,
+  car: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V11.5l1.7-4A2 2 0 0 1 7.6 6h8.8a2 2 0 0 1 1.9 1.5l1.7 4V16"/><path d="M4 16h16"/><path d="M4 16v2.2c0 .44.36.8.8.8H6a1 1 0 0 0 1-1V16"/><path d="M17 16v2.2c0 .44.36.8.8.8H19a1 1 0 0 0 1-1V16"/><circle cx="7.5" cy="13" r="1"/><circle cx="16.5" cy="13" r="1"/></svg>`,
+  hotel: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v15"/><path d="M14 21v-9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v9"/><path d="M4 21h16"/><path d="M7 8h1M7 11h1M7 14h1"/></svg>`,
+  bulb: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z"/></svg>`,
+  warn: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 4.4 2.6 18a1.6 1.6 0 0 0 1.4 2.4h16a1.6 1.6 0 0 0 1.4-2.4L13.7 4.4a1.6 1.6 0 0 0-2.8 0Z"/></svg>`,
+  tree: `<svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 7 10h2.5L6 16h4.5v5h3v-5H18l-3.5-6H17L12 3Z"/></svg>`,
+  chevron: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`
+};
+
 function mapLink(address) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
 }
@@ -375,29 +394,29 @@ function timeLabel(block) {
 
 function chipsHTML(block) {
   const chips = [];
-  if (block.price) chips.push(`<span class="chip">💶 ${escapeHTML(block.price)}</span>`);
-  if (block.hours) chips.push(`<span class="chip">🕐 ${escapeHTML(block.hours)}</span>`);
-  if (block.address) chips.push(`<a class="chip map" href="${mapLink(block.address)}" target="_blank" rel="noopener">📍 מפה</a>`);
-  if (block.infoUrl) chips.push(`<a class="chip info" href="${escapeHTML(block.infoUrl)}" target="_blank" rel="noopener">🔗 מידע נוסף</a>`);
+  if (block.price) chips.push(`<span class="chip">${escapeHTML(block.price)}</span>`);
+  if (block.hours) chips.push(`<span class="chip">${ICON.clock} ${escapeHTML(block.hours)}</span>`);
+  if (block.address) chips.push(`<a class="chip map" href="${mapLink(block.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>`);
+  if (block.infoUrl) chips.push(`<a class="chip info" href="${escapeHTML(block.infoUrl)}" target="_blank" rel="noopener">${ICON.link} מידע נוסף</a>`);
   if (!chips.length) return "";
   return `<div class="chips">${chips.join("")}</div>`;
 }
 
 function tipsHTML(block) {
   if (!block.tips || !block.tips.length) return "";
-  return block.tips.map(t => `<div class="tip ${t.warn ? "warn" : ""}">${t.warn ? "⚠️ " : "💡 "}${escapeHTML(t.text)}</div>`).join("");
+  return block.tips.map(t => `<div class="tip ${t.warn ? "warn" : ""}">${t.warn ? ICON.warn : ICON.bulb}<span>${escapeHTML(t.text)}</span></div>`).join("");
 }
 
 function legHTML(drive) {
   if (!drive) return "";
   const dist = drive.dist ? ` · ${escapeHTML(drive.dist)}` : "";
-  return `<div class="leg"><span>🚗</span><span>${escapeHTML(drive.time)}${dist} ${escapeHTML(drive.from)}</span></div>`;
+  return `<div class="leg">${ICON.car}<span>${escapeHTML(drive.time)}${dist} ${escapeHTML(drive.from)}</span></div>`;
 }
 
 function imageHTML(image) {
   if (!image) return "";
   const credit = image.credit
-    ? `<a class="stop-credit" href="${commonsFileUrl(image.commonsFile)}" target="_blank" rel="noopener">📷 ${escapeHTML(image.credit)} · ${escapeHTML(image.license)}, ויקישיתוף</a>`
+    ? `<a class="stop-credit" href="${commonsFileUrl(image.commonsFile)}" target="_blank" rel="noopener">${ICON.camera} ${escapeHTML(image.credit)} · ${escapeHTML(image.license)}, ויקישיתוף</a>`
     : "";
   return `<img class="stop-img" src="${image.file}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
 }
@@ -445,7 +464,7 @@ function dayStopsHTML(day) {
   }
   if (day.returnLeg) {
     html += legHTML(day.returnLeg);
-    html += `<div class="leg-end">🏨 ${escapeHTML(day.returnLeg.label)}</div>`;
+    html += `<div class="leg-end">${ICON.hotel} ${escapeHTML(day.returnLeg.label)}</div>`;
   }
   return html;
 }
@@ -469,7 +488,7 @@ function dayRouteLink(day) {
 function routeButtonHTML(day) {
   const link = dayRouteLink(day);
   if (!link) return "";
-  return `<a class="route-btn" href="${link}" target="_blank" rel="noopener">🗺️ מסלול הנסיעה של היום ב-Maps</a>`;
+  return `<a class="route-btn" href="${link}" target="_blank" rel="noopener">${ICON.route} מסלול הנסיעה של היום ב-Maps</a>`;
 }
 
 /* ============================================================
@@ -488,12 +507,12 @@ function renderItinerary() {
             <span class="day-date">${hebWeekday(day.date)}, ${dayMonth(day.date)}${isToday ? '<span class="day-today-dot"></span>' : ""}</span>
             <span class="day-title">${escapeHTML(day.title)}</span>
           </span>
-          <span class="day-chevron">⌄</span>
+          <span class="day-chevron">${ICON.chevron}</span>
         </summary>
         <div class="day-body">
           <div class="day-meta">${escapeHTML(day.place)} · ${escapeHTML(day.driveNote)}</div>
           ${routeButtonHTML(day)}
-          ${day.dayNote ? `<div class="tip">💡 ${escapeHTML(day.dayNote)}</div>` : ""}
+          ${day.dayNote ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(day.dayNote)}</span></div>` : ""}
           ${dayStopsHTML(day)}
         </div>
       </details>
@@ -524,8 +543,8 @@ function renderNow() {
       </div>
       <div class="card">
         <strong>${escapeHTML(TRIP.hotel.name)}</strong><br>
-        <span style="color:var(--ink-soft);font-size:14px">${escapeHTML(TRIP.hotel.address)}</span>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 מפה</a></div>
+        <span style="color:var(--text-muted);font-size:14px">${escapeHTML(TRIP.hotel.address)}</span>
+        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a></div>
       </div>
       <h2 class="mini-list-title">לפני שנוסעים</h2>
       ${renderChecklistHTML()}
@@ -537,7 +556,7 @@ function renderNow() {
   if (todayStr > TRIP.end) {
     view.innerHTML = `
       <div class="countdown">
-        <div class="num">🌲</div>
+        <div class="num">${ICON.tree}</div>
         <div class="label">הטיול נגמר — מקווים שהיה כיף!</div>
       </div>
       <div class="empty-note">המסלול המלא עדיין כאן, תחת "מסלול", אם בא לכם להיזכר.</div>
@@ -617,7 +636,7 @@ function renderNow() {
         <div class="timeline-item ${isPast ? "done" : ""}">
           <div class="time">${timeLabel(b)}</div>
           <div class="body">
-            ${b.drive && !isPast ? `<div class="leg-hint">🚗 ${escapeHTML(b.drive.time)} ${escapeHTML(b.drive.from)}</div>` : ""}
+            ${b.drive && !isPast ? `<div class="leg-hint">${ICON.car} ${escapeHTML(b.drive.time)} ${escapeHTML(b.drive.from)}</div>` : ""}
             <h3>${escapeHTML(b.title)}</h3>
             <p>${escapeHTML(b.desc)}</p>
           </div>
@@ -626,7 +645,7 @@ function renderNow() {
     }).join("");
 
   const returnHTML = (currentIdx === -1 && day.returnLeg)
-    ? `${legHTML(day.returnLeg)}<div class="leg-end">🏨 ${escapeHTML(day.returnLeg.label)}</div>`
+    ? `${legHTML(day.returnLeg)}<div class="leg-end">${ICON.hotel} ${escapeHTML(day.returnLeg.label)}</div>`
     : "";
 
   view.innerHTML = `
@@ -635,7 +654,7 @@ function renderNow() {
     ${restHTML ? `<h2 class="mini-list-title">המשך היום</h2><div class="card">${restHTML}</div>` : ""}
     ${returnHTML}
     <div class="chips" style="margin-top:16px">
-      <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 ${escapeHTML(TRIP.hotel.name)}</a>
+      <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} ${escapeHTML(TRIP.hotel.name)}</a>
     </div>
   `;
 }
@@ -679,7 +698,7 @@ function renderInfo() {
       <div class="card">
         <div class="info-row"><span class="k">שם</span><span class="v">${escapeHTML(TRIP.hotel.name)}</span></div>
         <div class="info-row"><span class="k">כתובת</span><span class="v">${escapeHTML(TRIP.hotel.address)}</span></div>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">📍 פתיחה במפות</a></div>
+        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} פתיחה במפות</a></div>
       </div>
     </div>
 
@@ -688,7 +707,7 @@ function renderInfo() {
       <div class="card">
         <div class="info-row"><span class="k">נחיתה — ${hebWeekday(TRIP.flightIn.date)}, ${dayMonth(TRIP.flightIn.date)}</span><span class="v">${TRIP.flightIn.city}, ${TRIP.flightIn.time}</span></div>
         <div class="info-row"><span class="k">טיסת חזרה — ${hebWeekday(TRIP.flightOut.date)}, ${dayMonth(TRIP.flightOut.date)}</span><span class="v">${TRIP.flightOut.city}, ${TRIP.flightOut.time}</span></div>
-        <div class="tip">💡 ${escapeHTML(TRIP.flightOut.note)}</div>
+        <div class="tip">${ICON.bulb}<span>${escapeHTML(TRIP.flightOut.note)}</span></div>
       </div>
     </div>
 
@@ -700,7 +719,7 @@ function renderInfo() {
     <div class="info-section">
       <h2>כדאי לדעת</h2>
       <div class="card">
-        ${GENERAL_TIPS.map(t => `<div class="tip">💡 ${escapeHTML(t)}</div>`).join("")}
+        ${GENERAL_TIPS.map(t => `<div class="tip">${ICON.bulb}<span>${escapeHTML(t)}</span></div>`).join("")}
       </div>
     </div>
   `;
@@ -724,6 +743,9 @@ $$(".tab").forEach(tab => {
 });
 
 function init() {
+  $("#topbarIcon").innerHTML = ICON.tree;
+  $$(".tab-icon").forEach(el => { el.innerHTML = ICON[el.dataset.icon]; });
+
   renderNow();
   renderItinerary();
   renderInfo();

@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>היער השחור 2026</title>
 
-<meta name="theme-color" content="#1c3a2e">
+<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1210" media="(prefers-color-scheme: dark)">
 <meta name="description" content="תוכנית הטיול המשפחתי ביער השחור, 17–24 באוגוסט 2026">
 
 <!-- iOS "Add to Home Screen" -->
@@ -21,7 +22,7 @@
 <body>
 
 <header class="topbar" id="topbar">
-  <span class="topbar-icon">🌲</span>
+  <span class="topbar-icon" id="topbarIcon"></span>
   <div class="topbar-text">
     <strong>היער השחור</strong>
     <span id="topbarSub">17–24 באוגוסט 2026</span>
@@ -36,13 +37,13 @@
 
 <nav class="tabbar">
   <button class="tab" data-view="now">
-    <span class="tab-icon">🕐</span><span>עכשיו</span>
+    <span class="tab-icon" data-icon="clock"></span><span>עכשיו</span>
   </button>
   <button class="tab" data-view="itinerary">
-    <span class="tab-icon">📅</span><span>מסלול</span>
+    <span class="tab-icon" data-icon="calendar"></span><span>מסלול</span>
   </button>
   <button class="tab" data-view="info">
-    <span class="tab-icon">ℹ️</span><span>מידע</span>
+    <span class="tab-icon" data-icon="info"></span><span>מידע</span>
   </button>
 </nav>
 
