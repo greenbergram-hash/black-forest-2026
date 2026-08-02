@@ -1,6 +1,8 @@
 /* ============================================================
    היער השחור 2026 — נתוני הטיול
-   הכל מוטמע בקוד, אין קריאות רשת אחרי הטעינה הראשונה (חוץ מקישורי מפות/מידע חיצוניים).
+   רוב הנתונים מוטמעים בקוד; קריאת הרשת היחידה בפועל היא תחזית מזג האוויר
+   (Open-Meteo, בלי מפתח API) בלשונית "מזג אוויר". חוץ מזה, אין קריאות רשת
+   אחרי הטעינה הראשונה (חוץ מקישורי מפות/וויז/מידע חיצוניים).
    ============================================================ */
 
 const TRIP = {
@@ -51,11 +53,19 @@ const ICON = {
   tree: `<svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 7 10h2.5L6 16h4.5v5h3v-5H18l-3.5-6H17L12 3Z"/></svg>`,
   chevron: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
   ticket: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.3a1.7 1.7 0 0 0 0 3.4V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.3a1.7 1.7 0 0 0 0-3.4Z"/><path d="M9 7.5v9" stroke-dasharray="2.2 2.2"/></svg>`,
-  target: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`
+  target: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`,
+  cloud: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7.1 9.5 4 4 0 0 0 7 18Z"/></svg>`,
+  refresh: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/></svg>`,
+  drop: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`,
+  waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`
 };
 
 function mapLink(address) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+}
+
+function wazeLink(address) {
+  return "https://waze.com/ul?q=" + encodeURIComponent(address) + "&navigate=yes";
 }
 
 function commonsFileUrl(filename) {
@@ -412,6 +422,35 @@ const TOWN_COORDS = {
   "79853": { lat: 47.8672, lng: 8.2000 }  // Lenzkirch
 };
 
+/* ============================================================
+   מזג אוויר — מיקומים לבחירה (אזורי הטיול) ותחזית 7 ימים חיה מ-Open-Meteo
+   ============================================================ */
+
+const WEATHER_LOCATIONS = [
+  { key: "feldberg", label: "פלדברג (המלון)", lat: 47.8601, lng: 8.1075 },
+  { key: "titisee", label: "טיטיזה-נוישטט", lat: 47.9174, lng: 8.1524 },
+  { key: "rust", label: "Rust (Europa-Park / רולנטיקה)", lat: 48.2686, lng: 7.7217 },
+  { key: "freiburg", label: "פרייבורג", lat: 47.9990, lng: 7.8421 },
+  { key: "todtnau", label: "טודנאו", lat: 47.8317, lng: 7.9364 },
+  { key: "triberg", label: "טריברג / גוטאך", lat: 48.1298, lng: 8.2308 },
+  { key: "steinen", label: "שטיינן (פארק הציפורים)", lat: 47.7075, lng: 7.7503 },
+  { key: "schaffhausen", label: "שפהאוזן (מפלי הריין)", lat: 47.6779, lng: 8.6153 },
+  { key: "zurich", label: "ציריך", lat: 47.3769, lng: 8.5417 }
+];
+
+// ברירת מחדל חכמה: כשפותחים את הלשונית ביום מסוים בטיול, מציגים ישר את
+// התחזית לאזור של אותו יום (אלא אם המשתמש כבר בחר מיקום ידנית בעבר).
+const DAY_WEATHER_LOCATION = {
+  "2026-08-17": "feldberg",
+  "2026-08-18": "titisee",
+  "2026-08-19": "rust",
+  "2026-08-20": "freiburg",
+  "2026-08-21": "rust",
+  "2026-08-22": "triberg",
+  "2026-08-23": "steinen",
+  "2026-08-24": "schaffhausen"
+};
+
 const RED_CARD_INFO = {
   title: "כרטיס האדום — Hochschwarzwald Card",
   eligibilityNote: "המלון שלכם (Hotel Schlehdorn) הוא בית הארחה שותף, וכל שהייה של 2 לילות ומעלה מזכה בכרטיס בחינם — אתם שוהים 7 לילות, אז זה אוטומטי לגמרי. אין צורך לרכוש שום דבר.",
@@ -641,6 +680,7 @@ function chipsHTML(block) {
   if (block.price) chips.push(`<span class="chip">${escapeHTML(block.price)}</span>`);
   if (block.hours) chips.push(`<span class="chip">${ICON.clock} ${escapeHTML(block.hours)}</span>`);
   if (block.address) chips.push(`<a class="chip map" href="${mapLink(block.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>`);
+  if (block.address) chips.push(`<a class="chip waze" href="${wazeLink(block.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>`);
   if (block.infoUrl) chips.push(`<a class="chip info" href="${escapeHTML(block.infoUrl)}" target="_blank" rel="noopener">${ICON.link} מידע נוסף</a>`);
   if (!chips.length) return "";
   return `<div class="chips">${chips.join("")}</div>`;
@@ -788,7 +828,10 @@ function renderNow() {
       <div class="card">
         <strong>${escapeHTML(TRIP.hotel.name)}</strong><br>
         <span style="color:var(--text-muted);font-size:14px">${escapeHTML(TRIP.hotel.address)}</span>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a></div>
+        <div class="chips">
+          <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
+          <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
+        </div>
       </div>
       <h2 class="mini-list-title">לפני שנוסעים</h2>
       ${renderChecklistHTML()}
@@ -899,6 +942,7 @@ function renderNow() {
     ${returnHTML}
     <div class="chips" style="margin-top:16px">
       <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} ${escapeHTML(TRIP.hotel.name)}</a>
+      <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
     </div>
   `;
 }
@@ -942,7 +986,10 @@ function renderInfo() {
       <div class="card">
         <div class="info-row"><span class="k">שם</span><span class="v">${escapeHTML(TRIP.hotel.name)}</span></div>
         <div class="info-row"><span class="k">כתובת</span><span class="v">${escapeHTML(TRIP.hotel.address)}</span></div>
-        <div class="chips"><a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} פתיחה במפות</a></div>
+        <div class="chips">
+          <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} פתיחה במפות</a>
+          <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
+        </div>
       </div>
     </div>
 
@@ -968,6 +1015,240 @@ function renderInfo() {
     </div>
   `;
   bindChecklist();
+}
+
+/* ============================================================
+   תצוגת מזג אוויר — תחזית 7 ימים חיה (Open-Meteo), לפי מיקום נבחר
+   ============================================================ */
+
+const WEATHER_CACHE_TTL_MS = 20 * 60 * 1000;
+
+function weatherDefaultLocationKey() {
+  const todayStr = localDateStr(new Date());
+  return DAY_WEATHER_LOCATION[todayStr] || WEATHER_LOCATIONS[0].key;
+}
+
+let weatherLocationKey = localStorage.getItem("bf2026-weather-loc") || weatherDefaultLocationKey();
+const weatherCache = {}; // key -> { fetchedAt, data, error }
+const weatherFetching = new Set();
+
+function weatherLocationByKey(key) {
+  return WEATHER_LOCATIONS.find(l => l.key === key) || WEATHER_LOCATIONS[0];
+}
+
+const WEATHER_EMOJI = {
+  0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
+  45: "🌫️", 48: "🌫️",
+  51: "🌦️", 53: "🌦️", 55: "🌦️",
+  56: "🌧️", 57: "🌧️",
+  61: "🌧️", 63: "🌧️", 65: "🌧️",
+  66: "🌧️", 67: "🌧️",
+  71: "🌨️", 73: "🌨️", 75: "🌨️", 77: "🌨️",
+  80: "🌦️", 81: "🌧️", 82: "⛈️",
+  85: "🌨️", 86: "🌨️",
+  95: "⛈️", 96: "⛈️", 99: "⛈️"
+};
+const WEATHER_LABEL_HE = {
+  0: "בהיר", 1: "בהיר בעיקר", 2: "מעונן חלקית", 3: "מעונן",
+  45: "ערפילי", 48: "ערפילי (כפור)",
+  51: "טפטוף קל", 53: "טפטוף", 55: "טפטוף חזק",
+  56: "טפטוף קופא", 57: "טפטוף קופא חזק",
+  61: "גשם קל", 63: "גשם", 65: "גשם חזק",
+  66: "גשם קופא", 67: "גשם קופא חזק",
+  71: "שלג קל", 73: "שלג", 75: "שלג כבד", 77: "גרגירי שלג",
+  80: "ממטרים קלים", 81: "ממטרים", 82: "ממטרים חזקים",
+  85: "ממטרי שלג", 86: "ממטרי שלג כבדים",
+  95: "סופת רעמים", 96: "סופת רעמים עם ברד", 99: "סופת רעמים עם ברד כבד"
+};
+function weatherEmoji(code) { return WEATHER_EMOJI[code] || "🌡️"; }
+function weatherLabelHe(code) { return WEATHER_LABEL_HE[code] || ""; }
+
+function minutesAgoLabel(ts) {
+  const mins = Math.floor((Date.now() - ts) / 60000);
+  if (mins < 1) return "עודכן לפני רגע";
+  if (mins === 1) return "עודכן לפני דקה";
+  if (mins < 60) return `עודכן לפני ${mins} דקות`;
+  const hours = Math.floor(mins / 60);
+  return hours === 1 ? "עודכן לפני שעה" : `עודכן לפני ${hours} שעות`;
+}
+
+async function fetchWeatherData(loc) {
+  const url = "https://api.open-meteo.com/v1/forecast"
+    + "?latitude=" + loc.lat + "&longitude=" + loc.lng
+    + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+    + "&hourly=precipitation_probability"
+    + "&current=temperature_2m,weather_code"
+    + "&timezone=auto&forecast_days=7";
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("weather-fetch-failed");
+  return res.json();
+}
+
+// לכל יום, חלונות השעות שבהם סיכוי הגשם השעתי עובר סף — כדי להראות "גשם צפוי 14:00–19:00"
+// ולא רק אחוז יומי גולמי. יכולים להיות כמה חלונות נפרדים באותו יום (למשל בוקר וערב) —
+// הם מזוהים בנפרד ולא ממוזגים לטווח אחד רחב מדי, חוץ מפער של שעה בודדת ביניהם.
+const RAIN_HOUR_THRESHOLD = 20;
+
+function rainHourRanges(hourly, dayIndex) {
+  if (!hourly || !hourly.time || !hourly.precipitation_probability) return [];
+  const start = dayIndex * 24;
+  const end = Math.min(start + 24, hourly.time.length);
+  const ranges = [];
+  let runStart = null;
+  for (let h = start; h < end; h++) {
+    const above = hourly.precipitation_probability[h] >= RAIN_HOUR_THRESHOLD;
+    if (above && runStart === null) runStart = h;
+    if (!above && runStart !== null) { ranges.push([runStart, h - 1]); runStart = null; }
+  }
+  if (runStart !== null) ranges.push([runStart, end - 1]);
+
+  const merged = [];
+  for (const r of ranges) {
+    if (merged.length && r[0] - merged[merged.length - 1][1] <= 1) {
+      merged[merged.length - 1][1] = r[1];
+    } else {
+      merged.push(r.slice());
+    }
+  }
+  return merged.map(([a, b]) => [a - start, b - start]);
+}
+
+function rainHourRangeLabel(hourly, dayIndex) {
+  const ranges = rainHourRanges(hourly, dayIndex);
+  if (!ranges.length) return null;
+  const fmt = h => String(h).padStart(2, "0") + ":00";
+  return ranges.map(([startHour, endHourIncl]) => {
+    const endHour = Math.min(endHourIncl + 1, 24);
+    return startHour === endHour - 1 ? fmt(startHour) : `${fmt(startHour)}–${fmt(endHour)}`;
+  }).join(" · ");
+}
+
+function weatherRefreshBtnHTML(isFetching) {
+  return `<button class="weather-refresh-btn" id="weather-refresh" ${isFetching ? "disabled" : ""}>${ICON.refresh}${isFetching ? "מרענן…" : "רענון"}</button>`;
+}
+
+function currentWeatherHTML(loc, current) {
+  if (!current) return "";
+  return `
+    <div class="weather-current">
+      <div class="weather-current-icon">${weatherEmoji(current.weather_code)}</div>
+      <div class="weather-current-body">
+        <div class="weather-current-temp">${Math.round(current.temperature_2m)}°</div>
+        <div class="weather-current-label">${escapeHTML(weatherLabelHe(current.weather_code))} · עכשיו ב${escapeHTML(loc.label)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function weatherDaysHTML(daily, hourly) {
+  const todayStr = localDateStr(new Date());
+  const rows = daily.time.map((dateStr, i) => {
+    const isToday = dateStr === todayStr;
+    const code = daily.weather_code[i];
+    const max = Math.round(daily.temperature_2m_max[i]);
+    const min = Math.round(daily.temperature_2m_min[i]);
+    const pop = daily.precipitation_probability_max[i];
+    const rainRange = pop != null && pop >= RAIN_HOUR_THRESHOLD ? rainHourRangeLabel(hourly, i) : null;
+    return `
+      <div class="weather-day ${isToday ? "today" : ""}">
+        <div class="weather-day-main">
+          <div class="weather-day-date">
+            ${isToday ? "היום" : escapeHTML(hebWeekday(dateStr).replace("יום ", ""))}
+            <span>${dayMonth(dateStr)}</span>
+          </div>
+          <div class="weather-day-icon">${weatherEmoji(code)}</div>
+          <div class="weather-day-desc">${escapeHTML(weatherLabelHe(code))}</div>
+          <div class="weather-day-pop">${pop != null ? `${ICON.drop}${pop}%` : ""}</div>
+          <div class="weather-day-temps"><span class="max">${max}°</span><span class="min">${min}°</span></div>
+        </div>
+        ${rainRange ? `<div class="weather-day-rain-hours">${ICON.drop} גשם צפוי בין ${rainRange}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+  return `<div class="card weather-days">${rows}</div>`;
+}
+
+function weatherViewHTML(loc, entry, isFetching) {
+  const optionsHTML = WEATHER_LOCATIONS.map(l =>
+    `<option value="${l.key}" ${l.key === loc.key ? "selected" : ""}>${escapeHTML(l.label)}</option>`
+  ).join("");
+
+  let bodyHTML;
+  if (entry && entry.data) {
+    bodyHTML = currentWeatherHTML(loc, entry.data.current) + weatherDaysHTML(entry.data.daily, entry.data.hourly);
+  } else if (entry && entry.error) {
+    bodyHTML = `<div class="empty-note">${escapeHTML(entry.error)}</div>`;
+  } else {
+    bodyHTML = `<div class="empty-note">טוען תחזית…</div>`;
+  }
+
+  let statusHTML = "";
+  if (entry) {
+    statusHTML = entry.error
+      ? `<div class="weather-updated"><span class="weather-error">${ICON.warn} ${escapeHTML(entry.error)}</span>${weatherRefreshBtnHTML(isFetching)}</div>`
+      : `<div class="weather-updated"><span>${minutesAgoLabel(entry.fetchedAt)}</span>${weatherRefreshBtnHTML(isFetching)}</div>`;
+  }
+
+  return `
+    <h2 class="mini-list-title" style="margin-top:0">מזג אוויר — 7 ימים</h2>
+    <select id="weather-location-select" class="redcard-select" style="width:100%;margin-bottom:12px">${optionsHTML}</select>
+    ${statusHTML}
+    ${bodyHTML}
+    <div class="chips" style="margin-top:14px">
+      <a class="chip info" href="https://open-meteo.com/" target="_blank" rel="noopener">${ICON.link} נתונים מ-Open-Meteo</a>
+    </div>
+  `;
+}
+
+function bindWeather() {
+  const sel = $("#weather-location-select");
+  if (sel) {
+    sel.addEventListener("change", () => {
+      weatherLocationKey = sel.value;
+      localStorage.setItem("bf2026-weather-loc", weatherLocationKey);
+      renderWeather();
+    });
+  }
+  const refreshBtn = $("#weather-refresh");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      const entry = weatherCache[weatherLocationKey];
+      if (entry) entry.fetchedAt = 0;
+      renderWeather();
+    });
+  }
+}
+
+function maybeFetchWeather(key) {
+  const entry = weatherCache[key];
+  const fresh = entry && (entry.data || entry.error) && (Date.now() - entry.fetchedAt < WEATHER_CACHE_TTL_MS);
+  if (fresh || weatherFetching.has(key)) return;
+
+  weatherFetching.add(key);
+  renderWeather();
+
+  const loc = weatherLocationByKey(key);
+  fetchWeatherData(loc)
+    .then(data => { weatherCache[key] = { fetchedAt: Date.now(), data, error: null }; })
+    .catch(() => {
+      const prev = weatherCache[key];
+      weatherCache[key] = { fetchedAt: Date.now(), data: prev ? prev.data : null, error: "לא הצלחנו לטעון תחזית עדכנית — בדקו חיבור לאינטרנט." };
+    })
+    .finally(() => {
+      weatherFetching.delete(key);
+      if (weatherLocationKey === key) renderWeather();
+    });
+}
+
+function renderWeather() {
+  const key = weatherLocationKey;
+  const loc = weatherLocationByKey(key);
+  const entry = weatherCache[key];
+  const isFetching = weatherFetching.has(key);
+
+  $("#view-weather").innerHTML = weatherViewHTML(loc, entry, isFetching);
+  bindWeather();
+  maybeFetchWeather(key);
 }
 
 /* ============================================================
@@ -1015,6 +1296,7 @@ function redCardPlannedItemHTML(item) {
         ${item.caveat ? `<div class="tip warn">${ICON.warn}<span>${escapeHTML(item.caveat)}</span></div>` : ""}
         <div class="chips">
           <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
+          <a class="chip waze" href="${wazeLink(item.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
           ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
         </div>
       </div>
@@ -1042,6 +1324,7 @@ function redCardCatalogItemHTML(item, dist) {
         ${item.note ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(item.note)}</span></div>` : ""}
         <div class="chips">
           <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
+          <a class="chip waze" href="${wazeLink(item.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
           ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
         </div>
       </div>
@@ -1263,6 +1546,7 @@ function init() {
   renderItinerary();
   renderRedCard();
   renderInfo();
+  renderWeather();
   showView("now");
 
   if ("serviceWorker" in navigator) {
@@ -1272,8 +1556,10 @@ function init() {
   }
 
   // רענון תצוגת "עכשיו" מדי דקה, כדי שהפעילות הנוכחית תישאר מדויקת
-  // אם האפליקציה נשארת פתוחה.
+  // אם האפליקציה נשארת פתוחה. אותו טיימר גם בודק אם התחזית התיישנה
+  // ומרענן אותה ברקע (maybeFetchWeather בתוך renderWeather).
   setInterval(renderNow, 60000);
+  setInterval(renderWeather, 60000);
 }
 
 init();
