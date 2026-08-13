@@ -10,7 +10,8 @@ const TRIP = {
   end: "2026-08-24",
   hotel: {
     name: "Hotel Schlehdorn",
-    address: "Am Sommerberg 1, 79868 Feldberg (Schwarzwald)-Altglashütten, Germany"
+    address: "Am Sommerberg 1, 79868 Feldberg (Schwarzwald)-Altglashütten, Germany",
+    coords: { lat: 47.8555, lng: 8.1069, elev: 950 }
   },
   flightIn: { city: "ציריך", date: "2026-08-17", time: "12:30", note: "נסיעה למלון: כשעה ורבע עד שעה וחצי" },
   flightOut: { city: "ציריך", date: "2026-08-24", time: "22:00", note: "לוודא את השעה המדויקת מול הכרטיס בפועל" }
@@ -115,6 +116,8 @@ const DAYS = [
         title: "Fundorena (\"פאנדורנה\")",
         desc: "מתחם טרמפולינות, חבלים וטיפוס בפלדברג. שימו לב: השם הרשמי הוא Fundorena (לא Pandorena כפי שכתוב לפעמים). או פשוט להתארגן ולנוח במלון אחרי יום נסיעה.",
         address: "Fundorena, Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
+        coords: { lat: 47.8747, lng: 8.0233, elev: 1230 },
+        indoor: true,
         drive: { time: "כ-12 דקות", dist: "כ-8 ק\"מ", from: "מהמלון" },
         infoUrl: "https://fundorena.de/",
         tips: [{ text: "יום ראשון של הטיול — אין שום בעיה לא לעשות כלום חוץ מלהתארגן." }]
@@ -133,6 +136,7 @@ const DAYS = [
         title: "שביל רוואנהשלוכט (Ravennaschlucht)",
         desc: "מתחילים ב-Hofgut Sternen — שווה לראות לפני השביל: גשר הרכבת (Ravenna Viaduct, גובה 37 מ׳) שעוברים מתחתיו, שעון קוקייה ענק שנפתח בכל שעה עגולה, וחנות שעוני קוקייה עם סדנת ניפוח זכוכית. השביל עצמו: קניון צר ומיוער, מוצל כמעט כולו, עם מפלים קטנים לאורך הדרך — בין 30 דקות לכ-3 שעות, תלוי בקצב.",
         address: "Wanderparkplatz Hofgut Sternen, Höllsteig 76, 79874 Breitnau, Germany",
+        coords: { lat: 47.9345, lng: 8.0135, elev: 660 },
         drive: { time: "כ-24 דקות", dist: "כ-17 ק\"מ", from: "מהמלון" },
         image: { file: "images/ravennaschlucht.jpg", credit: "Bermicourt", license: "CC BY-SA 4.0", commonsFile: "Ravenna_Bridge.JPG" },
         infoUrl: "https://goblackforest.co.il/שביל-רוואנהשלוכט/",
@@ -143,6 +147,7 @@ const DAYS = [
         title: "אגם טיטיזי",
         desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה.",
         address: "Seestraße, 79822 Titisee-Neustadt, Germany",
+        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
         drive: { time: "כ-11 דקות", dist: "כ-9 ק\"מ", from: "משביל רוואנהשלוכט" },
         image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
         infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
@@ -153,6 +158,8 @@ const DAYS = [
         title: "Badeparadies Schwarzwald",
         desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. 4 שעות מספיקות — פתוח עד 22:00.",
         address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
+        coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
+        indoor: true,
         drive: { time: "כ-3 דקות", dist: "כ-1 ק\"מ", from: "מאגם טיטיזי" },
         image: { file: "images/badeparadies.jpg", credit: "qwesy qwesy", license: "CC BY 3.0", commonsFile: "Galaxy_Schwarzwald_(Badeparadies_Schwarzwald_in_Titisee)_-_panoramio.jpg" },
         price: "כ-22€ (4 שעות) / כ-30€ (יום) לנפש",
@@ -176,6 +183,7 @@ const DAYS = [
         title: "יום מלא ב-Europa-Park",
         desc: "יום רביעי נבחר בכוונה — יחד עם יום שישי, זה היום הכי פחות עמוס בפארק (סופ\"ש הכי צפוף). טיפ: להגיע בפתיחה.",
         address: "Europa-Park-Straße 2, 77977 Rust, Germany",
+        coords: { lat: 48.266, lng: 7.722, elev: 160 },
         drive: { time: "כ-1:20 שעות", dist: "כ-76 ק\"מ", from: "מהמלון" },
         image: { file: "images/europapark.jpg", credit: "Gabriel Rinaldi", license: "CC BY-SA 4.0", commonsFile: "Haupteingang_(main_entrance)_Europa-Park_Rust.JPG" },
         price: "כ-34–38€ ליום (הערכה 2026, תלוי בתאריך)",
@@ -210,6 +218,7 @@ const DAYS = [
         title: "פרייבורג — שוק הקתדרלה",
         desc: "שוק הקתדרלה (\"מינסטרמארקט\") בכיכר Münsterplatz — פועל כל בוקר חוץ מיום ראשון. צד צפוני: שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים). צד דרומי: תבלינים, כלי עץ, מזכרות, אוכל רחוב. אחר כך טיול בכיכר המונסטר ותעלות המים (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\") אם נשאר זמן.",
         address: "Münsterplatz 1, 79098 Freiburg im Breisgau, Germany",
+        coords: { lat: 47.9955, lng: 7.8522, elev: 280 },
         drive: { time: "כ-53 דקות", dist: "כ-38 ק\"מ", from: "מהמלון" },
         image: { file: "images/freiburg.jpg", credit: "Sven Puth", license: "CC BY-SA 4.0", commonsFile: "Freiburg_-_Münsterplatz.jpg" },
         infoUrl: "https://goblackforest.co.il/שוק-פרייבורג/",
@@ -220,6 +229,7 @@ const DAYS = [
         title: "מפלי טודנאו",
         desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
         address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
+        coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
         drive: { time: "כ-34 דקות", dist: "כ-28 ק\"מ", from: "מפרייבורג" },
         image: { file: "images/todtnau-falls.jpg", credit: "Freiburg1120", license: "CC BY-SA 3.0", commonsFile: "Todtnauer_Wasserfall.jpg" },
         infoUrl: "https://goblackforest.co.il/מפלי-טודנאו/"
@@ -229,6 +239,7 @@ const DAYS = [
         title: "הגשר התלוי Blackforestline",
         desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
         address: "Außer Ort 38, 79674 Todtnau, Germany",
+        coords: { lat: 47.8283, lng: 7.945, elev: 730 },
         drive: { time: "כ-דקה", dist: "כ-80 מ׳ בלבד", from: "ממפלי טודנאו" },
         image: { file: "images/blackforestline.jpg", credit: "Daniel Reust", license: "CC BY-SA 4.0", commonsFile: "Hängebrücke_\"Blackforestline\"_Todtnau.jpg" },
         price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
@@ -249,6 +260,8 @@ const DAYS = [
         title: "פארק המים רולנטיקה",
         desc: "יום שישי נבחר בכוונה, כמו רביעי — אחד הימים הפחות עמוסים. כרטיס נפרד מ-Europa-Park.",
         address: "Roland-Mack-Ring 1, 77977 Rust, Germany",
+        coords: { lat: 48.2597, lng: 7.73, elev: 160 },
+        indoor: true,
         drive: { time: "כ-1:22 שעות", dist: "כ-74 ק\"מ", from: "מהמלון" },
         image: { file: "images/rulantica.jpg", credit: "Simone Graffi", license: "CC0 / נחלת הכלל", commonsFile: "Rulantica_EuropaPark.jpg" },
         hours: "בד\"כ 09:30/10:00–22:00 (לבדוק באתר הרשמי לפי התאריך)",
@@ -278,6 +291,7 @@ const DAYS = [
         title: "טריברג",
         desc: "מפלי טריברג — המפורסמים ביער השחור — פלוס שעוני קוקייה ענקיים ומרכז עיירה קלאסי.",
         address: "Hauptstraße 85, 78098 Triberg im Schwarzwald, Germany",
+        coords: { lat: 48.1297, lng: 8.2306, elev: 700 },
         drive: { time: "כ-54 דקות", dist: "כ-55 ק\"מ", from: "מהמלון" },
         image: { file: "images/triberg.jpg", credit: "Arminia", license: "CC BY-SA 3.0", commonsFile: "Triberger_Wasserfall2.JPG" },
         price: "כניסה למפלים: מבוגר 7–8€, כרטיס משפחתי כ-20€, ילדים עד גיל 6 חינם (בד\"כ מזומן בלבד). אותו כרטיס מזכה גם בכניסה ל-Schwarzwaldmuseum ול-Triberg-Land.",
@@ -290,6 +304,7 @@ const DAYS = [
         title: "גוטאך — שביל החושים",
         desc: "מסלול מעגלי, בין שעה לשלוש שעות לפי קצב. הליכה על דשא, בוץ, אבנים וחול, מוצל ברובו, עם תחנות חוש (מישוש, ריח, ראייה). שווה גם עם ילדים גדולים יותר.",
         address: "Hauptstr. 103, 77793 Gutach im Schwarzwald, Germany",
+        coords: { lat: 48.2461, lng: 8.1917, elev: 290 },
         drive: { time: "כ-25 דקות", dist: "כ-16 ק\"מ", from: "מטריברג" },
         infoUrl: "https://www.parkmitallensinnen.de/",
         tips: [
@@ -303,6 +318,7 @@ const DAYS = [
         title: "Sommerrodelbahn גוטאך (רשות)",
         desc: "מגלשת קיץ נוספת, בד\"כ פחות עמוסה מזו שבטודנאו. כניסה חופשית, משלמים רק לפי נסיעה.",
         address: "Singersbach 1a, 77793 Gutach im Schwarzwald, Germany",
+        coords: { lat: 48.24, lng: 8.185, elev: 320 },
         drive: { time: "כ-3 דקות", dist: "כ-1.6 ק\"מ", from: "משביל החושים" },
         hours: "פתוח מ-10:00 (מ-9:00 בחופשת הקיץ)",
         infoUrl: "https://www.sommerrodelbahn-gutach.de/en/",
@@ -323,6 +339,7 @@ const DAYS = [
         title: "פארק הציפורים בשטיינן",
         desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מופע עופות דורסים ב-11:00 וב-15:00; קופים מסתובבים חופשי עם האכלה ב-12:00 וב-16:00 — יש גם סבב בוקר וגם סבב אחה\"צ, אז אפשר לתכנן לפי מה שנוח.",
         address: "Hofener Str. 60, 79585 Steinen, Germany",
+        coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
         drive: { time: "כ-58 דקות", dist: "כ-49 ק\"מ", from: "מהמלון" },
         image: { file: "images/vogelpark.jpg", credit: "Taxiarchos228 / Wladyslaw Sojka", license: "Free Art License 1.3", commonsFile: "Steinen_-_Vogelpark1.jpg" },
         price: "מבוגר 20€, ילד (4–11) 10€",
@@ -348,6 +365,7 @@ const DAYS = [
         title: "מפלי הריין",
         desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
         address: "Rheinfall, 8212 Neuhausen am Rheinfall, Switzerland",
+        coords: { lat: 47.6779, lng: 8.6152, elev: 390 },
         drive: { time: "כ-56 דקות", dist: "כ-56 ק\"מ", from: "מהמלון" },
         image: { file: "images/rheinfall.jpg", credit: "CrazyD", license: "CC BY-SA 3.0", commonsFile: "Rheinfall_bei_Schaffhausen_02.JPG" },
         infoUrl: "https://rheinfall.ch/en/",
@@ -358,6 +376,8 @@ const DAYS = [
         title: "Lindt Home of Chocolate",
         desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
         address: "Schokoladenplatz 1, 8802 Kilchberg, Switzerland",
+        coords: { lat: 47.3231, lng: 8.5453, elev: 410 },
+        indoor: true,
         drive: { time: "כ-1 שעה", dist: "כ-58 ק\"מ", from: "ממפלי הריין" },
         image: { file: "images/lindt.jpg", credit: "Brian Shamblen", license: "CC BY 2.0", commonsFile: "Two_story_chocolate_fountain_in_the_lobby_of_the_Lindt_factory_in_Zurich,_Switzerland_(52167915483).jpg" },
         tips: [
@@ -371,6 +391,8 @@ const DAYS = [
         title: "טיסה הביתה מציריך",
         desc: "נסיעה לנתב\"ג ציריך, ואז המראה ב-22:00. לוודא את השעה המדויקת מול הכרטיס בפועל, קרוב יותר לתאריך.",
         address: "Zürich Airport (ZRH), Flughafenstrasse, 8058 Zürich-Flughafen, Switzerland",
+        coords: { lat: 47.4502, lng: 8.5618, elev: 430 },
+        indoor: true,
         drive: { time: "כ-31 דקות", dist: "כ-19 ק\"מ", from: "מ-Lindt Home of Chocolate" },
         image: { file: "images/zurich-airport.jpg", credit: "Designalltag", license: "CC BY-SA 4.0", commonsFile: "Flughafen_Zuerich.jpg" },
         infoUrl: "https://www.flughafen-zuerich.ch/en/passengers"
@@ -420,35 +442,6 @@ const TOWN_COORDS = {
   "78126": { lat: 48.0975, lng: 8.4364 }, // Königsfeld
   "79871": { lat: 47.8747, lng: 8.1719 }, // Eisenbach
   "79853": { lat: 47.8672, lng: 8.2000 }  // Lenzkirch
-};
-
-/* ============================================================
-   מזג אוויר — מיקומים לבחירה (אזורי הטיול) ותחזית 7 ימים חיה מ-Open-Meteo
-   ============================================================ */
-
-const WEATHER_LOCATIONS = [
-  { key: "feldberg", label: "פלדברג (המלון)", lat: 47.8601, lng: 8.1075 },
-  { key: "titisee", label: "טיטיזה-נוישטט", lat: 47.9174, lng: 8.1524 },
-  { key: "rust", label: "Rust (Europa-Park / רולנטיקה)", lat: 48.2686, lng: 7.7217 },
-  { key: "freiburg", label: "פרייבורג", lat: 47.9990, lng: 7.8421 },
-  { key: "todtnau", label: "טודנאו", lat: 47.8317, lng: 7.9364 },
-  { key: "triberg", label: "טריברג / גוטאך", lat: 48.1298, lng: 8.2308 },
-  { key: "steinen", label: "שטיינן (פארק הציפורים)", lat: 47.7075, lng: 7.7503 },
-  { key: "schaffhausen", label: "שפהאוזן (מפלי הריין)", lat: 47.6779, lng: 8.6153 },
-  { key: "zurich", label: "ציריך", lat: 47.3769, lng: 8.5417 }
-];
-
-// ברירת מחדל חכמה: כשפותחים את הלשונית ביום מסוים בטיול, מציגים ישר את
-// התחזית לאזור של אותו יום (אלא אם המשתמש כבר בחר מיקום ידנית בעבר).
-const DAY_WEATHER_LOCATION = {
-  "2026-08-17": "feldberg",
-  "2026-08-18": "titisee",
-  "2026-08-19": "rust",
-  "2026-08-20": "freiburg",
-  "2026-08-21": "rust",
-  "2026-08-22": "triberg",
-  "2026-08-23": "steinen",
-  "2026-08-24": "schaffhausen"
 };
 
 const RED_CARD_INFO = {
@@ -705,14 +698,15 @@ function imageHTML(image) {
   return `<img class="stop-img" src="${image.file}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
 }
 
-// בלוק "תחנה" מלא — עם תמונה, כתובת, זמן נסיעה, וכל השאר.
-function stopCardHTML(block) {
+// בלוק "תחנה" מלא — עם תמונה, כתובת, זמן נסיעה, תחזית וכל השאר.
+function stopCardHTML(day, block) {
   return `
     <div class="stop">
       ${imageHTML(block.image)}
       <div class="stop-body">
         ${timeLabel(block) ? `<div class="stop-time">${timeLabel(block)}</div>` : ""}
         <h3>${escapeHTML(block.title)}</h3>
+        ${weatherHTML(day, block)}
         <p>${escapeHTML(block.desc)}</p>
         ${chipsHTML(block)}
         ${tipsHTML(block)}
@@ -722,7 +716,7 @@ function stopCardHTML(block) {
 }
 
 // בלוק מידע נלווה (בלי כתובת/מפה/תמונה משלו).
-function infoItemHTML(block) {
+function infoItemHTML(day, block) {
   return `
     <div class="timeline-item">
       <div class="time">${timeLabel(block)}</div>
@@ -741,9 +735,9 @@ function dayStopsHTML(day) {
   for (const b of day.blocks) {
     if (b.address) {
       html += legHTML(b.drive);
-      html += stopCardHTML(b);
+      html += stopCardHTML(day, b);
     } else {
-      html += infoItemHTML(b);
+      html += infoItemHTML(day, b);
     }
   }
   if (day.returnLeg) {
@@ -779,19 +773,27 @@ function routeButtonHTML(day) {
    תצוגת המסלול המלא
    ============================================================ */
 
+// אילו ימים פתוחים כרגע — נשמר כדי שרענון התחזית לא יסגור את מה שהמשתמש פתח.
+// null = המשתמש עוד לא נגע, וברירת המחדל (היום פתוח) בתוקף.
+let openDays = null;
+
 function renderItinerary() {
   const todayStr = localDateStr(new Date());
   const html = DAYS.map((day, i) => {
     const isToday = day.date === todayStr;
+    const isOpen = openDays ? openDays.has(day.date) : isToday;
 
     return `
-      <details class="day" data-date="${day.date}" ${isToday ? "open" : ""}>
+      <details class="day" data-date="${day.date}" ${isOpen ? "open" : ""}>
         <summary>
           <span class="day-summary-left">
             <span class="day-date">${hebWeekday(day.date)}, ${dayMonth(day.date)}${isToday ? '<span class="day-today-dot"></span>' : ""}</span>
             <span class="day-title">${escapeHTML(day.title)}</span>
           </span>
-          <span class="day-chevron">${ICON.chevron}</span>
+          <span class="day-summary-right">
+            ${dayWeatherHTML(day)}
+            <span class="day-chevron">${ICON.chevron}</span>
+          </span>
         </summary>
         <div class="day-body">
           <div class="day-meta">${escapeHTML(day.place)} · ${escapeHTML(day.driveNote)}</div>
@@ -804,6 +806,13 @@ function renderItinerary() {
   }).join("");
 
   $("#view-itinerary").innerHTML = `<h2 class="mini-list-title" style="margin-top:0">המסלול המלא</h2>${html}`;
+
+  // שמירת מצב פתוח/סגור, כדי לשחזר אותו אחרי רינדור מחדש (למשל כשהתחזית מתעדכנת).
+  $$("details.day").forEach(el => {
+    el.addEventListener("toggle", () => {
+      openDays = new Set($$("details.day").filter(d => d.open).map(d => d.dataset.date));
+    });
+  });
 }
 
 /* ============================================================
@@ -1008,6 +1017,18 @@ function renderInfo() {
     </div>
 
     <div class="info-section">
+      <h2>על התחזית</h2>
+      <div class="card">
+        <div class="info-row"><span class="k">מקור</span><span class="v"><a class="plain" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></span></div>
+        <div class="info-row"><span class="k">רזולוציה</span><span class="v">שעתית, לפי מיקום כל תחנה</span></div>
+        <div class="info-row"><span class="k">אופק</span><span class="v">כ-${WX.horizonDays} ימים קדימה</span></div>
+        <div class="tip">${ICON.bulb}<span>לכל פעילות מוצגת התחזית לשעות שלה בלבד, לפי הקואורדינטות של אותה תחנה — לכן פלדברג (1,200 מ׳) ורוסט (160 מ׳) מקבלים מספרים שונים לגמרי באותו יום.</span></div>
+        <div class="tip">${ICON.bulb}<span>התחזית נמשכת מחדש בפתיחת האפליקציה, בחזרה אליה, בחזרה לרשת, ואוטומטית כשהיא בת יותר מחצי שעה. אפשר גם ללחוץ "רענון". התחזית האחרונה נשמרת במכשיר ומוצגת גם בלי קליטה.</span></div>
+        <div class="tip">${ICON.bulb}<span>תחזית ליום 7–8 קדימה היא כיוון כללי, לא הבטחה — ככל שמתקרבים היא מתייצבת. שווה להסתכל שוב בכל בוקר.</span></div>
+      </div>
+    </div>
+
+    <div class="info-section">
       <h2>כדאי לדעת</h2>
       <div class="card">
         ${GENERAL_TIPS.map(t => `<div class="tip">${ICON.bulb}<span>${escapeHTML(t)}</span></div>`).join("")}
@@ -1018,23 +1039,23 @@ function renderInfo() {
 }
 
 /* ============================================================
-   תצוגת מזג אוויר — תחזית 7 ימים חיה (Open-Meteo), לפי מיקום נבחר
+   תחזית מזג אוויר — לפי השעות והמיקום של כל פעילות
+   מקור: Open-Meteo (חינמי, בלי מפתח API). קריאה אחת מביאה תחזית שעתית
+   לכל תחנות הטיול ולכל ימי הטיול, ומכאן כל פעילות שולפת רק את השעות שלה
+   ורק את הנקודה שלה — לכן פלדברג (1,230 מ׳) ורוסט (160 מ׳) מקבלים מספרים
+   שונים לגמרי באותו יום. התחזית נשמרת ב-localStorage כדי שתהיה זמינה גם
+   בלי קליטה, ומתרעננת אוטומטית כשהיא מתיישנת (WX.maxAgeMs).
    ============================================================ */
 
-const WEATHER_CACHE_TTL_MS = 20 * 60 * 1000;
-
-function weatherDefaultLocationKey() {
-  const todayStr = localDateStr(new Date());
-  return DAY_WEATHER_LOCATION[todayStr] || WEATHER_LOCATIONS[0].key;
-}
-
-let weatherLocationKey = localStorage.getItem("bf2026-weather-loc") || weatherDefaultLocationKey();
-const weatherCache = {}; // key -> { fetchedAt, data, error }
-const weatherFetching = new Set();
-
-function weatherLocationByKey(key) {
-  return WEATHER_LOCATIONS.find(l => l.key === key) || WEATHER_LOCATIONS[0];
-}
+const WX = {
+  api: "https://api.open-meteo.com/v1/forecast",
+  cacheKey: "bf2026-weather-v1",
+  maxAgeMs: 30 * 60 * 1000,   // אחרי חצי שעה התחזית נחשבת מיושנת ונמשכת מחדש
+  horizonDays: 15,            // Open-Meteo נותן תחזית עד ~16 יום קדימה
+  store: null,                // { fetchedAt, range, byPoint }
+  status: "idle",             // idle | loading | ok | error | out-of-range
+  listeners: []
+};
 
 const WEATHER_EMOJI = {
   0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
@@ -1060,8 +1081,24 @@ const WEATHER_LABEL_HE = {
   85: "ממטרי שלג", 86: "ממטרי שלג כבדים",
   95: "סופת רעמים", 96: "סופת רעמים עם ברד", 99: "סופת רעמים עם ברד כבד"
 };
+
+// דירוג חומרה — כשפעילות פרושה על כמה שעות, מציגים את המצב הגרוע ביותר
+// שבהן ולא את הראשון. הסדר לא זהה לסדר המספרי של הקודים (ערפל למשל
+// פחות חמור מטפטוף, למרות שהקוד שלו גבוה יותר).
+const WEATHER_RANK = {
+  0: 0, 1: 1, 2: 2, 3: 3,
+  45: 4, 48: 4,
+  51: 5, 53: 6, 55: 7, 56: 6, 57: 7,
+  61: 8, 63: 9, 65: 10, 66: 9, 67: 10,
+  71: 8, 73: 9, 75: 10, 77: 8,
+  80: 8, 81: 9, 82: 11,
+  85: 9, 86: 10,
+  95: 12, 96: 13, 99: 13
+};
+
 function weatherEmoji(code) { return WEATHER_EMOJI[code] || "🌡️"; }
 function weatherLabelHe(code) { return WEATHER_LABEL_HE[code] || ""; }
+function weatherRank(code) { return WEATHER_RANK[code] != null ? WEATHER_RANK[code] : 0; }
 
 function minutesAgoLabel(ts) {
   const mins = Math.floor((Date.now() - ts) / 60000);
@@ -1072,183 +1109,349 @@ function minutesAgoLabel(ts) {
   return hours === 1 ? "עודכן לפני שעה" : `עודכן לפני ${hours} שעות`;
 }
 
-async function fetchWeatherData(loc) {
-  const url = "https://api.open-meteo.com/v1/forecast"
-    + "?latitude=" + loc.lat + "&longitude=" + loc.lng
-    + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
-    + "&hourly=precipitation_probability"
-    + "&current=temperature_2m,weather_code"
-    + "&timezone=auto&forecast_days=7";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("weather-fetch-failed");
-  return res.json();
+function wxPointKey(c) {
+  return `${c.lat.toFixed(4)},${c.lng.toFixed(4)}`;
 }
 
-// לכל יום, חלונות השעות שבהם סיכוי הגשם השעתי עובר סף — כדי להראות "גשם צפוי 14:00–19:00"
-// ולא רק אחוז יומי גולמי. יכולים להיות כמה חלונות נפרדים באותו יום (למשל בוקר וערב) —
-// הם מזוהים בנפרד ולא ממוזגים לטווח אחד רחב מדי, חוץ מפער של שעה בודדת ביניהם.
-const RAIN_HOUR_THRESHOLD = 20;
-
-function rainHourRanges(hourly, dayIndex) {
-  if (!hourly || !hourly.time || !hourly.precipitation_probability) return [];
-  const start = dayIndex * 24;
-  const end = Math.min(start + 24, hourly.time.length);
-  const ranges = [];
-  let runStart = null;
-  for (let h = start; h < end; h++) {
-    const above = hourly.precipitation_probability[h] >= RAIN_HOUR_THRESHOLD;
-    if (above && runStart === null) runStart = h;
-    if (!above && runStart !== null) { ranges.push([runStart, h - 1]); runStart = null; }
-  }
-  if (runStart !== null) ranges.push([runStart, end - 1]);
-
-  const merged = [];
-  for (const r of ranges) {
-    if (merged.length && r[0] - merged[merged.length - 1][1] <= 1) {
-      merged[merged.length - 1][1] = r[1];
-    } else {
-      merged.push(r.slice());
+// כל הנקודות שצריך להן תחזית — תחנות הטיול (בלי כפילויות).
+function wxPoints() {
+  const map = new Map();
+  for (const day of DAYS) {
+    for (const b of day.blocks) {
+      if (!b.coords) continue;
+      const key = wxPointKey(b.coords);
+      if (!map.has(key)) map.set(key, { key, ...b.coords });
     }
   }
-  return merged.map(([a, b]) => [a - start, b - start]);
+  return Array.from(map.values());
 }
 
-function rainHourRangeLabel(hourly, dayIndex) {
-  const ranges = rainHourRanges(hourly, dayIndex);
-  if (!ranges.length) return null;
+// טווח התאריכים שאפשר לבקש עכשיו: החיתוך בין ימי הטיול לבין אופק התחזית.
+function wxRange() {
+  const now = new Date();
+  const today = localDateStr(now);
+  const horizon = localDateStr(new Date(now.getTime() + WX.horizonDays * 86400000));
+  const start = today > TRIP.start ? today : TRIP.start;
+  const end = TRIP.end < horizon ? TRIP.end : horizon;
+  if (start > end) return null;   // הטיול נגמר, או שעדיין רחוק מדי לתחזית
+  return { start, end };
+}
+
+function wxDaysUntilForecast() {
+  const today = new Date(localDateStr(new Date()) + "T00:00:00");
+  const first = new Date(TRIP.start + "T00:00:00");
+  return Math.max(0, Math.ceil((first - today) / 86400000) - WX.horizonDays);
+}
+
+function wxLoadCache() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(WX.cacheKey) || "null");
+    if (!parsed || !parsed.byPoint || !parsed.fetchedAt) return null;
+    return parsed;
+  } catch { return null; }
+}
+
+function wxSaveCache(store) {
+  try { localStorage.setItem(WX.cacheKey, JSON.stringify(store)); } catch { /* מכסת אחסון — לא קריטי */ }
+}
+
+function wxIsStale() {
+  if (!WX.store) return true;
+  const range = wxRange();
+  if (!range) return false;
+  if (WX.store.range.start !== range.start || WX.store.range.end !== range.end) return true;
+  return Date.now() - WX.store.fetchedAt > WX.maxAgeMs;
+}
+
+async function wxFetch({ force = false } = {}) {
+  const range = wxRange();
+  if (!range) { WX.status = "out-of-range"; wxNotify(); return; }
+  if (WX.status === "loading") return;
+  if (!force && !wxIsStale()) return;
+  if (!navigator.onLine) {
+    // אין רשת — נשארים עם מה שיש בקאש, בלי להציג שגיאה מיותרת.
+    if (!WX.store) { WX.status = "error"; wxNotify(); }
+    return;
+  }
+
+  const points = wxPoints();
+  const params = new URLSearchParams({
+    latitude: points.map(p => p.lat).join(","),
+    longitude: points.map(p => p.lng).join(","),
+    elevation: points.map(p => p.elev).join(","),
+    hourly: "temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m",
+    timezone: "Europe/Berlin",
+    start_date: range.start,
+    end_date: range.end
+  });
+
+  WX.status = "loading";
+  wxNotify();
+
+  try {
+    const res = await fetch(`${WX.api}?${params}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    const results = Array.isArray(json) ? json : [json];
+    if (results.length !== points.length) throw new Error("unexpected response shape");
+
+    const byPoint = {};
+    results.forEach((r, i) => { if (r && r.hourly) byPoint[points[i].key] = r.hourly; });
+
+    WX.store = { fetchedAt: Date.now(), range, byPoint };
+    WX.status = "ok";
+    WX.error = null;
+    wxSaveCache(WX.store);
+  } catch (err) {
+    // נכשל — אם יש תחזית ישנה בקאש ממשיכים להציג אותה.
+    WX.status = WX.store ? "ok" : "error";
+    WX.error = String(err);
+  }
+  wxNotify();
+}
+
+function wxNotify() {
+  WX.listeners.forEach(fn => { try { fn(); } catch { /* התעלמות */ } });
+}
+
+/* התחזית של פעילות בודדת: קיצונים על השעות שהיא מתוכננת להן, בנקודה שלה.
+   מחזיר null אם אין קואורדינטות, אין שעה, או שהתאריך עוד לא בתוך אופק התחזית. */
+function blockWeather(day, block) {
+  if (!block || !block.coords || !WX.store) return null;
+  const series = WX.store.byPoint[wxPointKey(block.coords)];
+  if (!series || !series.time) return null;
+
+  const startMin = toMinutes(block.start);
+  if (startMin == null) return null;
+  let endMin = toMinutes(block.end);
+  if (endMin == null || endMin <= startMin) endMin = startMin + 60;
+
+  const firstHour = Math.floor(startMin / 60);
+  const lastHour = Math.min(23, Math.ceil(endMin / 60) - 1);
+
+  const idx = [];
+  for (let h = firstHour; h <= lastHour; h++) {
+    const i = series.time.indexOf(`${day.date}T${String(h).padStart(2, "0")}:00`);
+    if (i !== -1) idx.push(i);
+  }
+  if (!idx.length) return null;
+
+  const pick = (arr, i) => (arr && arr[i] != null ? arr[i] : null);
+  let tMin = Infinity, tMax = -Infinity, feelsMax = -Infinity;
+  let pop = 0, mm = 0, wind = 0, worst = null;
+
+  for (const i of idx) {
+    const t = pick(series.temperature_2m, i);
+    if (t != null) { tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+    const f = pick(series.apparent_temperature, i);
+    if (f != null) feelsMax = Math.max(feelsMax, f);
+    const p = pick(series.precipitation_probability, i);
+    if (p != null) pop = Math.max(pop, p);
+    const r = pick(series.precipitation, i);
+    if (r != null) mm += r;
+    const w = pick(series.wind_speed_10m, i);
+    if (w != null) wind = Math.max(wind, w);
+    const c = pick(series.weather_code, i);
+    if (c != null && (worst == null || weatherRank(c) > weatherRank(worst))) worst = c;
+  }
+  if (tMin === Infinity) return null;
+
+  return {
+    tMin: Math.round(tMin),
+    tMax: Math.round(tMax),
+    feels: feelsMax === -Infinity ? null : Math.round(feelsMax),
+    pop: Math.round(pop),
+    mm: Math.round(mm * 10) / 10,
+    wind: Math.round(wind),
+    code: worst,
+    firstHour,
+    lastHour
+  };
+}
+
+// סיכום יומי — איחוד של כל הפעילויות של אותו יום, כל אחת בשעות ובמיקום שלה.
+function dayWeather(day) {
+  const parts = day.blocks.map(b => blockWeather(day, b)).filter(Boolean);
+  if (!parts.length) return null;
+  return {
+    tMin: Math.min(...parts.map(p => p.tMin)),
+    tMax: Math.max(...parts.map(p => p.tMax)),
+    pop: Math.max(...parts.map(p => p.pop)),
+    mm: Math.round(parts.reduce((s, p) => s + p.mm, 0) * 10) / 10,
+    code: parts.reduce((worst, p) => (worst == null || weatherRank(p.code) > weatherRank(worst) ? p.code : worst), null)
+  };
+}
+
+/* חלונות הגשם של היום — אבל רק בשעות שאתם בחוץ, ולפי המיקום שאתם אמורים
+   להיות בו באותה שעה. שעה שבה סיכוי הגשם עובר את הסף נחשבת "גשומה";
+   רצפים סמוכים (עם פער של שעה אחת לכל היותר) מאוחדים לחלון אחד. */
+const RAIN_HOUR_THRESHOLD = 20;
+
+function dayRainWindows(day) {
+  if (!WX.store) return [];
+  const byHour = new Map();
+  for (const b of day.blocks) {
+    if (!b.coords) continue;
+    const series = WX.store.byPoint[wxPointKey(b.coords)];
+    const w = blockWeather(day, b);
+    if (!series || !w) continue;
+    for (let h = w.firstHour; h <= w.lastHour; h++) {
+      const i = series.time.indexOf(`${day.date}T${String(h).padStart(2, "0")}:00`);
+      if (i === -1) continue;
+      const p = series.precipitation_probability ? series.precipitation_probability[i] : null;
+      if (p == null) continue;
+      byHour.set(h, Math.max(byHour.get(h) != null ? byHour.get(h) : 0, p));
+    }
+  }
+  if (!byHour.size) return [];
+
+  const hours = Array.from(byHour.keys()).sort((a, b) => a - b);
+  const wet = hours.filter(h => byHour.get(h) >= RAIN_HOUR_THRESHOLD);
+  const windows = [];
+  for (const h of wet) {
+    const last = windows[windows.length - 1];
+    if (last && h - last[1] <= 2) last[1] = h;
+    else windows.push([h, h]);
+  }
+  return windows;
+}
+
+function dayRainWindowLabel(day) {
+  const windows = dayRainWindows(day);
+  if (!windows.length) return null;
   const fmt = h => String(h).padStart(2, "0") + ":00";
-  return ranges.map(([startHour, endHourIncl]) => {
-    const endHour = Math.min(endHourIncl + 1, 24);
-    return startHour === endHour - 1 ? fmt(startHour) : `${fmt(startHour)}–${fmt(endHour)}`;
-  }).join(" · ");
+  return windows.map(([a, b]) => (a === b ? fmt(a) : `${fmt(a)}–${fmt(b + 1)}`)).join(" · ");
 }
 
-function weatherRefreshBtnHTML(isFetching) {
-  return `<button class="weather-refresh-btn" id="weather-refresh" ${isFetching ? "disabled" : ""}>${ICON.refresh}${isFetching ? "מרענן…" : "רענון"}</button>`;
+function popLevel(pop) {
+  if (pop >= 60) return "high";
+  if (pop >= 30) return "mid";
+  return "low";
 }
 
-function currentWeatherHTML(loc, current) {
-  if (!current) return "";
+// שורת מזג האוויר שמוצגת בתוך כרטיס פעילות.
+function weatherHTML(day, block) {
+  const w = blockWeather(day, block);
+  if (!w) {
+    if (!block.coords || !block.start) return "";
+    if (WX.status === "loading") return `<div class="wx wx-pending">טוען תחזית…</div>`;
+    if (WX.status === "out-of-range") return `<div class="wx wx-pending">התחזית תיפתח בעוד ${wxDaysUntilForecast()} ימים</div>`;
+    if (WX.status === "error") return `<div class="wx wx-pending">אין תחזית זמינה כרגע</div>`;
+    return "";
+  }
+
+  const temp = w.tMin === w.tMax ? `${w.tMax}°` : `${w.tMin}°–${w.tMax}°`;
+  const label = weatherLabelHe(w.code);
+
+  const rainWarn = (!block.indoor && w.pop >= 50)
+    ? `<div class="wx-warn">${ICON.warn}<span>סיכוי גבוה לגשם בשעות של הפעילות הזו — שווה מעיל/מטרייה, או להחליף עם פעילות מקורה ביום אחר.</span></div>`
+    : "";
+
   return `
-    <div class="weather-current">
-      <div class="weather-current-icon">${weatherEmoji(current.weather_code)}</div>
-      <div class="weather-current-body">
-        <div class="weather-current-temp">${Math.round(current.temperature_2m)}°</div>
-        <div class="weather-current-label">${escapeHTML(weatherLabelHe(current.weather_code))} · עכשיו ב${escapeHTML(loc.label)}</div>
-      </div>
+    <div class="wx">
+      <span class="wx-icon">${weatherEmoji(w.code)}</span>
+      <span class="wx-temp">${temp}</span>
+      <span class="wx-pop ${popLevel(w.pop)}">${ICON.drop}${w.pop}% גשם</span>
+      ${w.mm >= 0.5 ? `<span class="wx-mm">${w.mm} מ"מ</span>` : ""}
+      ${label ? `<span class="wx-desc">${escapeHTML(label)}</span>` : ""}
+      ${w.wind >= 25 ? `<span class="wx-wind">${w.wind} קמ"ש רוח</span>` : ""}
+    </div>
+    ${rainWarn}
+  `;
+}
+
+function dayWeatherHTML(day) {
+  const w = dayWeather(day);
+  if (!w) return "";
+  const temp = w.tMin === w.tMax ? `${w.tMax}°` : `${w.tMin}°–${w.tMax}°`;
+  return `<span class="wx-inline ${popLevel(w.pop)}">${weatherEmoji(w.code)} ${temp} · ${ICON.drop}${w.pop}%</span>`;
+}
+
+function wxUpdatedLabel() {
+  if (WX.status === "out-of-range") return `התחזית נפתחת בעוד ${wxDaysUntilForecast()} ימים`;
+  if (!WX.store) return WX.status === "error" ? "לא הצלחנו להביא תחזית" : "אין עדיין תחזית";
+  return minutesAgoLabel(WX.store.fetchedAt);
+}
+
+function wxBarHTML() {
+  const loading = WX.status === "loading";
+  return `
+    <div class="weather-updated">
+      <span>${loading ? "מרענן…" : escapeHTML(wxUpdatedLabel())}</span>
+      <button class="weather-refresh-btn" id="weather-refresh" ${loading ? "disabled" : ""}>${ICON.refresh}${loading ? "מרענן…" : "רענון"}</button>
     </div>
   `;
 }
 
-function weatherDaysHTML(daily, hourly) {
+function bindWxRefresh() {
+  const btn = $("#weather-refresh");
+  if (btn) btn.addEventListener("click", () => wxFetch({ force: true }));
+}
+
+/* ============================================================
+   תצוגת מזג אוויר — כל ימי הטיול, פעילות אחרי פעילות
+   ============================================================ */
+
+function weatherDayCardHTML(day) {
   const todayStr = localDateStr(new Date());
-  const rows = daily.time.map((dateStr, i) => {
-    const isToday = dateStr === todayStr;
-    const code = daily.weather_code[i];
-    const max = Math.round(daily.temperature_2m_max[i]);
-    const min = Math.round(daily.temperature_2m_min[i]);
-    const pop = daily.precipitation_probability_max[i];
-    const rainRange = pop != null && pop >= RAIN_HOUR_THRESHOLD ? rainHourRangeLabel(hourly, i) : null;
+  const isToday = day.date === todayStr;
+  const dw = dayWeather(day);
+  const rain = dayRainWindowLabel(day);
+
+  const rows = day.blocks.map(b => {
+    if (!b.coords || !b.start) return "";
+    const w = blockWeather(day, b);
+    const right = w
+      ? `<span class="wx-act-temp">${w.tMin === w.tMax ? `${w.tMax}°` : `${w.tMin}°–${w.tMax}°`}</span>
+         <span class="wx-pop ${popLevel(w.pop)}">${ICON.drop}${w.pop}%</span>`
+      : `<span class="wx-act-none">—</span>`;
     return `
-      <div class="weather-day ${isToday ? "today" : ""}">
-        <div class="weather-day-main">
-          <div class="weather-day-date">
-            ${isToday ? "היום" : escapeHTML(hebWeekday(dateStr).replace("יום ", ""))}
-            <span>${dayMonth(dateStr)}</span>
-          </div>
-          <div class="weather-day-icon">${weatherEmoji(code)}</div>
-          <div class="weather-day-desc">${escapeHTML(weatherLabelHe(code))}</div>
-          <div class="weather-day-pop">${pop != null ? `${ICON.drop}${pop}%` : ""}</div>
-          <div class="weather-day-temps"><span class="max">${max}°</span><span class="min">${min}°</span></div>
-        </div>
-        ${rainRange ? `<div class="weather-day-rain-hours">${ICON.drop} גשם צפוי בין ${rainRange}</div>` : ""}
+      <div class="wx-act">
+        <span class="wx-act-icon">${w ? weatherEmoji(w.code) : "🌡️"}</span>
+        <span class="wx-act-body">
+          <strong><bdi>${escapeHTML(b.title)}</bdi></strong>
+          <span class="wx-act-meta">
+            <span class="wx-act-when">${escapeHTML(timeLabel(b))}${w && weatherLabelHe(w.code) ? " · " + escapeHTML(weatherLabelHe(w.code)) : ""}</span>
+            ${right}
+          </span>
+        </span>
       </div>
     `;
   }).join("");
-  return `<div class="card weather-days">${rows}</div>`;
-}
-
-function weatherViewHTML(loc, entry, isFetching) {
-  const optionsHTML = WEATHER_LOCATIONS.map(l =>
-    `<option value="${l.key}" ${l.key === loc.key ? "selected" : ""}>${escapeHTML(l.label)}</option>`
-  ).join("");
-
-  let bodyHTML;
-  if (entry && entry.data) {
-    bodyHTML = currentWeatherHTML(loc, entry.data.current) + weatherDaysHTML(entry.data.daily, entry.data.hourly);
-  } else if (entry && entry.error) {
-    bodyHTML = `<div class="empty-note">${escapeHTML(entry.error)}</div>`;
-  } else {
-    bodyHTML = `<div class="empty-note">טוען תחזית…</div>`;
-  }
-
-  let statusHTML = "";
-  if (entry) {
-    statusHTML = entry.error
-      ? `<div class="weather-updated"><span class="weather-error">${ICON.warn} ${escapeHTML(entry.error)}</span>${weatherRefreshBtnHTML(isFetching)}</div>`
-      : `<div class="weather-updated"><span>${minutesAgoLabel(entry.fetchedAt)}</span>${weatherRefreshBtnHTML(isFetching)}</div>`;
-  }
 
   return `
-    <h2 class="mini-list-title" style="margin-top:0">מזג אוויר — 7 ימים</h2>
-    <select id="weather-location-select" class="redcard-select" style="width:100%;margin-bottom:12px">${optionsHTML}</select>
-    ${statusHTML}
-    ${bodyHTML}
+    <div class="card wx-day-card ${isToday ? "today" : ""}">
+      <div class="wx-day-head">
+        <div class="wx-day-date">
+          ${isToday ? "היום" : escapeHTML(hebWeekday(day.date).replace("יום ", ""))}
+          <span>${dayMonth(day.date)} · ${escapeHTML(day.title)}</span>
+        </div>
+        ${dw ? `<div class="wx-day-sum">${weatherEmoji(dw.code)} <strong>${dw.tMin}°–${dw.tMax}°</strong> <span class="wx-pop ${popLevel(dw.pop)}">${ICON.drop}${dw.pop}%</span></div>` : ""}
+      </div>
+      ${rows || `<div class="empty-note" style="padding:8px 0">אין פעילות עם מיקום ושעה ביום הזה.</div>`}
+      ${rain ? `<div class="wx-day-rain">${ICON.drop} גשם צפוי בשעות הפעילות בין ${rain}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderWeather() {
+  const body = (WX.status === "out-of-range" && !WX.store)
+    ? `<div class="empty-note">התחזית מכסה כ-${WX.horizonDays} ימים קדימה — היא תיפתח בעוד ${wxDaysUntilForecast()} ימים ותתמלא כאן.</div>`
+    : (!WX.store && WX.status === "error")
+      ? `<div class="empty-note">לא הצלחנו לטעון תחזית — בדקו חיבור לאינטרנט ונסו "רענון".</div>`
+      : (!WX.store)
+        ? `<div class="empty-note">טוען תחזית…</div>`
+        : DAYS.map(weatherDayCardHTML).join("");
+
+  $("#view-weather").innerHTML = `
+    <h2 class="mini-list-title" style="margin-top:0">מזג אוויר — לפי שעות הפעילות</h2>
+    ${wxBarHTML()}
+    ${body}
     <div class="chips" style="margin-top:14px">
       <a class="chip info" href="https://open-meteo.com/" target="_blank" rel="noopener">${ICON.link} נתונים מ-Open-Meteo</a>
     </div>
   `;
-}
-
-function bindWeather() {
-  const sel = $("#weather-location-select");
-  if (sel) {
-    sel.addEventListener("change", () => {
-      weatherLocationKey = sel.value;
-      localStorage.setItem("bf2026-weather-loc", weatherLocationKey);
-      renderWeather();
-    });
-  }
-  const refreshBtn = $("#weather-refresh");
-  if (refreshBtn) {
-    refreshBtn.addEventListener("click", () => {
-      const entry = weatherCache[weatherLocationKey];
-      if (entry) entry.fetchedAt = 0;
-      renderWeather();
-    });
-  }
-}
-
-function maybeFetchWeather(key) {
-  const entry = weatherCache[key];
-  const fresh = entry && (entry.data || entry.error) && (Date.now() - entry.fetchedAt < WEATHER_CACHE_TTL_MS);
-  if (fresh || weatherFetching.has(key)) return;
-
-  weatherFetching.add(key);
-  renderWeather();
-
-  const loc = weatherLocationByKey(key);
-  fetchWeatherData(loc)
-    .then(data => { weatherCache[key] = { fetchedAt: Date.now(), data, error: null }; })
-    .catch(() => {
-      const prev = weatherCache[key];
-      weatherCache[key] = { fetchedAt: Date.now(), data: prev ? prev.data : null, error: "לא הצלחנו לטעון תחזית עדכנית — בדקו חיבור לאינטרנט." };
-    })
-    .finally(() => {
-      weatherFetching.delete(key);
-      if (weatherLocationKey === key) renderWeather();
-    });
-}
-
-function renderWeather() {
-  const key = weatherLocationKey;
-  const loc = weatherLocationByKey(key);
-  const entry = weatherCache[key];
-  const isFetching = weatherFetching.has(key);
-
-  $("#view-weather").innerHTML = weatherViewHTML(loc, entry, isFetching);
-  bindWeather();
-  maybeFetchWeather(key);
+  bindWxRefresh();
 }
 
 /* ============================================================
@@ -1538,9 +1741,23 @@ $$(".tab").forEach(tab => {
   tab.addEventListener("click", () => showView(tab.dataset.view));
 });
 
+// רינדור מחדש של כל התצוגות שמושפעות מהתחזית, בלי לאבד את הגלילה
+// ואת הימים הפתוחים במסלול.
+function rerenderWeatherViews() {
+  const app = $("#app");
+  const scroll = app ? app.scrollTop : 0;
+  renderItinerary();   // סיכום יומי בכותרת כל יום
+  renderWeather();
+  if (app) app.scrollTop = scroll;
+}
+
 function init() {
   $("#topbarIcon").innerHTML = ICON.tree;
   $$(".tab-icon").forEach(el => { el.innerHTML = ICON[el.dataset.icon]; });
+
+  // תחזית שמורה מהפעם הקודמת — מוצגת מיד, גם בלי רשת.
+  WX.store = wxLoadCache();
+  if (WX.store) WX.status = "ok";
 
   renderNow();
   renderItinerary();
@@ -1555,11 +1772,22 @@ function init() {
     });
   }
 
+  // כל שינוי במצב התחזית (טעינה/הצלחה/כישלון) מרנדר מחדש.
+  WX.listeners.push(rerenderWeatherViews);
+  wxFetch();
+
   // רענון תצוגת "עכשיו" מדי דקה, כדי שהפעילות הנוכחית תישאר מדויקת
-  // אם האפליקציה נשארת פתוחה. אותו טיימר גם בודק אם התחזית התיישנה
-  // ומרענן אותה ברקע (maybeFetchWeather בתוך renderWeather).
-  setInterval(renderNow, 60000);
-  setInterval(renderWeather, 60000);
+  // אם האפליקציה נשארת פתוחה. באותה הזדמנות בודקים אם התחזית התיישנה.
+  setInterval(() => {
+    renderNow();
+    if (wxIsStale()) wxFetch();
+  }, 60000);
+
+  // חזרה לאפליקציה / חזרה לרשת — מושכים תחזית מעודכנת אם צריך.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && wxIsStale()) wxFetch();
+  });
+  window.addEventListener("online", () => wxFetch({ force: true }));
 }
 
 init();
