@@ -585,6 +585,24 @@ a.plain { color: inherit; text-decoration: none; }
    ולכן השם פשוט מקבל מספיק רוחב. */
 .wx-act-body { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 3px; line-height: 1.3; }
 .wx-act-body strong { font-size: 13.5px; }
+.wx-act-title { display: flex; align-items: center; gap: 8px; }
+.wx-act-title strong { flex: 1; min-width: 0; }
+/* קישור לתחזית של גוגל לאותו יישוב — קטן, לא גונב את תשומת הלב מהמספרים. */
+.wx-act-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wx-act-link .icon { width: 11px; height: 11px; }
+.wx-act-link:hover { color: var(--text); border-color: var(--text-faint); }
 .wx-act-meta { display: flex; align-items: center; gap: 8px; }
 .wx-act-when { flex: 1; min-width: 0; font-size: 11.5px; color: var(--text-faint); }
 .wx-act-temp { font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
