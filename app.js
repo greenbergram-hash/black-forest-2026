@@ -69,6 +69,11 @@ function wazeLink(address) {
   return "https://waze.com/ul?q=" + encodeURIComponent(address) + "&navigate=yes";
 }
 
+// תחזית Google לאותו יישוב — כרטיס מזג האוויר של גוגל, לצד התחזית שבאפליקציה.
+function googleWeatherLink(place) {
+  return "https://www.google.com/search?q=" + encodeURIComponent("weather " + place);
+}
+
 function commonsFileUrl(filename) {
   return "https://commons.wikimedia.org/wiki/File:" + encodeURIComponent(filename);
 }
@@ -117,6 +122,7 @@ const DAYS = [
         desc: "מתחם טרמפולינות, חבלים וטיפוס בפלדברג. שימו לב: השם הרשמי הוא Fundorena (לא Pandorena כפי שכתוב לפעמים). או פשוט להתארגן ולנוח במלון אחרי יום נסיעה.",
         address: "Fundorena, Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
         coords: { lat: 47.8747, lng: 8.0233, elev: 1230 },
+        wxPlace: "Feldberg (Schwarzwald), Germany",
         indoor: true,
         drive: { time: "כ-12 דקות", dist: "כ-8 ק\"מ", from: "מהמלון" },
         infoUrl: "https://fundorena.de/",
@@ -137,6 +143,7 @@ const DAYS = [
         desc: "מתחילים ב-Hofgut Sternen — שווה לראות לפני השביל: גשר הרכבת (Ravenna Viaduct, גובה 37 מ׳) שעוברים מתחתיו, שעון קוקייה ענק שנפתח בכל שעה עגולה, וחנות שעוני קוקייה עם סדנת ניפוח זכוכית. השביל עצמו: קניון צר ומיוער, מוצל כמעט כולו, עם מפלים קטנים לאורך הדרך — בין 30 דקות לכ-3 שעות, תלוי בקצב.",
         address: "Wanderparkplatz Hofgut Sternen, Höllsteig 76, 79874 Breitnau, Germany",
         coords: { lat: 47.9345, lng: 8.0135, elev: 660 },
+        wxPlace: "Breitnau, Germany",
         drive: { time: "כ-24 דקות", dist: "כ-17 ק\"מ", from: "מהמלון" },
         image: { file: "images/ravennaschlucht.jpg", credit: "Bermicourt", license: "CC BY-SA 4.0", commonsFile: "Ravenna_Bridge.JPG" },
         infoUrl: "https://goblackforest.co.il/שביל-רוואנהשלוכט/",
@@ -148,6 +155,7 @@ const DAYS = [
         desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה.",
         address: "Seestraße, 79822 Titisee-Neustadt, Germany",
         coords: { lat: 47.9008, lng: 8.147, elev: 850 },
+        wxPlace: "Titisee-Neustadt, Germany",
         drive: { time: "כ-11 דקות", dist: "כ-9 ק\"מ", from: "משביל רוואנהשלוכט" },
         image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
         infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
@@ -159,6 +167,7 @@ const DAYS = [
         desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. 4 שעות מספיקות — פתוח עד 22:00.",
         address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
         coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
+        wxPlace: "Titisee-Neustadt, Germany",
         indoor: true,
         drive: { time: "כ-3 דקות", dist: "כ-1 ק\"מ", from: "מאגם טיטיזי" },
         image: { file: "images/badeparadies.jpg", credit: "qwesy qwesy", license: "CC BY 3.0", commonsFile: "Galaxy_Schwarzwald_(Badeparadies_Schwarzwald_in_Titisee)_-_panoramio.jpg" },
@@ -184,6 +193,7 @@ const DAYS = [
         desc: "יום רביעי נבחר בכוונה — יחד עם יום שישי, זה היום הכי פחות עמוס בפארק (סופ\"ש הכי צפוף). טיפ: להגיע בפתיחה.",
         address: "Europa-Park-Straße 2, 77977 Rust, Germany",
         coords: { lat: 48.266, lng: 7.722, elev: 160 },
+        wxPlace: "Rust, Baden-Württemberg, Germany",
         drive: { time: "כ-1:20 שעות", dist: "כ-76 ק\"מ", from: "מהמלון" },
         image: { file: "images/europapark.jpg", credit: "Gabriel Rinaldi", license: "CC BY-SA 4.0", commonsFile: "Haupteingang_(main_entrance)_Europa-Park_Rust.JPG" },
         price: "כ-34–38€ ליום (הערכה 2026, תלוי בתאריך)",
@@ -219,6 +229,7 @@ const DAYS = [
         desc: "שוק הקתדרלה (\"מינסטרמארקט\") בכיכר Münsterplatz — פועל כל בוקר חוץ מיום ראשון. צד צפוני: שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים). צד דרומי: תבלינים, כלי עץ, מזכרות, אוכל רחוב. אחר כך טיול בכיכר המונסטר ותעלות המים (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\") אם נשאר זמן.",
         address: "Münsterplatz 1, 79098 Freiburg im Breisgau, Germany",
         coords: { lat: 47.9955, lng: 7.8522, elev: 280 },
+        wxPlace: "Freiburg im Breisgau, Germany",
         drive: { time: "כ-53 דקות", dist: "כ-38 ק\"מ", from: "מהמלון" },
         image: { file: "images/freiburg.jpg", credit: "Sven Puth", license: "CC BY-SA 4.0", commonsFile: "Freiburg_-_Münsterplatz.jpg" },
         infoUrl: "https://goblackforest.co.il/שוק-פרייבורג/",
@@ -230,6 +241,7 @@ const DAYS = [
         desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
         address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
         coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
+        wxPlace: "Todtnau, Germany",
         drive: { time: "כ-34 דקות", dist: "כ-28 ק\"מ", from: "מפרייבורג" },
         image: { file: "images/todtnau-falls.jpg", credit: "Freiburg1120", license: "CC BY-SA 3.0", commonsFile: "Todtnauer_Wasserfall.jpg" },
         infoUrl: "https://goblackforest.co.il/מפלי-טודנאו/"
@@ -240,6 +252,7 @@ const DAYS = [
         desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
         address: "Außer Ort 38, 79674 Todtnau, Germany",
         coords: { lat: 47.8283, lng: 7.945, elev: 730 },
+        wxPlace: "Todtnau, Germany",
         drive: { time: "כ-דקה", dist: "כ-80 מ׳ בלבד", from: "ממפלי טודנאו" },
         image: { file: "images/blackforestline.jpg", credit: "Daniel Reust", license: "CC BY-SA 4.0", commonsFile: "Hängebrücke_\"Blackforestline\"_Todtnau.jpg" },
         price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
@@ -261,6 +274,7 @@ const DAYS = [
         desc: "יום שישי נבחר בכוונה, כמו רביעי — אחד הימים הפחות עמוסים. כרטיס נפרד מ-Europa-Park.",
         address: "Roland-Mack-Ring 1, 77977 Rust, Germany",
         coords: { lat: 48.2597, lng: 7.73, elev: 160 },
+        wxPlace: "Rust, Baden-Württemberg, Germany",
         indoor: true,
         drive: { time: "כ-1:22 שעות", dist: "כ-74 ק\"מ", from: "מהמלון" },
         image: { file: "images/rulantica.jpg", credit: "Simone Graffi", license: "CC0 / נחלת הכלל", commonsFile: "Rulantica_EuropaPark.jpg" },
@@ -292,6 +306,7 @@ const DAYS = [
         desc: "מפלי טריברג — המפורסמים ביער השחור — פלוס שעוני קוקייה ענקיים ומרכז עיירה קלאסי.",
         address: "Hauptstraße 85, 78098 Triberg im Schwarzwald, Germany",
         coords: { lat: 48.1297, lng: 8.2306, elev: 700 },
+        wxPlace: "Triberg im Schwarzwald, Germany",
         drive: { time: "כ-54 דקות", dist: "כ-55 ק\"מ", from: "מהמלון" },
         image: { file: "images/triberg.jpg", credit: "Arminia", license: "CC BY-SA 3.0", commonsFile: "Triberger_Wasserfall2.JPG" },
         price: "כניסה למפלים: מבוגר 7–8€, כרטיס משפחתי כ-20€, ילדים עד גיל 6 חינם (בד\"כ מזומן בלבד). אותו כרטיס מזכה גם בכניסה ל-Schwarzwaldmuseum ול-Triberg-Land.",
@@ -305,6 +320,7 @@ const DAYS = [
         desc: "מסלול מעגלי, בין שעה לשלוש שעות לפי קצב. הליכה על דשא, בוץ, אבנים וחול, מוצל ברובו, עם תחנות חוש (מישוש, ריח, ראייה). שווה גם עם ילדים גדולים יותר.",
         address: "Hauptstr. 103, 77793 Gutach im Schwarzwald, Germany",
         coords: { lat: 48.2461, lng: 8.1917, elev: 290 },
+        wxPlace: "Gutach im Schwarzwald, Germany",
         drive: { time: "כ-25 דקות", dist: "כ-16 ק\"מ", from: "מטריברג" },
         infoUrl: "https://www.parkmitallensinnen.de/",
         tips: [
@@ -319,6 +335,7 @@ const DAYS = [
         desc: "מגלשת קיץ נוספת, בד\"כ פחות עמוסה מזו שבטודנאו. כניסה חופשית, משלמים רק לפי נסיעה.",
         address: "Singersbach 1a, 77793 Gutach im Schwarzwald, Germany",
         coords: { lat: 48.24, lng: 8.185, elev: 320 },
+        wxPlace: "Gutach im Schwarzwald, Germany",
         drive: { time: "כ-3 דקות", dist: "כ-1.6 ק\"מ", from: "משביל החושים" },
         hours: "פתוח מ-10:00 (מ-9:00 בחופשת הקיץ)",
         infoUrl: "https://www.sommerrodelbahn-gutach.de/en/",
@@ -340,6 +357,7 @@ const DAYS = [
         desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מופע עופות דורסים ב-11:00 וב-15:00; קופים מסתובבים חופשי עם האכלה ב-12:00 וב-16:00 — יש גם סבב בוקר וגם סבב אחה\"צ, אז אפשר לתכנן לפי מה שנוח.",
         address: "Hofener Str. 60, 79585 Steinen, Germany",
         coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
+        wxPlace: "Steinen, Baden-Württemberg, Germany",
         drive: { time: "כ-58 דקות", dist: "כ-49 ק\"מ", from: "מהמלון" },
         image: { file: "images/vogelpark.jpg", credit: "Taxiarchos228 / Wladyslaw Sojka", license: "Free Art License 1.3", commonsFile: "Steinen_-_Vogelpark1.jpg" },
         price: "מבוגר 20€, ילד (4–11) 10€",
@@ -366,6 +384,7 @@ const DAYS = [
         desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
         address: "Rheinfall, 8212 Neuhausen am Rheinfall, Switzerland",
         coords: { lat: 47.6779, lng: 8.6152, elev: 390 },
+        wxPlace: "Neuhausen am Rheinfall, Switzerland",
         drive: { time: "כ-56 דקות", dist: "כ-56 ק\"מ", from: "מהמלון" },
         image: { file: "images/rheinfall.jpg", credit: "CrazyD", license: "CC BY-SA 3.0", commonsFile: "Rheinfall_bei_Schaffhausen_02.JPG" },
         infoUrl: "https://rheinfall.ch/en/",
@@ -377,6 +396,7 @@ const DAYS = [
         desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
         address: "Schokoladenplatz 1, 8802 Kilchberg, Switzerland",
         coords: { lat: 47.3231, lng: 8.5453, elev: 410 },
+        wxPlace: "Kilchberg, Zürich, Switzerland",
         indoor: true,
         drive: { time: "כ-1 שעה", dist: "כ-58 ק\"מ", from: "ממפלי הריין" },
         image: { file: "images/lindt.jpg", credit: "Brian Shamblen", license: "CC BY 2.0", commonsFile: "Two_story_chocolate_fountain_in_the_lobby_of_the_Lindt_factory_in_Zurich,_Switzerland_(52167915483).jpg" },
@@ -392,6 +412,7 @@ const DAYS = [
         desc: "נסיעה לנתב\"ג ציריך, ואז המראה ב-22:00. לוודא את השעה המדויקת מול הכרטיס בפועל, קרוב יותר לתאריך.",
         address: "Zürich Airport (ZRH), Flughafenstrasse, 8058 Zürich-Flughafen, Switzerland",
         coords: { lat: 47.4502, lng: 8.5618, elev: 430 },
+        wxPlace: "Kloten (Zürich Airport), Switzerland",
         indoor: true,
         drive: { time: "כ-31 דקות", dist: "כ-19 ק\"מ", from: "מ-Lindt Home of Chocolate" },
         image: { file: "images/zurich-airport.jpg", credit: "Designalltag", license: "CC BY-SA 4.0", commonsFile: "Flughafen_Zuerich.jpg" },
@@ -1409,7 +1430,10 @@ function weatherDayCardHTML(day) {
       <div class="wx-act">
         <span class="wx-act-icon">${w ? weatherEmoji(w.code) : "🌡️"}</span>
         <span class="wx-act-body">
-          <strong><bdi>${escapeHTML(b.title)}</bdi></strong>
+          <span class="wx-act-title">
+            <strong><bdi>${escapeHTML(b.title)}</bdi></strong>
+            ${b.wxPlace ? `<a class="wx-act-link" href="${googleWeatherLink(b.wxPlace)}" target="_blank" rel="noopener" title="${escapeHTML("תחזית Google עבור " + b.wxPlace)}">${ICON.link} Google</a>` : ""}
+          </span>
           <span class="wx-act-meta">
             <span class="wx-act-when">${escapeHTML(timeLabel(b))}${w && weatherLabelHe(w.code) ? " · " + escapeHTML(weatherLabelHe(w.code)) : ""}</span>
             ${right}
