@@ -950,11 +950,15 @@ function renderNow() {
   }
 
   const dayNum = dayIndex + 1;
+  const heroWx = dayWeatherHTML(day);
+  const heroRain = dayRainWindowLabel(day);
   let heroHTML = `
     <div class="hero">
       <p class="hero-eyebrow">יום ${dayNum} מתוך ${DAYS.length} · ${hebWeekday(day.date)}, ${dayMonth(day.date)}</p>
       <h1 class="hero-title">${escapeHTML(day.title)}</h1>
       <p class="hero-sub">${escapeHTML(day.place)} · ${escapeHTML(day.driveNote)}</p>
+      ${heroWx ? `<p class="hero-wx">${heroWx}</p>` : ""}
+      ${heroRain ? `<div class="wx-day-rain">${ICON.drop} גשם צפוי בשעות הפעילות בין ${heroRain}</div>` : ""}
     </div>
     ${routeButtonHTML(day)}
   `;
@@ -968,6 +972,7 @@ function renderNow() {
         <div class="kicker"><span class="pulse"></span>${isNow ? "עכשיו" : "בקרוב"}${timeLabel(b) ? " · " + timeLabel(b) : ""}</div>
         ${imageHTML(b.image)}
         <h2>${escapeHTML(b.title)}</h2>
+        ${weatherHTML(day, b)}
         ${!isNow ? legHTML(b.drive) : ""}
         <p>${escapeHTML(b.desc)}</p>
         ${chipsHTML(b)}
@@ -988,12 +993,16 @@ function renderNow() {
     .filter((_, i) => i !== currentIdx)
     .map(({ b, s }) => {
       const isPast = s != null && s < nowMinutes && currentIdx !== -1 && s < timed[currentIdx].s;
+      const bw = isPast ? null : blockWeather(day, b);
+      const bwHTML = bw
+        ? `<span class="wx-inline ${popLevel(bw.pop)}">${weatherEmoji(bw.code)} ${bw.tMin === bw.tMax ? `${bw.tMax}°` : `${bw.tMin}°–${bw.tMax}°`} · ${ICON.drop}${bw.pop}%</span>`
+        : "";
       return `
         <div class="timeline-item ${isPast ? "done" : ""}">
           <div class="time">${timeLabel(b)}</div>
           <div class="body">
             ${b.drive && !isPast ? `<div class="leg-hint">${ICON.car} ${escapeHTML(b.drive.time)} ${escapeHTML(b.drive.from)}</div>` : ""}
-            <h3>${escapeHTML(b.title)}</h3>
+            <h3>${escapeHTML(b.title)}${bwHTML ? ` ${bwHTML}` : ""}</h3>
             <p>${escapeHTML(b.desc)}</p>
           </div>
         </div>
@@ -1809,6 +1818,7 @@ $$(".tab").forEach(tab => {
 function rerenderWeatherViews() {
   const app = $("#app");
   const scroll = app ? app.scrollTop : 0;
+  renderNow();         // תחזית של הפעילות הנוכחית ושל המשך היום
   renderItinerary();   // סיכום יומי בכותרת כל יום
   renderWeather();
   if (app) app.scrollTop = scroll;
