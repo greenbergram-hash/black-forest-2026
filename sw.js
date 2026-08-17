@@ -35,9 +35,17 @@ const SHELL = [
 // ואין סיבה שההתקנה הראשונה תוריד את כולם — הם נכנסים למטמון דרך הכפתור
 // "הורדת הפודקאסטים של היום" בלשונית "עכשיו", או בהאזנה ראשונה.
 
+// cache: "reload" מכריח כל קובץ ב-SHELL להגיע מהרשת בזמן ההתקנה.
+// בלי זה, העלאת המספר של CACHE לא מספיקה: GitHub Pages מגיש את הקבצים עם
+// Cache-Control: max-age=600, כך שמכשיר שפתח את האפליקציה בעשר הדקות
+// האחרונות היה שומר במטמון החדש דווקא את app.js הישן מהמטמון של הדפדפן —
+// ומכיוון שה-Service Worker הוא cache-first, הגרסה הישנה הייתה נתקעת שם
+// עד העלאת הגרסה הבאה.
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(cache => cache.addAll(SHELL.map(url => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
   );
 });
 
