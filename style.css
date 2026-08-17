@@ -713,3 +713,95 @@ details.redcard-item[open] .day-chevron { transform: rotate(180deg); color: var(
 }
 .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
 .toggle-btn .icon { width: 13px; height: 13px; }
+
+/* ---- podcast: the place name is the link ---- */
+.pod-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.pod-title-text {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.pod-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.pod-cue .icon { width: 13px; height: 13px; }
+.pod-title[aria-expanded="true"] .pod-cue { background: var(--accent); color: var(--accent-contrast); }
+.timeline-item.done .pod-title-text { text-decoration-color: var(--text-faint); }
+.timeline-item.done .pod-cue { background: var(--surface-2); color: var(--text-faint); }
+
+.pod-panel {
+  margin: 10px 0 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-strong);
+}
+.pod-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.pod-head .icon { color: var(--accent); }
+.pod-note { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+/* בלי זה פקדי הנגן של הדפדפן נשארים לבנים גם במצב כהה */
+.pod-audio { width: 100%; display: block; color-scheme: light dark; }
+.pod-missing {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--danger);
+}
+.pod-missing .icon { margin-top: 2px; flex: none; }
+
+.pod-dl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  margin: -6px 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+}
+.pod-dl[data-state="working"] { opacity: .7; }
+.pod-dl[data-state="done"] { border-color: var(--border-strong); color: var(--text-muted); background: var(--surface-2); }
+.pod-dl[data-state="partial"] { border-color: var(--danger); color: var(--danger); }
