@@ -178,6 +178,12 @@ body {
   color: var(--text-muted);
   margin: 0;
 }
+.hero-wx { margin: 10px 0 0; }
+.hero .wx-day-rain { margin-top: 6px; }
+
+/* תחזית קומפקטית לצד שם הפעילות ברשימת "המשך היום" */
+.timeline-item h3 .wx-inline { margin-inline-start: 6px; font-weight: 600; }
+.timeline-item.done .wx-inline { display: none; }
 
 .now-current {
   background: var(--surface);

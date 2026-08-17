@@ -1,4 +1,7 @@
-const CACHE = "bf2026-v6";
+// חשוב: כל שינוי ב-app.js / style.css / index.html מחייב העלאת המספר כאן.
+// ה-Service Worker הוא cache-first, אז בלי זה מכשיר שכבר התקין את האפליקציה
+// ימשיך להריץ את הגרסה הישנה לנצח.
+const CACHE = "bf2026-v7";
 const SHELL = [
   "./",
   "./index.html",
