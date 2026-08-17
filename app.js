@@ -61,7 +61,10 @@ const ICON = {
   cloud: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7.1 9.5 4 4 0 0 0 7 18Z"/></svg>`,
   refresh: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/></svg>`,
   drop: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`,
-  waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`
+  waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`,
+  headphones: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18Z"/><path d="M20 14h-2.5a1 1 0 0 0-1 1v3.5a1 1 0 0 0 1 1h1a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>`,
+  download: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 19h14"/></svg>`,
+  check: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"/></svg>`
 };
 
 function mapLink(address) {
@@ -101,6 +104,36 @@ function formatDistance(km) {
 
 const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
 
+/* ============================================================
+   פודקאסטים לילדים — פרק לכל אזור פעילות, להאזנה בדרך לשם.
+   הקבצים מיוצרים ב-NotebookLM מחומרי המקור שב-podcast-scripts/, מומרים
+   ל-m4a עם tools/convert-audio.sh ונשמרים ב-audio/ באותו שם.
+   minutes = אורך היעד, נגזר מזמן הנסיעה לאותו אזור. אם הפרק שיצא ארוך
+   יותר זה בסדר — הנגן זוכר איפה עצרנו וממשיך משם בפעם הבאה.
+   ברגע שקובץ הפרק קיים, לעדכן כאן את האורך האמיתי שלו: המספר הזה מוצג
+   למשתמש על שם המקום ("11 דק׳"), ואין טעם שהוא יבטיח משהו אחר מהקובץ.
+   בלוק מקבל פרק דרך השדה area, וכמה בלוקים באותו אזור חולקים פרק אחד
+   (מגלשת Hasenhorn, המפלים והגשר התלוי הם כולם "טודנאו").
+
+   rev: חשוב — אם מחליפים קובץ פרק שכבר הועלה פעם, צריך להעלות את המספר
+   הזה ב-1. הפרקים נשמרים במטמון לפי כתובת, אז בלי זה מכשיר שכבר הוריד את
+   הפרק ימשיך לנגן את הגרסה הישנה לנצח (בדיוק כמו CACHE ב-sw.js).
+   ============================================================ */
+const PODCASTS = {
+  feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 8,  rev: 1 },
+  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1 },
+  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 10, rev: 1 },
+  europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 15, rev: 1 },
+  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 7,  rev: 1 },
+  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 13, rev: 1 },
+  rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 15, rev: 1 },
+  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 13, rev: 1 },
+  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 9,  rev: 1 },
+  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 13, rev: 1 },
+  badeparadies: { title: "Badeparadies",             file: "audio/badeparadies.m4a", minutes: 11, rev: 1 },
+  lindt:        { title: "לינדט — עולם השוקולד",     file: "audio/lindt.m4a",        minutes: 14, rev: 1 }
+};
+
 /* לכל יום — blocks כרונולוגי. start/end בפורמט "HH:MM" (שעון מקומי).
    approx:true אומר שהמסמך המקורי לא נתן שעה מדויקת — זו הערכה סבירה.
    בלוק עם address הוא "תחנה" אמיתית (עם מפה, תמונה, זמן נסיעה מהתחנה הקודמת).
@@ -122,6 +155,7 @@ const DAYS = [
       {
         start: "14:30", end: "18:00", approx: true,
         title: "Fundorena (\"פאנדורנה\")",
+        area: "feldberg",
         desc: "מתחם טרמפולינות, חבלים וטיפוס בפלדברג. שימו לב: השם הרשמי הוא Fundorena (לא Pandorena כפי שכתוב לפעמים). או פשוט להתארגן ולנוח במלון אחרי יום נסיעה.",
         address: "Fundorena, Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
         coords: { lat: 47.8747, lng: 8.0233, elev: 1230 },
@@ -143,6 +177,7 @@ const DAYS = [
       {
         start: "09:00", end: "10:00", approx: false,
         title: "מגלשת הקיץ Hasenhorn",
+        area: "todtnau",
         desc: "מגלשת קיץ באורך 2.9 ק\"מ — מהארוכות והמרשימות בגרמניה. עולים ברכבל הכיסא ויורדים במזחלת על מסילה. מגיעים בפתיחה בכוונה: בסופי שבוע ובחופשות נוצרים תורים ארוכים.",
         address: "Brandenbergstr. 3, 79674 Todtnau, Germany",
         coords: { lat: 47.83, lng: 7.939, elev: 660 },
@@ -158,6 +193,7 @@ const DAYS = [
       {
         start: "10:15", end: "11:30", approx: true,
         title: "מפלי טודנאו",
+        area: "todtnau",
         desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
         address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
         coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
@@ -169,6 +205,7 @@ const DAYS = [
       {
         start: "11:30", end: "12:45", approx: true,
         title: "הגשר התלוי Blackforestline",
+        area: "todtnau",
         desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
         address: "Außer Ort 38, 79674 Todtnau, Germany",
         coords: { lat: 47.8283, lng: 7.945, elev: 730 },
@@ -183,6 +220,7 @@ const DAYS = [
       {
         start: "13:45", end: "17:00", approx: true,
         title: "פארק הציפורים והקופים בשטיינן",
+        area: "vogelpark",
         desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מגיעים לסבב אחר הצהריים: מופע עופות דורסים ב-15:00, וקופים שמסתובבים חופשי עם האכלה ב-16:00. (יש גם סבב בוקר ב-11:00 וב-12:00, אבל היום מתחיל בטודנאו.)",
         address: "Hofener Str. 60, 79585 Steinen, Germany",
         coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
@@ -206,6 +244,7 @@ const DAYS = [
       {
         start: "09:00", end: "18:00", approx: false,
         title: "יום מלא ב-Europa-Park",
+        area: "europapark",
         desc: "יום רביעי נבחר בכוונה — יחד עם יום שישי, זה היום הכי פחות עמוס בפארק (סופ\"ש הכי צפוף). טיפ: להגיע בפתיחה.",
         address: "Europa-Park-Straße 2, 77977 Rust, Germany",
         coords: { lat: 48.266, lng: 7.722, elev: 160 },
@@ -242,6 +281,7 @@ const DAYS = [
       {
         start: "10:00", end: "12:00", approx: true,
         title: "אגם טיטיזי (רשות)",
+        area: "titisee",
         desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום ראשון 23.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר, ואם שני הימים אפורים וקרים — אפשר פשוט לוותר.",
         address: "Seestraße, 79822 Titisee-Neustadt, Germany",
         coords: { lat: 47.9008, lng: 8.147, elev: 850 },
@@ -258,6 +298,7 @@ const DAYS = [
       {
         start: "13:30", end: "16:00", approx: true,
         title: "פרייבורג — העיר העתיקה",
+        area: "freiburg",
         desc: "כיכר המונסטר, תעלות המים הקטנות שברחובות (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\"). שוק הקתדרלה (\"מינסטרמארקט\") ב-Münsterplatz פועל כל בוקר חוץ מיום ראשון ונסגר סביב 13:00 — צד צפוני שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים), צד דרומי תבלינים, כלי עץ, מזכרות ואוכל רחוב.",
         address: "Münsterplatz 1, 79098 Freiburg im Breisgau, Germany",
         coords: { lat: 47.9955, lng: 7.8522, elev: 280 },
@@ -270,6 +311,7 @@ const DAYS = [
       {
         start: "16:00", end: "19:00", approx: true,
         title: "Keidel Mineral-Thermalbad",
+        area: "freiburg",
         desc: "מרחצאות מינרליים תרמיים בשכונת St. Georgen שבדרום פרייבורג. בריכות פנים וחוץ במים חמים, בריכת חוויה חיצונית עם תעלת זרם ומיטות בועות, ומגרש משחקים בחוץ. סיום טוב ליום עירוני — ובמיוחד אם יורד גשם.",
         address: "An den Heilquellen 4, 79111 Freiburg im Breisgau, Germany",
         coords: { lat: 47.9739, lng: 7.8203, elev: 240 },
@@ -293,6 +335,7 @@ const DAYS = [
       {
         start: "10:00", end: "18:00", approx: true,
         title: "פארק המים רולנטיקה",
+        area: "rulantica",
         desc: "יום שישי נבחר בכוונה, כמו רביעי — אחד הימים הפחות עמוסים. כרטיס נפרד מ-Europa-Park.",
         address: "Roland-Mack-Ring 1, 77977 Rust, Germany",
         coords: { lat: 48.2597, lng: 7.73, elev: 160 },
@@ -325,6 +368,7 @@ const DAYS = [
       {
         start: "09:30", end: "12:00", approx: true,
         title: "טריברג",
+        area: "triberg",
         desc: "מפלי טריברג — המפורסמים ביער השחור — פלוס שעוני קוקייה ענקיים ומרכז עיירה קלאסי.",
         address: "Hauptstraße 85, 78098 Triberg im Schwarzwald, Germany",
         coords: { lat: 48.1297, lng: 8.2306, elev: 700 },
@@ -339,6 +383,7 @@ const DAYS = [
       {
         start: "13:00", end: "15:30", approx: true,
         title: "גוטאך — שביל החושים",
+        area: "gutach",
         desc: "מסלול מעגלי, בין שעה לשלוש שעות לפי קצב. הליכה על דשא, בוץ, אבנים וחול, מוצל ברובו, עם תחנות חוש (מישוש, ריח, ראייה). שווה גם עם ילדים גדולים יותר.",
         address: "Hauptstr. 103, 77793 Gutach im Schwarzwald, Germany",
         coords: { lat: 48.2461, lng: 8.1917, elev: 290 },
@@ -354,6 +399,7 @@ const DAYS = [
       {
         start: "15:30", end: "16:30", approx: true,
         title: "Sommerrodelbahn גוטאך (רשות)",
+        area: "gutach",
         desc: "מגלשת קיץ נוספת, בד\"כ פחות עמוסה מזו שבטודנאו. כניסה חופשית, משלמים רק לפי נסיעה.",
         address: "Singersbach 1a, 77793 Gutach im Schwarzwald, Germany",
         coords: { lat: 48.24, lng: 8.185, elev: 320 },
@@ -376,6 +422,7 @@ const DAYS = [
       {
         start: "10:30", end: "12:30", approx: true,
         title: "מפלי הריין",
+        area: "rheinfall",
         desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
         address: "Rheinfall, 8212 Neuhausen am Rheinfall, Switzerland",
         coords: { lat: 47.6779, lng: 8.6152, elev: 390 },
@@ -391,6 +438,7 @@ const DAYS = [
       {
         start: "14:00", end: "15:30", approx: true,
         title: "אגם טיטיזי (רשות)",
+        area: "titisee",
         desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום חמישי 20.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר. היתרון כאן — האגם שלוש דקות מ-Badeparadies, אז אפשר להחליט על המקום.",
         address: "Seestraße, 79822 Titisee-Neustadt, Germany",
         coords: { lat: 47.9008, lng: 8.147, elev: 850 },
@@ -403,6 +451,7 @@ const DAYS = [
       {
         start: "16:00", end: "20:00", approx: true,
         title: "Badeparadies Schwarzwald",
+        area: "badeparadies",
         desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. פתוח עד 22:00, אז גם כניסה ב-16:00 נותנת יום מלא.",
         address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
         coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
@@ -431,6 +480,7 @@ const DAYS = [
       {
         start: "11:30", end: "16:00", approx: true,
         title: "Lindt Home of Chocolate",
+        area: "lindt",
         desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
         address: "Schokoladenplatz 1, 8802 Kilchberg, Switzerland",
         coords: { lat: 47.3231, lng: 8.5453, elev: 410 },
@@ -739,6 +789,253 @@ function chipsHTML(block) {
   return `<div class="chips">${chips.join("")}</div>`;
 }
 
+/* ============================================================
+   נגן הפודקאסטים לילדים
+   שם המקום עצמו הוא הקישור — לחיצה עליו פותחת נגן מתחתיו.
+   יש אלמנט <audio> אחד לכל האפליקציה, שנודד לפאנל הפתוח. זה מה שמאפשר
+   ל-renderNow() לרוץ כל דקה בלי לקטוע פרק באמצע: הוצאת האלמנט מה-DOM
+   לא עוצרת השמעה, כל עוד מחזיקים בהפניה אליו.
+   ============================================================ */
+
+const POD = { id: null, audio: null };
+const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
+const POD_CACHE = "bf2026-audio";       // מטמון נפרד, כדי שעדכון גרסה לא ימחק פרקים
+
+function podcastFor(block) {
+  return block && block.area ? (PODCASTS[block.area] || null) : null;
+}
+
+// הכתובת שממנה מנגנים ושלפיה נשמר המטמון — כולל מספר הגרסה של הפרק.
+function podUrl(pod) {
+  return `${pod.file}?v=${pod.rev || 1}`;
+}
+
+function podToday() {
+  return DAYS.find(d => d.date === localDateStr(new Date())) || null;
+}
+
+function podLoadPos() {
+  try { return JSON.parse(localStorage.getItem(POD_POS_KEY)) || {}; } catch { return {}; }
+}
+
+function podSavePos(id, seconds) {
+  const all = podLoadPos();
+  all[id] = Math.floor(seconds);
+  try { localStorage.setItem(POD_POS_KEY, JSON.stringify(all)); } catch { /* התעלמות */ }
+}
+
+// כותרת המקום כקישור לפרק. extraHTML נשאר בתוך הכותרת (למשל התחזית המוטבעת).
+function podTitleHTML(block, extraHTML = "") {
+  const pod = podcastFor(block);
+  const title = escapeHTML(block.title);
+  if (!pod) return title + extraHTML;
+  const label = escapeHTML(`האזנה לפרק הפודקאסט על ${pod.title}, ${pod.minutes} דקות`);
+  return `<button type="button" class="pod-title" data-pod="${block.area}" aria-expanded="false" aria-label="${label}">`
+    + `<span class="pod-title-text">${title}</span>`
+    + `<span class="pod-cue">${ICON.headphones}${pod.minutes} דק׳</span>`
+    + `</button>${extraHTML}`;
+}
+
+function podPanelHTML(block) {
+  if (!podcastFor(block)) return "";
+  return `<div class="pod-panel" data-pod-panel="${block.area}" hidden></div>`;
+}
+
+function podEnsureAudio() {
+  if (POD.audio) return POD.audio;
+  const el = document.createElement("audio");
+  el.className = "pod-audio";
+  el.controls = true;
+  el.preload = "metadata";
+  el.addEventListener("timeupdate", () => {
+    if (POD.id && el.currentTime > 0) podSavePos(POD.id, el.currentTime);
+  });
+  el.addEventListener("ended", () => { if (POD.id) podSavePos(POD.id, 0); });
+  el.addEventListener("error", podShowMissing);
+  POD.audio = el;
+  return el;
+}
+
+function podSetMediaSession(pod) {
+  if (!("mediaSession" in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: pod.title,
+      artist: "פודקאסט לילדים",
+      album: "היער השחור 2026",
+      artwork: [{ src: "icons/icon-512.png", sizes: "512x512", type: "image/png" }]
+    });
+  } catch { /* התעלמות — אין תמיכה */ }
+}
+
+// מעביר את הנגן לפאנל הפתוח ומסנכרן את כל הכותרות. נקרא אחרי כל רינדור.
+function podMount() {
+  const audio = POD.id ? podEnsureAudio() : POD.audio;
+  if (audio && audio.parentNode) audio.parentNode.removeChild(audio);
+  $$(".pod-panel").forEach(p => { p.innerHTML = ""; p.hidden = true; });
+  $$(".pod-title").forEach(b => b.setAttribute("aria-expanded", String(!!POD.id && b.dataset.pod === POD.id)));
+  if (!POD.id) return;
+
+  const pod = PODCASTS[POD.id];
+  // אותו אזור יכול להופיע גם ב"עכשיו" וגם ב"מסלול" — מעדיפים את התצוגה הפעילה.
+  const target = $(`.view.active .pod-panel[data-pod-panel="${POD.id}"]`)
+    || $(`.pod-panel[data-pod-panel="${POD.id}"]`);
+  if (!target) return;
+
+  target.innerHTML = `<div class="pod-head">${ICON.headphones}<strong>${escapeHTML(pod.title)}</strong>`
+    + `<span class="pod-note">פרק לילדים · ${pod.minutes} דק׳</span></div>`;
+  target.appendChild(audio);
+  target.hidden = false;
+}
+
+function podShowMissing() {
+  const target = $(`.pod-panel[data-pod-panel="${POD.id}"]:not([hidden])`);
+  if (!target || target.querySelector(".pod-missing")) return;
+  const note = document.createElement("div");
+  note.className = "pod-missing";
+  note.innerHTML = `${ICON.warn}<span>הפרק הזה עוד לא הועלה לאפליקציה — ההוראות ליצירה שלו ב-NotebookLM נמצאות בתיקייה podcast-scripts.</span>`;
+  target.appendChild(note);
+}
+
+function podOpen(id) {
+  const pod = PODCASTS[id];
+  if (!pod) return;
+  const el = podEnsureAudio();
+  if (POD.id !== id) {
+    el.pause();
+    POD.id = id;
+    el.src = podUrl(pod);
+    const pos = podLoadPos()[id] || 0;
+    if (pos > 0) {
+      el.addEventListener("loadedmetadata", function seek() {
+        el.removeEventListener("loadedmetadata", seek);
+        // לא ממשיכים מ-5 השניות האחרונות — עדיף להתחיל מחדש
+        if (isFinite(el.duration) && pos < el.duration - 5) el.currentTime = pos;
+      });
+    }
+    podSetMediaSession(pod);
+  }
+  podMount();
+  el.play().catch(() => { /* אם הדפדפן חסם — יש כפתור ניגון בנגן עצמו */ });
+}
+
+function podClose() {
+  if (POD.audio) POD.audio.pause();
+  POD.id = null;
+  podMount();
+}
+
+function podToggle(id) {
+  if (POD.id === id) podClose(); else podOpen(id);
+}
+
+/* ---- הורדה מראש לאופליין: הפרקים של היום, מהמלון לפני שיוצאים ---- */
+
+function podDayIds(day) {
+  const ids = [];
+  if (!day) return ids;
+  for (const b of day.blocks) {
+    if (b.area && PODCASTS[b.area] && !ids.includes(b.area)) ids.push(b.area);
+  }
+  return ids;
+}
+
+function podEpisodeCount(n) {
+  return n === 1 ? "פרק אחד" : `${n} פרקים`;
+}
+
+function podDownloadBtnHTML(day) {
+  const ids = podDayIds(day);
+  if (!ids.length || !("caches" in window)) return "";
+  return `<button type="button" class="pod-dl" id="podDownload" data-state="idle">`
+    + `${ICON.download}<span>הורדת הפודקאסטים של היום לאופליין · ${podEpisodeCount(ids.length)}</span></button>`;
+}
+
+// אחרי הורדת גרסה חדשה של פרק — זורקים את הגרסאות הקודמות שלו מהמטמון,
+// כדי שלא יישארו בטלפון עוד כמה מגה-בייט של פרק שאף אחד לא ישמע.
+async function podPurgeOldRevs(cache, pod) {
+  try {
+    const keep = podUrl(pod);
+    for (const req of await cache.keys()) {
+      const path = new URL(req.url).pathname;
+      if (path.endsWith(pod.file.replace("audio/", "/audio/")) && !req.url.endsWith(keep)) {
+        await cache.delete(req);
+      }
+    }
+  } catch { /* התעלמות — ניקוי בלבד */ }
+}
+
+async function podCachedCount(ids) {
+  try {
+    const cache = await caches.open(POD_CACHE);
+    let n = 0;
+    for (const id of ids) if (await cache.match(podUrl(PODCASTS[id]))) n++;
+    return n;
+  } catch { return 0; }
+}
+
+function podSetDownloadLabel(text, icon, state) {
+  const btn = $("#podDownload");
+  if (!btn) return;
+  btn.dataset.state = state;
+  btn.innerHTML = `${icon}<span>${text}</span>`;
+}
+
+// נקרא אחרי כל רינדור של "עכשיו" — מעדכן את הכפתור לפי מה שכבר במטמון.
+async function podRefreshDownloadBtn() {
+  const btn = $("#podDownload");
+  if (!btn || btn.dataset.state === "working") return;
+  const ids = podDayIds(podToday());
+  if (!ids.length) return;
+  const have = await podCachedCount(ids);
+  const still = $("#podDownload");
+  if (!still || still.dataset.state === "working") return;
+  if (have === ids.length) {
+    podSetDownloadLabel("כל הפרקים של היום זמינים גם בלי רשת", ICON.check, "done");
+  } else if (have > 0) {
+    podSetDownloadLabel(`הורדת הפרקים שנשארו · ${have} מתוך ${ids.length} כבר אצלכם`, ICON.download, "idle");
+  } else {
+    podSetDownloadLabel(`הורדת הפודקאסטים של היום לאופליין · ${podEpisodeCount(ids.length)}`, ICON.download, "idle");
+  }
+}
+
+async function podDownloadToday() {
+  const ids = podDayIds(podToday());
+  const btn = $("#podDownload");
+  if (!ids.length || !btn || btn.dataset.state === "working") return;
+  btn.dataset.state = "working";
+
+  const cache = await caches.open(POD_CACHE);
+  let have = 0, missing = 0;
+  for (let i = 0; i < ids.length; i++) {
+    const live = $("#podDownload");
+    if (live) live.innerHTML = `${ICON.download}<span>מוריד… ${i + 1} מתוך ${ids.length}</span>`;
+    const pod = PODCASTS[ids[i]];
+    const url = podUrl(pod);
+    try {
+      if (await cache.match(url)) { have++; continue; }
+      const res = await fetch(url, { cache: "no-store" });
+      // רק 200 שלם נכנס למטמון — תשובת 206 חלקית לא ניתנת לאחסון
+      if (res.status === 200) {
+        await cache.put(url, res);
+        await podPurgeOldRevs(cache, pod);
+        have++;
+      } else { missing++; }
+    } catch { missing++; }
+  }
+
+  const live = $("#podDownload");
+  if (live) live.dataset.state = "idle";
+  if (missing === 0) {
+    podSetDownloadLabel("כל הפרקים של היום זמינים גם בלי רשת", ICON.check, "done");
+  } else if (have === 0) {
+    const what = ids.length === 1 ? "הפרק של היום עוד לא הועלה" : "הפרקים של היום עוד לא הועלו";
+    podSetDownloadLabel(`${what} לאפליקציה`, ICON.warn, "partial");
+  } else {
+    podSetDownloadLabel(`${have} מתוך ${ids.length} פרקים ירדו — השאר עוד לא הועלו`, ICON.warn, "partial");
+  }
+}
+
 function tipsHTML(block) {
   if (!block.tips || !block.tips.length) return "";
   return block.tips.map(t => `<div class="tip ${t.warn ? "warn" : ""}">${t.warn ? ICON.warn : ICON.bulb}<span>${escapeHTML(t.text)}</span></div>`).join("");
@@ -765,7 +1062,8 @@ function stopCardHTML(day, block) {
       ${imageHTML(block.image)}
       <div class="stop-body">
         ${timeLabel(block) ? `<div class="stop-time">${timeLabel(block)}</div>` : ""}
-        <h3>${escapeHTML(block.title)}</h3>
+        <h3>${podTitleHTML(block)}</h3>
+        ${podPanelHTML(block)}
         ${weatherHTML(day, block)}
         <p>${escapeHTML(block.desc)}</p>
         ${chipsHTML(block)}
@@ -873,6 +1171,8 @@ function renderItinerary() {
       openDays = new Set($$("details.day").filter(d => d.open).map(d => d.dataset.date));
     });
   });
+
+  podMount();
 }
 
 /* ============================================================
@@ -961,6 +1261,7 @@ function renderNow() {
       ${heroRain ? `<div class="wx-day-rain">${ICON.drop} גשם צפוי בשעות הפעילות בין ${heroRain}</div>` : ""}
     </div>
     ${routeButtonHTML(day)}
+    ${podDownloadBtnHTML(day)}
   `;
 
   let currentHTML = "";
@@ -971,7 +1272,8 @@ function renderNow() {
       <div class="now-current">
         <div class="kicker"><span class="pulse"></span>${isNow ? "עכשיו" : "בקרוב"}${timeLabel(b) ? " · " + timeLabel(b) : ""}</div>
         ${imageHTML(b.image)}
-        <h2>${escapeHTML(b.title)}</h2>
+        <h2>${podTitleHTML(b)}</h2>
+        ${podPanelHTML(b)}
         ${weatherHTML(day, b)}
         ${!isNow ? legHTML(b.drive) : ""}
         <p>${escapeHTML(b.desc)}</p>
@@ -1002,7 +1304,8 @@ function renderNow() {
           <div class="time">${timeLabel(b)}</div>
           <div class="body">
             ${b.drive && !isPast ? `<div class="leg-hint">${ICON.car} ${escapeHTML(b.drive.time)} ${escapeHTML(b.drive.from)}</div>` : ""}
-            <h3>${escapeHTML(b.title)}${bwHTML ? ` ${bwHTML}` : ""}</h3>
+            <h3>${podTitleHTML(b, bwHTML ? ` ${bwHTML}` : "")}</h3>
+            ${podPanelHTML(b)}
             <p>${escapeHTML(b.desc)}</p>
           </div>
         </div>
@@ -1023,6 +1326,9 @@ function renderNow() {
       <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
     </div>
   `;
+
+  podMount();               // מחזיר את הנגן לפאנל שהיה פתוח, בלי לקטוע השמעה
+  podRefreshDownloadBtn();
 }
 
 /* ============================================================
@@ -1807,6 +2113,7 @@ function showView(name) {
   $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));
   $("#app").scrollTop = 0;
   localStorage.setItem("bf2026-lasttab", name);
+  podMount();   // אם פרק מתנגן, הנגן עובר לתצוגה שנפתחה עכשיו
 }
 
 $$(".tab").forEach(tab => {
@@ -1838,6 +2145,13 @@ function init() {
   renderInfo();
   renderWeather();
   showView("now");
+
+  // האזנה מואצלת: "עכשיו" מתרנדר כל דקה, ובלי אצילה היו נערמים מאזינים.
+  $("#app").addEventListener("click", e => {
+    const title = e.target.closest(".pod-title");
+    if (title) { podToggle(title.dataset.pod); return; }
+    if (e.target.closest("#podDownload")) podDownloadToday();
+  });
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
