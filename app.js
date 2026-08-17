@@ -118,18 +118,18 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
    הפרק ימשיך לנגן את הגרסה הישנה לנצח (בדיוק כמו CACHE ב-sw.js).
    ============================================================ */
 const PODCASTS = {
-  feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 6,  rev: 1 },
-  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 8,  rev: 1 },
-  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 9,  rev: 1 },
-  europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 12, rev: 1 },
-  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 5,  rev: 1 },
-  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 10, rev: 1 },
-  rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 12, rev: 1 },
-  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 10, rev: 1 },
-  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 7,  rev: 1 },
-  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 10, rev: 1 },
-  badeparadies: { title: "Badeparadies",             file: "audio/badeparadies.m4a", minutes: 8,  rev: 1 },
-  lindt:        { title: "לינדט — עולם השוקולד",     file: "audio/lindt.m4a",        minutes: 10, rev: 1 }
+  feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 8,  rev: 1 },
+  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1 },
+  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 12, rev: 1 },
+  europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 15, rev: 1 },
+  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 7,  rev: 1 },
+  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 13, rev: 1 },
+  rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 15, rev: 1 },
+  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 13, rev: 1 },
+  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 9,  rev: 1 },
+  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 13, rev: 1 },
+  badeparadies: { title: "Badeparadies",             file: "audio/badeparadies.m4a", minutes: 11, rev: 1 },
+  lindt:        { title: "לינדט — עולם השוקולד",     file: "audio/lindt.m4a",        minutes: 14, rev: 1 }
 };
 
 /* לכל יום — blocks כרונולוגי. start/end בפורמט "HH:MM" (שעון מקומי).
