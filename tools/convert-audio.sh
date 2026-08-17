@@ -40,15 +40,25 @@ fi
 
 mkdir -p "$ROOT/audio"
 
-# ‎-f m4af     מכולת MPEG-4 audio (‎.m4a)
-# ‎-d aac      קידוד AAC-LC
-# ‎-b 32000    32kbps — מספיק בהחלט לדיבור
-# ‎--mix -c 1  מיזוג לערוץ אחד (מונו). לא לוותר על זה: בלי מונו, afconvert
-#             שומר שני ערוצים ומוריד את תדירות הדגימה ל-12kHz כדי להגיע
-#             ל-32kbps, והתוצאה נשמעת עמומה. עם מונו הוא נשאר על 32kHz.
+# ההמרה היא בשני שלבים, וזה לא סתם:
+# NotebookLM מייצא לפעמים WAV ולפעמים m4a דחוס. כשהמקור כבר דחוס (AAC),
+# afconvert לא מצליח למזג לערוץ אחד תוך כדי פענוח וקידוד מחדש, ונופל עם
+#   Error: ExtAudioFileSetProperty ('cclo') failed (-66564)
+# ('cclo' הוא מבנה הערוצים שהוא מנסה לקבוע). הפתרון: לפענח קודם ל-PCM גולמי,
+# ורק ממנו לקודד. עבור מקור WAV השלב הראשון הוא כמעט חינם.
+TMP="$(mktemp -t podcast-convert).wav"
+trap 'rm -f "$TMP"' EXIT
+
+# שלב 1 — פענוח ל-PCM ומיזוג למונו (‎--mix -c 1).
+afconvert -f WAVE -d LEI16 --mix -c 1 "$SRC" "$TMP"
+
+# שלב 2 — קידוד ל-AAC.
+# ‎-f m4af   מכולת MPEG-4 audio (‎.m4a)
+# ‎-d aac    קידוד AAC-LC
+# ‎-b 32000  32kbps — מספיק בהחלט לדיבור מונו
 #
 # ‎-s 3 (VBR) בכוונה לא כאן — הוא מתעלם מ-‎-b ומנפח את הקובץ פי אחד וחצי.
-afconvert -f m4af -d aac -b 32000 --mix -c 1 "$SRC" "$OUT"
+afconvert -f m4af -d aac -b 32000 "$TMP" "$OUT"
 
 SIZE=$(du -h "$OUT" | cut -f1 | tr -d ' ')
 SECS=$(afinfo "$OUT" | awk -F': ' '/estimated duration/ {printf "%.0f", $2}')
