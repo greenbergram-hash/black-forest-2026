@@ -110,6 +110,8 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
    ל-m4a עם tools/convert-audio.sh ונשמרים ב-audio/ באותו שם.
    minutes = אורך היעד, נגזר מזמן הנסיעה לאותו אזור. אם הפרק שיצא ארוך
    יותר זה בסדר — הנגן זוכר איפה עצרנו וממשיך משם בפעם הבאה.
+   ברגע שקובץ הפרק קיים, לעדכן כאן את האורך האמיתי שלו: המספר הזה מוצג
+   למשתמש על שם המקום ("11 דק׳"), ואין טעם שהוא יבטיח משהו אחר מהקובץ.
    בלוק מקבל פרק דרך השדה area, וכמה בלוקים באותו אזור חולקים פרק אחד
    (מגלשת Hasenhorn, המפלים והגשר התלוי הם כולם "טודנאו").
 
@@ -120,7 +122,7 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
 const PODCASTS = {
   feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 8,  rev: 1 },
   todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1 },
-  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 12, rev: 1 },
+  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 10, rev: 1 },
   europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 15, rev: 1 },
   titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 7,  rev: 1 },
   freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 13, rev: 1 },
