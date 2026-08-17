@@ -19,19 +19,22 @@ const TRIP = {
 
 // רשימת לפני-הטיול — נשמרת ב-localStorage כך שהסימונים נשארים במכשיר.
 const CHECKLIST = [
-  "להזמין מראש כרטיסי Rulantica — הפארק מתמלא כמעט כל יום",
-  "להזמין מראש כרטיסי Europa-Park (מקושר לתאריך ספציפי, אי אפשר להחליף) — קנייה בקופה עולה 10€ יותר לאדם",
+  "לוודא את חלון הזמן של Badeparadies ליום ראשון 23.8 — לפי התוכנית מגיעים ב-16:00",
   "להוריד את אפליקציית Europa-Park, לסמן מועדפים ולתכנן Virtual Line (VL) למתקנים המרכזיים",
-  "להזמין מראש סדנת שוקולד בלינדט, אם עושים אותה ביום האחרון",
   "להזמין מראש כרטיס + חלון זמן למוזיאון לינדט (ביקוש גבוה מאוד)",
-  "להביא מגבות מהמלון לרולנטיקה (או לשכור במקום)",
+  "להזמין מראש סדנת שוקולד בלינדט, אם עושים אותה ביום האחרון",
+  "להביא מגבות מהמלון לרולנטיקה, ל-Badeparadies ול-Keidel (או לשכור במקום)",
+  "בגדי ים זמינים גם ביום פרייבורג (20.8) — Keidel בסוף היום",
   "לקחת נעליים סגורות / סנדלי מים לשביל החושים בגוטאך (בוץ, אבנים, נחלים)",
+  "לבדוק תחזית לפני מגלשת Hasenhorn ב-18.8 — היא לא פועלת בסופת רעמים או ברוח חזקה",
   "לתכנן מראש את ארוחות יום ראשון — הרבה מסעדות בגרמניה סגורות בימי ראשון"
 ];
 
 const GENERAL_TIPS = [
-  "הרבה מסעדות בגרמניה סגורות בימי ראשון — לתכנן מראש את הארוחות ליום ראשון (23.8).",
+  "הרבה מסעדות בגרמניה סגורות בימי ראשון — ב-23.8 אתם ב-Badeparadies עד הערב, ויש שם אוכל, אז זה מכוסה.",
   "מוזיאון ה-FIFA בציריך סגור בימי שני — ומכיוון שה-24.8 הוא יום שני, באותו יום זה לינדט או כלום.",
+  "אגם טיטיזי מופיע פעמיים בתוכנית כבלוק רשות — ב-20.8 בבוקר וב-23.8 אחרי מפלי הריין. עושים אותו ביום שבו מזג האוויר טוב יותר, לא בשניהם.",
+  "שוק הקתדרלה בפרייבורג נסגר סביב 13:00 ולא פועל בימי ראשון — הוא רלוונטי ב-20.8 רק אם מדלגים על האגם ומגיעים מוקדם.",
   "במסלולים עם מעברי נחל (כמו בגוטאך) — לקחת נעלי מים או סנדלים.",
   "זמני הנסיעה בכל האפליקציה הם הערכות שנבדקו מול Google Maps מראש — כדאי לפתוח את \"מסלול הנסיעה של היום\" בפועל לפני היציאה, אם יש קליטה, לזמן מדויק בזמן אמת."
 ];
@@ -133,53 +136,66 @@ const DAYS = [
   },
   {
     date: "2026-08-18",
-    title: "טיטיזה",
-    place: "טיטיזה-נוישטט",
-    driveNote: "כ-20 דקות נסיעה מהמלון",
+    title: "טודנאו + פארק הציפורים",
+    place: "טודנאו (בוקר) · שטיינן (אחה\"צ)",
+    driveNote: "כ-28 דקות לטודנאו · משם כ-40 דקות בעמק הוויזנטל (B317) לשטיינן",
     blocks: [
       {
-        start: "09:00", end: "12:00", approx: true,
-        title: "שביל רוואנהשלוכט (Ravennaschlucht)",
-        desc: "מתחילים ב-Hofgut Sternen — שווה לראות לפני השביל: גשר הרכבת (Ravenna Viaduct, גובה 37 מ׳) שעוברים מתחתיו, שעון קוקייה ענק שנפתח בכל שעה עגולה, וחנות שעוני קוקייה עם סדנת ניפוח זכוכית. השביל עצמו: קניון צר ומיוער, מוצל כמעט כולו, עם מפלים קטנים לאורך הדרך — בין 30 דקות לכ-3 שעות, תלוי בקצב.",
-        address: "Wanderparkplatz Hofgut Sternen, Höllsteig 76, 79874 Breitnau, Germany",
-        coords: { lat: 47.9345, lng: 8.0135, elev: 660 },
-        wxPlace: "Breitnau, Germany",
-        drive: { time: "כ-24 דקות", dist: "כ-17 ק\"מ", from: "מהמלון" },
-        image: { file: "images/ravennaschlucht.jpg", credit: "Bermicourt", license: "CC BY-SA 4.0", commonsFile: "Ravenna_Bridge.JPG" },
-        infoUrl: "https://goblackforest.co.il/שביל-רוואנהשלוכט/",
-        tips: [{ text: "אורך גמיש — טוב ליום עם רגליים עייפות, פשוט חוזרים מוקדם." }]
-      },
-      {
-        start: "12:00", end: "13:30", approx: true,
-        title: "אגם טיטיזי",
-        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה.",
-        address: "Seestraße, 79822 Titisee-Neustadt, Germany",
-        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
-        wxPlace: "Titisee-Neustadt, Germany",
-        drive: { time: "כ-11 דקות", dist: "כ-9 ק\"מ", from: "משביל רוואנהשלוכט" },
-        image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
-        infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
-        tips: [{ text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." }]
-      },
-      {
-        start: "14:00", end: "18:00", approx: true,
-        title: "Badeparadies Schwarzwald",
-        desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. 4 שעות מספיקות — פתוח עד 22:00.",
-        address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
-        coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
-        wxPlace: "Titisee-Neustadt, Germany",
-        indoor: true,
-        drive: { time: "כ-3 דקות", dist: "כ-1 ק\"מ", from: "מאגם טיטיזי" },
-        image: { file: "images/badeparadies.jpg", credit: "qwesy qwesy", license: "CC BY 3.0", commonsFile: "Galaxy_Schwarzwald_(Badeparadies_Schwarzwald_in_Titisee)_-_panoramio.jpg" },
-        price: "כ-22€ (4 שעות) / כ-30€ (יום) לנפש",
-        hours: "9:00–22:00 בכל יום (כולל שלישי) בחופשת הקיץ",
-        infoUrl: "https://www.badeparadies-schwarzwald.de/en/",
+        start: "09:00", end: "10:00", approx: false,
+        title: "מגלשת הקיץ Hasenhorn",
+        desc: "מגלשת קיץ באורך 2.9 ק\"מ — מהארוכות והמרשימות בגרמניה. עולים ברכבל הכיסא ויורדים במזחלת על מסילה. מגיעים בפתיחה בכוונה: בסופי שבוע ובחופשות נוצרים תורים ארוכים.",
+        address: "Brandenbergstr. 3, 79674 Todtnau, Germany",
+        coords: { lat: 47.83, lng: 7.939, elev: 660 },
+        wxPlace: "Todtnau, Germany",
+        drive: { time: "כ-28 דקות", dist: "כ-24 ק\"מ", from: "מהמלון" },
+        hours: "09:00–16:30 בקיץ",
+        infoUrl: "https://www.hasenhorn-rodelbahn.de/en/",
         tips: [
-          { text: "חובה להזמין מראש באתר, כולל שיבוץ מקום/מיטת שיזוף — אי אפשר פשוט להגיע ולהיכנס בקופה.", warn: true }
+          { text: "נסיעה עצמאית רק מגיל 8 ומגובה 1.40 מ׳. עם מבוגר על אותה מזחלת — מגיל 3 ומגובה 95 ס\"מ, כך שהילד בן ה-5 רוכב צמוד ולא לבד.", warn: true },
+          { text: "לא פועלת בסופת רעמים, ברוח חזקה או בכפור — שווה לבדוק את התחזית לפני שיוצאים." }
         ]
+      },
+      {
+        start: "10:15", end: "11:30", approx: true,
+        title: "מפלי טודנאו",
+        desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
+        address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
+        coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
+        wxPlace: "Todtnau, Germany",
+        drive: { time: "כ-6 דקות", dist: "כ-4 ק\"מ", from: "ממגלשת Hasenhorn" },
+        image: { file: "images/todtnau-falls.jpg", credit: "Freiburg1120", license: "CC BY-SA 3.0", commonsFile: "Todtnauer_Wasserfall.jpg" },
+        infoUrl: "https://goblackforest.co.il/מפלי-טודנאו/"
+      },
+      {
+        start: "11:30", end: "12:45", approx: true,
+        title: "הגשר התלוי Blackforestline",
+        desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
+        address: "Außer Ort 38, 79674 Todtnau, Germany",
+        coords: { lat: 47.8283, lng: 7.945, elev: 730 },
+        wxPlace: "Todtnau, Germany",
+        drive: { time: "כ-דקה", dist: "כ-80 מ׳ בלבד", from: "ממפלי טודנאו" },
+        image: { file: "images/blackforestline.jpg", credit: "Daniel Reust", license: "CC BY-SA 4.0", commonsFile: "Hängebrücke_\"Blackforestline\"_Todtnau.jpg" },
+        price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
+        hours: "8:00–20:30 בקיץ, כניסה אחרונה 19:00. קופה מאוישת/הנחות רק 10:00–16:00 — מעבר לזה רק מכונות, בלי הנחות.",
+        infoUrl: "https://goblackforest.co.il/blackforestline/",
+        tips: [{ text: "זו נקודת תצפית פנורמית — ביום מעונן נמוך רואים ממנה הרבה פחות. שווה להציץ בתחזית לפני שקונים את הקומבו." }]
+      },
+      {
+        start: "13:45", end: "17:00", approx: true,
+        title: "פארק הציפורים והקופים בשטיינן",
+        desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מגיעים לסבב אחר הצהריים: מופע עופות דורסים ב-15:00, וקופים שמסתובבים חופשי עם האכלה ב-16:00. (יש גם סבב בוקר ב-11:00 וב-12:00, אבל היום מתחיל בטודנאו.)",
+        address: "Hofener Str. 60, 79585 Steinen, Germany",
+        coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
+        wxPlace: "Steinen, Baden-Württemberg, Germany",
+        drive: { time: "כ-40 דקות", dist: "כ-35 ק\"מ", from: "מהגשר התלוי, בעמק הוויזנטל" },
+        image: { file: "images/vogelpark.jpg", credit: "Taxiarchos228 / Wladyslaw Sojka", license: "Free Art License 1.3", commonsFile: "Steinen_-_Vogelpark1.jpg" },
+        price: "מבוגר 20€, ילד (4–11) 10€",
+        hours: "10:00–18:00 בחופשת הקיץ",
+        infoUrl: "https://goblackforest.co.il/פארק-הציפורים-והקופים/",
+        tips: [{ text: "המופעים בחוץ — בגשם חזק הם עלולים להתבטל. אם התחזית גרועה לאחה\"צ, שווה להקדים ולתפוס את סבב 11:00/12:00 במקום." }]
       }
     ],
-    returnLeg: { time: "כ-11 דקות", dist: "כ-11 ק\"מ", from: "מ-Badeparadies", label: "חזרה למלון" }
+    returnLeg: { time: "כ-57 דקות", dist: "כ-49 ק\"מ", from: "מפארק הציפורים", label: "חזרה למלון" }
   },
   {
     date: "2026-08-19",
@@ -219,48 +235,54 @@ const DAYS = [
   },
   {
     date: "2026-08-20",
-    title: "פרייבורג + טודנאו",
-    place: "פרייבורג (בוקר) · טודנאו (אחה\"צ)",
-    driveNote: "פרייבורג כ-53 דקות מהמלון · טודנאו כ-34 דקות מפרייבורג",
+    title: "טיטיזה + פרייבורג",
+    place: "אגם טיטיזי (רשות) · פרייבורג",
+    driveNote: "האגם כ-12 דקות מהמלון · פרייבורג כ-45 דקות מהאגם",
     blocks: [
       {
-        start: "09:00", end: "12:00", approx: true,
-        title: "פרייבורג — שוק הקתדרלה",
-        desc: "שוק הקתדרלה (\"מינסטרמארקט\") בכיכר Münsterplatz — פועל כל בוקר חוץ מיום ראשון. צד צפוני: שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים). צד דרומי: תבלינים, כלי עץ, מזכרות, אוכל רחוב. אחר כך טיול בכיכר המונסטר ותעלות המים (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\") אם נשאר זמן.",
+        start: "10:00", end: "12:00", approx: true,
+        title: "אגם טיטיזי (רשות)",
+        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום ראשון 23.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר, ואם שני הימים אפורים וקרים — אפשר פשוט לוותר.",
+        address: "Seestraße, 79822 Titisee-Neustadt, Germany",
+        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
+        wxPlace: "Titisee-Neustadt, Germany",
+        drive: { time: "כ-12 דקות", dist: "כ-10 ק\"מ", from: "מהמלון" },
+        image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
+        infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
+        tips: [
+          { text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." },
+          { text: "אם מוותרים על האגם ויוצאים ישר לפרייבורג, מגיעים בזמן לשוק הקתדרלה לפני שהוא נסגר סביב 13:00." },
+          { text: "לוודא את שעות ההשכרה של סירות הפדלים לפני שמגיעים." }
+        ]
+      },
+      {
+        start: "13:30", end: "16:00", approx: true,
+        title: "פרייבורג — העיר העתיקה",
+        desc: "כיכר המונסטר, תעלות המים הקטנות שברחובות (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\"). שוק הקתדרלה (\"מינסטרמארקט\") ב-Münsterplatz פועל כל בוקר חוץ מיום ראשון ונסגר סביב 13:00 — צד צפוני שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים), צד דרומי תבלינים, כלי עץ, מזכרות ואוכל רחוב.",
         address: "Münsterplatz 1, 79098 Freiburg im Breisgau, Germany",
         coords: { lat: 47.9955, lng: 7.8522, elev: 280 },
         wxPlace: "Freiburg im Breisgau, Germany",
-        drive: { time: "כ-53 דקות", dist: "כ-38 ק\"מ", from: "מהמלון" },
+        drive: { time: "כ-45 דקות", dist: "כ-32 ק\"מ", from: "מאגם טיטיזי" },
         image: { file: "images/freiburg.jpg", credit: "Sven Puth", license: "CC BY-SA 4.0", commonsFile: "Freiburg_-_Münsterplatz.jpg" },
         infoUrl: "https://goblackforest.co.il/שוק-פרייבורג/",
-        tips: [{ text: "פרייבורג בבוקר — השוק לא פועל אחה\"צ, וגם ככה סגור בימי ראשון." }]
+        tips: [{ text: "בהגעה ב-13:30 השוק כבר סגור — הוא רלוונטי רק אם מדלגים על האגם ומגיעים לפני 13:00.", warn: true }]
       },
       {
-        start: "13:00", end: "15:00", approx: true,
-        title: "מפלי טודנאו",
-        desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
-        address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
-        coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
-        wxPlace: "Todtnau, Germany",
-        drive: { time: "כ-34 דקות", dist: "כ-28 ק\"מ", from: "מפרייבורג" },
-        image: { file: "images/todtnau-falls.jpg", credit: "Freiburg1120", license: "CC BY-SA 3.0", commonsFile: "Todtnauer_Wasserfall.jpg" },
-        infoUrl: "https://goblackforest.co.il/מפלי-טודנאו/"
-      },
-      {
-        start: "15:00", end: "17:00", approx: true,
-        title: "הגשר התלוי Blackforestline",
-        desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
-        address: "Außer Ort 38, 79674 Todtnau, Germany",
-        coords: { lat: 47.8283, lng: 7.945, elev: 730 },
-        wxPlace: "Todtnau, Germany",
-        drive: { time: "כ-דקה", dist: "כ-80 מ׳ בלבד", from: "ממפלי טודנאו" },
-        image: { file: "images/blackforestline.jpg", credit: "Daniel Reust", license: "CC BY-SA 4.0", commonsFile: "Hängebrücke_\"Blackforestline\"_Todtnau.jpg" },
-        price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
-        hours: "8:00–20:30 בקיץ, כניסה אחרונה 19:00. קופה מאוישת/הנחות רק 10:00–16:00 — מעבר לזה רק מכונות, בלי הנחות.",
-        infoUrl: "https://goblackforest.co.il/blackforestline/"
+        start: "16:00", end: "19:00", approx: true,
+        title: "Keidel Mineral-Thermalbad",
+        desc: "מרחצאות מינרליים תרמיים בשכונת St. Georgen שבדרום פרייבורג. בריכות פנים וחוץ במים חמים, בריכת חוויה חיצונית עם תעלת זרם ומיטות בועות, ומגרש משחקים בחוץ. סיום טוב ליום עירוני — ובמיוחד אם יורד גשם.",
+        address: "An den Heilquellen 4, 79111 Freiburg im Breisgau, Germany",
+        coords: { lat: 47.9739, lng: 7.8203, elev: 240 },
+        wxPlace: "Freiburg im Breisgau, Germany",
+        indoor: true,
+        drive: { time: "כ-12 דקות", dist: "כ-7 ק\"מ", from: "ממרכז פרייבורג" },
+        price: "ילדים 4–13: כ-9.50€ כרטיס יום",
+        hours: "09:00–22:00 בכל יום · אזור הסאונה מ-10:00",
+        infoUrl: "https://www.keideltherme.de/informationen/",
+        tips: [{ text: "לקחת בגדי ים ומגבות מהמלון." }]
       }
     ],
-    returnLeg: { time: "כ-28 דקות", dist: "כ-24 ק\"מ", from: "מהגשר התלוי", label: "חזרה למלון" }
+    returnLeg: { time: "כ-55 דקות", dist: "כ-42 ק\"מ", from: "מ-Keidel", label: "חזרה למלון" }
   },
   {
     date: "2026-08-21",
@@ -347,39 +369,12 @@ const DAYS = [
   },
   {
     date: "2026-08-23",
-    title: "פארק הציפורים בשטיינן",
-    place: "Vogelpark Steinen",
-    driveNote: "יום קליל בכוונה, אחרי שישה ימים עמוסים",
+    title: "מפלי הריין + Badeparadies",
+    place: "נוישאוזן אם ריינפאל · טיטיזה-נוישטט",
+    driveNote: "כ-56 דקות למפלי הריין · כשעה חזרה לאזור טיטיזה",
     blocks: [
       {
-        start: "10:00", end: "17:00", approx: true,
-        title: "פארק הציפורים בשטיינן",
-        desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מופע עופות דורסים ב-11:00 וב-15:00; קופים מסתובבים חופשי עם האכלה ב-12:00 וב-16:00 — יש גם סבב בוקר וגם סבב אחה\"צ, אז אפשר לתכנן לפי מה שנוח.",
-        address: "Hofener Str. 60, 79585 Steinen, Germany",
-        coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
-        wxPlace: "Steinen, Baden-Württemberg, Germany",
-        drive: { time: "כ-58 דקות", dist: "כ-49 ק\"מ", from: "מהמלון" },
-        image: { file: "images/vogelpark.jpg", credit: "Taxiarchos228 / Wladyslaw Sojka", license: "Free Art License 1.3", commonsFile: "Steinen_-_Vogelpark1.jpg" },
-        price: "מבוגר 20€, ילד (4–11) 10€",
-        hours: "10:00–18:00 בחופשת הקיץ",
-        infoUrl: "https://goblackforest.co.il/פארק-הציפורים-והקופים/"
-      },
-      {
-        start: null, end: null, approx: true,
-        title: "אם נשארה אנרגיה",
-        desc: "אופציות: ויטה קלאסיקה (ספא), פארק שטיינווטסן (מתקנים וחיות), או Fundorena (טרמפולינות/חבלים/טיפוס, 15 דקות מהמלון)."
-      }
-    ],
-    returnLeg: { time: "כ-57 דקות", dist: "כ-49 ק\"מ", from: "מפארק הציפורים", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-24",
-    title: "מפלי הריין + טיסה הביתה",
-    place: "שפהאוזן ← קילכברג ← נתב\"ג ציריך",
-    driveNote: "כ-56 דקות מהמלון לשפהאוזן, ועוד כשעה לקילכברג, ועוד כ-31 דקות לנתב\"ג",
-    blocks: [
-      {
-        start: "09:00", end: "12:00", approx: true,
+        start: "10:30", end: "12:30", approx: true,
         title: "מפלי הריין",
         desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
         address: "Rheinfall, 8212 Neuhausen am Rheinfall, Switzerland",
@@ -388,17 +383,60 @@ const DAYS = [
         drive: { time: "כ-56 דקות", dist: "כ-56 ק\"מ", from: "מהמלון" },
         image: { file: "images/rheinfall.jpg", credit: "CrazyD", license: "CC BY-SA 3.0", commonsFile: "Rheinfall_bei_Schaffhausen_02.JPG" },
         infoUrl: "https://rheinfall.ch/en/",
-        tips: [{ text: "השיט לסלע יכול להיות עוצמתי/מפחיד לילד בן 5 — שווה לבדוק מולו לפני שעולים. החניה ליד המפל בתשלום, כמה פרנקים שוויצריים לשעה." }]
+        tips: [
+          { text: "השיט לסלע יכול להיות עוצמתי/מפחיד לילד בן 5 — שווה לבדוק מולו לפני שעולים. החניה ליד המפל בתשלום, כמה פרנקים שוויצריים לשעה." },
+          { text: "לא להגיע מוקדם מדי — בשעות הבוקר המוקדמות האזור נוטה להיות מעונן וקריר, ומ-11:00 מתבהר ומתחמם." }
+        ]
       },
       {
-        start: "12:30", end: "16:00", approx: true,
+        start: "14:00", end: "15:30", approx: true,
+        title: "אגם טיטיזי (רשות)",
+        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום חמישי 20.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר. היתרון כאן — האגם שלוש דקות מ-Badeparadies, אז אפשר להחליט על המקום.",
+        address: "Seestraße, 79822 Titisee-Neustadt, Germany",
+        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
+        wxPlace: "Titisee-Neustadt, Germany",
+        drive: { time: "כ-1 שעה", dist: "כ-70 ק\"מ", from: "ממפלי הריין, מעבר גבול חזרה לגרמניה" },
+        image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
+        infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
+        tips: [{ text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." }]
+      },
+      {
+        start: "16:00", end: "20:00", approx: true,
+        title: "Badeparadies Schwarzwald",
+        desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. פתוח עד 22:00, אז גם כניסה ב-16:00 נותנת יום מלא.",
+        address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
+        coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
+        wxPlace: "Titisee-Neustadt, Germany",
+        indoor: true,
+        drive: { time: "כ-3 דקות", dist: "כ-1 ק\"מ", from: "מאגם טיטיזי" },
+        image: { file: "images/badeparadies.jpg", credit: "qwesy qwesy", license: "CC BY 3.0", commonsFile: "Galaxy_Schwarzwald_(Badeparadies_Schwarzwald_in_Titisee)_-_panoramio.jpg" },
+        price: "כ-22€ (4 שעות) / כ-30€ (יום) לנפש",
+        hours: "9:00–22:00 בכל יום בחופשת הקיץ",
+        infoUrl: "https://www.badeparadies-schwarzwald.de/en/",
+        tips: [
+          { text: "הכרטיסים כבר קנויים ליום ראשון אחר הצהריים — לוודא את חלון הזמן המדויק מול ההזמנה, במיוחד אם הוא כרטיס 4 שעות.", warn: true },
+          { text: "יום ראשון והרבה מסעדות סגורות — יש אוכל בתוך הפארק, וזה פותר את ארוחת הערב." },
+          { text: "להביא מגבות מהמלון, או לשכור במקום." }
+        ]
+      }
+    ],
+    returnLeg: { time: "כ-11 דקות", dist: "כ-11 ק\"מ", from: "מ-Badeparadies", label: "חזרה למלון" }
+  },
+  {
+    date: "2026-08-24",
+    title: "לינדט + טיסה הביתה",
+    place: "קילכברג ← נתב\"ג ציריך",
+    driveNote: "כ-1:50 שעות מהמלון לקילכברג, ועוד כ-31 דקות לנתב\"ג",
+    blocks: [
+      {
+        start: "11:30", end: "16:00", approx: true,
         title: "Lindt Home of Chocolate",
         desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
         address: "Schokoladenplatz 1, 8802 Kilchberg, Switzerland",
         coords: { lat: 47.3231, lng: 8.5453, elev: 410 },
         wxPlace: "Kilchberg, Zürich, Switzerland",
         indoor: true,
-        drive: { time: "כ-1 שעה", dist: "כ-58 ק\"מ", from: "ממפלי הריין" },
+        drive: { time: "כ-1:50 שעות", dist: "כ-145 ק\"מ", from: "מהמלון" },
         image: { file: "images/lindt.jpg", credit: "Brian Shamblen", license: "CC BY 2.0", commonsFile: "Two_story_chocolate_fountain_in_the_lobby_of_the_Lindt_factory_in_Zurich,_Switzerland_(52167915483).jpg" },
         tips: [
           { text: "מוזיאון ה-FIFA סגור בימי שני, וה-24.8 הוא יום שני — אז היום זה לינדט, אין ברירה אחרת.", warn: true },
@@ -418,7 +456,8 @@ const DAYS = [
         image: { file: "images/zurich-airport.jpg", credit: "Designalltag", license: "CC BY-SA 4.0", commonsFile: "Flughafen_Zuerich.jpg" },
         infoUrl: "https://www.flughafen-zuerich.ch/en/passengers"
       }
-    ]
+    ],
+    dayNote: "מפלי הריין עברו ליום ראשון 23.8, אז היום הזה קליל ויש בו הרבה זמן פנוי לפני הטיסה. זמן הנסיעה מהמלון לקילכברג הוא הערכה — שווה לפתוח את \"מסלול הנסיעה של היום\" ולוודא בבוקר."
     // אין returnLeg ביום הזה — מסתיים בשדה התעופה, לא חוזרים למלון.
   }
 ];
@@ -500,15 +539,15 @@ const RED_CARD_PLANNED = [
     site: "https://fundorena.de/"
   },
   {
-    dayDate: "2026-08-18", dayTitle: "טיטיזה", stopTitle: "שיט בסירה באגם טיטיזי",
+    dayDate: "2026-08-20", dayTitle: "טיטיזה + פרייבורג", stopTitle: "שיט בסירה באגם טיטיזי",
     type: "free", benefit: "שיט סיבוב חינם עם אחת משתי חברות השיט באגם (Bootsbetrieb Schweizer או Drubba) — תלוי מזג אוויר, אפריל–אוקטובר.",
     originalNote: null,
-    caveat: "זה סיבוב מאורגן בסירת שיט — לא זהה להשכרת סירת פדלים/חשמלית עצמאית שמופיעה בתוכנית המקורית. אם רוצים גם וגם, זו הטבה נוספת ולא תחליף.",
+    caveat: "בלוק האגם הוא רשות ומופיע גם ב-23.8 אחרי מפלי הריין — ההטבה תקפה בכל יום שבו תגיעו לאגם. בנוסף: זה סיבוב מאורגן בסירת שיט, לא זהה להשכרת סירת פדלים/חשמלית עצמאית. אם רוצים גם וגם, זו הטבה נוספת ולא תחליף.",
     address: "Seestraße 33, 79822 Titisee-Neustadt, Germany",
     site: "https://www.bootsbetrieb-schweizer-titisee.de/"
   },
   {
-    dayDate: "2026-08-18", dayTitle: "טיטיזה", stopTitle: "Badeparadies Schwarzwald",
+    dayDate: "2026-08-23", dayTitle: "מפלי הריין + Badeparadies", stopTitle: "Badeparadies Schwarzwald",
     type: "discount", benefit: "30% הנחה על כרטיס 4 שעות ל-Galaxy או Palmenoase.",
     originalNote: "מחיר מקורי לפי התוכנית: כ-22€ לאדם (4 שעות) ← אחרי הנחה כ-15.4€.",
     caveat: "בטקסט הרשמי מופיע \"ab 16 J.\" (מגיל 16) — לא ברור אם זה חל על Palmenoase (אזור ספא למבוגרים) בלבד או על ההנחה כולה. כדאי לוודא בקבלה או בפורטל הכרטיס לפני שמסתמכים על ההנחה לכל המשפחה. בנוסף: תוספת 6€ לאדם על כרטיס יום מלא, ובסופ״ש כרטיס משולב בלבד.",
@@ -516,7 +555,7 @@ const RED_CARD_PLANNED = [
     site: "https://www.badeparadies-schwarzwald.de/en/"
   },
   {
-    dayDate: "2026-08-20", dayTitle: "פרייבורג + טודנאו", stopTitle: "הגשר התלוי Blackforestline",
+    dayDate: "2026-08-18", dayTitle: "טודנאו + פארק הציפורים", stopTitle: "הגשר התלוי Blackforestline",
     type: "free", benefit: "כניסה חינם לגשר התלוי (פעם אחת).",
     originalNote: "בתוכנית המקורית מופיע כרטיס קומבו גשר+מפל בעלות של כ-12€ מבוגר / 9€ ילד.",
     caveat: "ההטבה מכסה רק את הגשר עצמו — לא נמצא אזכור לכניסה למפלי טודנאו בתוך הטבת הכרטיס. כדאי לבדוק בקופה אם אפשר לשלם רק על חלק המפל, או אם המחיר המשולב עדיין רלוונטי.",
