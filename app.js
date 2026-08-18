@@ -62,9 +62,7 @@ const ICON = {
   refresh: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/></svg>`,
   drop: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`,
   waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`,
-  headphones: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18Z"/><path d="M20 14h-2.5a1 1 0 0 0-1 1v3.5a1 1 0 0 0 1 1h1a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>`,
-  download: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 19h14"/></svg>`,
-  check: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"/></svg>`
+  headphones: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18Z"/><path d="M20 14h-2.5a1 1 0 0 0-1 1v3.5a1 1 0 0 0 1 1h1a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>`
 };
 
 function mapLink(address) {
@@ -799,19 +797,29 @@ function chipsHTML(block) {
 
 const POD = { id: null, audio: null };
 const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
-const POD_CACHE = "bf2026-audio";       // מטמון נפרד, כדי שעדכון גרסה לא ימחק פרקים
+
+/* הפרק נתלה רק על התחנה הראשונה של האזור באותו יום. יום טודנאו, למשל, הוא
+   שלוש תחנות שחולקות פרק אחד — הקישור מופיע על מגלשת Hasenhorn בלבד, ולא
+   שוב על המפלים ועל הגשר התלוי. הסימון נעשה פעם אחת בטעינה, לפי סדר
+   הבלוקים ביום, כך שאגם טיטיזי שמופיע בשני ימים מקבל קישור בכל אחד מהם. */
+(function markPodcastLeads() {
+  for (const day of DAYS) {
+    const seen = new Set();
+    for (const b of day.blocks) {
+      if (!b.area || !PODCASTS[b.area] || seen.has(b.area)) continue;
+      seen.add(b.area);
+      b.podLead = true;
+    }
+  }
+})();
 
 function podcastFor(block) {
-  return block && block.area ? (PODCASTS[block.area] || null) : null;
+  return block && block.podLead ? (PODCASTS[block.area] || null) : null;
 }
 
 // הכתובת שממנה מנגנים ושלפיה נשמר המטמון — כולל מספר הגרסה של הפרק.
 function podUrl(pod) {
   return `${pod.file}?v=${pod.rev || 1}`;
-}
-
-function podToday() {
-  return DAYS.find(d => d.date === localDateStr(new Date())) || null;
 }
 
 function podLoadPos() {
@@ -927,113 +935,6 @@ function podClose() {
 
 function podToggle(id) {
   if (POD.id === id) podClose(); else podOpen(id);
-}
-
-/* ---- הורדה מראש לאופליין: הפרקים של היום, מהמלון לפני שיוצאים ---- */
-
-function podDayIds(day) {
-  const ids = [];
-  if (!day) return ids;
-  for (const b of day.blocks) {
-    if (b.area && PODCASTS[b.area] && !ids.includes(b.area)) ids.push(b.area);
-  }
-  return ids;
-}
-
-function podEpisodeCount(n) {
-  return n === 1 ? "פרק אחד" : `${n} פרקים`;
-}
-
-function podDownloadBtnHTML(day) {
-  const ids = podDayIds(day);
-  if (!ids.length || !("caches" in window)) return "";
-  return `<button type="button" class="pod-dl" id="podDownload" data-state="idle">`
-    + `${ICON.download}<span>הורדת הפודקאסטים של היום לאופליין · ${podEpisodeCount(ids.length)}</span></button>`;
-}
-
-// אחרי הורדת גרסה חדשה של פרק — זורקים את הגרסאות הקודמות שלו מהמטמון,
-// כדי שלא יישארו בטלפון עוד כמה מגה-בייט של פרק שאף אחד לא ישמע.
-async function podPurgeOldRevs(cache, pod) {
-  try {
-    const keep = podUrl(pod);
-    for (const req of await cache.keys()) {
-      const path = new URL(req.url).pathname;
-      if (path.endsWith(pod.file.replace("audio/", "/audio/")) && !req.url.endsWith(keep)) {
-        await cache.delete(req);
-      }
-    }
-  } catch { /* התעלמות — ניקוי בלבד */ }
-}
-
-async function podCachedCount(ids) {
-  try {
-    const cache = await caches.open(POD_CACHE);
-    let n = 0;
-    for (const id of ids) if (await cache.match(podUrl(PODCASTS[id]))) n++;
-    return n;
-  } catch { return 0; }
-}
-
-function podSetDownloadLabel(text, icon, state) {
-  const btn = $("#podDownload");
-  if (!btn) return;
-  btn.dataset.state = state;
-  btn.innerHTML = `${icon}<span>${text}</span>`;
-}
-
-// נקרא אחרי כל רינדור של "עכשיו" — מעדכן את הכפתור לפי מה שכבר במטמון.
-async function podRefreshDownloadBtn() {
-  const btn = $("#podDownload");
-  if (!btn || btn.dataset.state === "working") return;
-  const ids = podDayIds(podToday());
-  if (!ids.length) return;
-  const have = await podCachedCount(ids);
-  const still = $("#podDownload");
-  if (!still || still.dataset.state === "working") return;
-  if (have === ids.length) {
-    podSetDownloadLabel("כל הפרקים של היום זמינים גם בלי רשת", ICON.check, "done");
-  } else if (have > 0) {
-    podSetDownloadLabel(`הורדת הפרקים שנשארו · ${have} מתוך ${ids.length} כבר אצלכם`, ICON.download, "idle");
-  } else {
-    podSetDownloadLabel(`הורדת הפודקאסטים של היום לאופליין · ${podEpisodeCount(ids.length)}`, ICON.download, "idle");
-  }
-}
-
-async function podDownloadToday() {
-  const ids = podDayIds(podToday());
-  const btn = $("#podDownload");
-  if (!ids.length || !btn || btn.dataset.state === "working") return;
-  btn.dataset.state = "working";
-
-  const cache = await caches.open(POD_CACHE);
-  let have = 0, missing = 0;
-  for (let i = 0; i < ids.length; i++) {
-    const live = $("#podDownload");
-    if (live) live.innerHTML = `${ICON.download}<span>מוריד… ${i + 1} מתוך ${ids.length}</span>`;
-    const pod = PODCASTS[ids[i]];
-    const url = podUrl(pod);
-    try {
-      if (await cache.match(url)) { have++; continue; }
-      const res = await fetch(url, { cache: "no-store" });
-      // רק 200 שלם נכנס למטמון — תשובת 206 חלקית לא ניתנת לאחסון
-      if (res.status === 200) {
-        await cache.put(url, res);
-        await podPurgeOldRevs(cache, pod);
-        have++;
-      } else { missing++; }
-    } catch { missing++; }
-  }
-
-  const live = $("#podDownload");
-  if (live) live.dataset.state = "idle";
-  if (missing === 0) {
-    podSetDownloadLabel("כל הפרקים של היום זמינים גם בלי רשת", ICON.check, "done");
-  } else if (have === 0) {
-    const what = ids.length === 1 ? "הפרק של היום עוד לא הועלה" : "הפרקים של היום עוד לא הועלו";
-    podSetDownloadLabel(`${what} לאפליקציה`, ICON.warn, "partial");
-  } else {
-    podSetDownloadLabel(`${have} מתוך ${ids.length} פרקים ירדו — השאר עוד לא הועלו`, ICON.warn, "partial");
-  }
 }
 
 function tipsHTML(block) {
@@ -1261,7 +1162,6 @@ function renderNow() {
       ${heroRain ? `<div class="wx-day-rain">${ICON.drop} גשם צפוי בשעות הפעילות בין ${heroRain}</div>` : ""}
     </div>
     ${routeButtonHTML(day)}
-    ${podDownloadBtnHTML(day)}
   `;
 
   let currentHTML = "";
@@ -1328,7 +1228,6 @@ function renderNow() {
   `;
 
   podMount();               // מחזיר את הנגן לפאנל שהיה פתוח, בלי לקטוע השמעה
-  podRefreshDownloadBtn();
 }
 
 /* ============================================================
@@ -2149,8 +2048,7 @@ function init() {
   // האזנה מואצלת: "עכשיו" מתרנדר כל דקה, ובלי אצילה היו נערמים מאזינים.
   $("#app").addEventListener("click", e => {
     const title = e.target.closest(".pod-title");
-    if (title) { podToggle(title.dataset.pod); return; }
-    if (e.target.closest("#podDownload")) podDownloadToday();
+    if (title) podToggle(title.dataset.pod);
   });
 
   if ("serviceWorker" in navigator) {

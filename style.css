@@ -785,23 +785,3 @@ details.redcard-item[open] .day-chevron { transform: rotate(180deg); color: var(
   color: var(--danger);
 }
 .pod-missing .icon { margin-top: 2px; flex: none; }
-
-.pod-dl {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 14px;
-  margin: -6px 0 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--accent);
-  background: var(--surface);
-  color: var(--accent);
-}
-.pod-dl[data-state="working"] { opacity: .7; }
-.pod-dl[data-state="done"] { border-color: var(--border-strong); color: var(--text-muted); background: var(--surface-2); }
-.pod-dl[data-state="partial"] { border-color: var(--danger); color: var(--danger); }
