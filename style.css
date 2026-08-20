@@ -775,6 +775,48 @@ details.redcard-item[open] .day-chevron { transform: rotate(180deg); color: var(
 .pod-note { color: var(--text-muted); font-size: 12px; font-weight: 500; }
 /* בלי זה פקדי הנגן של הדפדפן נשארים לבנים גם במצב כהה */
 .pod-audio { width: 100%; display: block; color-scheme: light dark; }
+/* שורת המהירות יושבת מתחת לנגן ולא בתוך הפקדים שלו, כדי שהיא לא תיעלם
+   כשהנגן צר — ובאייפון היא הדרך היחידה לשנות מהירות בכלל. */
+.pod-rates {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+.pod-rates-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-inline-end: 2px;
+}
+.pod-rate {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  /* יעד מגע נוח — לוחצים על זה ברכב, בנסיעה. */
+  min-width: 46px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--accent-soft-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.pod-rate.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  /* על רקע ה-accent, צבע המשטח הוא הניגוד הנכון בבהיר ובכהה גם יחד. */
+  color: var(--surface);
+}
+
+/* בשורות "המשך היום" הפאנל יושב בתוך עמודת הטקסט, שצרה ב-76 פיקסלים
+   (עמודת השעה של 64 ועוד רווח של 12). בטלפון זה השאיר לנגן 207 פיקסלים
+   בלבד. הפאנל חורג החוצה ולוקח את כל רוחב השורה. */
+.timeline-item .pod-panel { margin-inline-start: -76px; }
+
 .pod-missing {
   display: flex;
   align-items: flex-start;
