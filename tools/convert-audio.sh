@@ -60,6 +60,20 @@ afconvert -f WAVE -d LEI16 --mix -c 1 "$SRC" "$TMP"
 # ‎-s 3 (VBR) בכוונה לא כאן — הוא מתעלם מ-‎-b ומנפח את הקובץ פי אחד וחצי.
 afconvert -f m4af -d aac -b 32000 "$TMP" "$OUT"
 
+# מכאן והלאה הפרק קיים, אז מסמנים אותו כזמין ב-app.js. בלי ready האפליקציה
+# לא מציגה עליו אוזניות בכלל, וזאת בכוונה — הסימון הידני נשכח, והמשתמש היה
+# מקבל כפתור שמוביל להודעה "הפרק עוד לא הועלה".
+if ! grep -q "^  $AREA: *{.*ready: true" "$ROOT/app.js"; then
+  # התוספת נכנסת אחרי rev, בסוף הרשומה — אותו סדר שדות בכל השורות.
+  /usr/bin/sed -i '' -E "s/^(  $AREA: *\{.*rev: [0-9]+)( \})/\1, ready: true\2/" "$ROOT/app.js"
+  if grep -q "^  $AREA: *{.*ready: true" "$ROOT/app.js"; then
+    echo "סומן ב-app.js: הפרק \"$AREA\" זמין עכשיו באפליקציה (ready: true)."
+  else
+    echo "שימו לב: לא הצלחתי לסמן ready: true בשורה של \"$AREA\" ב-app.js —" >&2
+    echo "בלי זה הפרק לא יופיע באפליקציה. להוסיף ידנית בסוף הרשומה." >&2
+  fi
+fi
+
 SIZE=$(du -h "$OUT" | cut -f1 | tr -d ' ')
 SECS=$(afinfo "$OUT" | awk -F': ' '/estimated duration/ {printf "%.0f", $2}')
 MINS=$((SECS / 60))

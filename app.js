@@ -116,14 +116,19 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
    rev: חשוב — אם מחליפים קובץ פרק שכבר הועלה פעם, צריך להעלות את המספר
    הזה ב-1. הפרקים נשמרים במטמון לפי כתובת, אז בלי זה מכשיר שכבר הוריד את
    הפרק ימשיך לנגן את הגרסה הישנה לנצח (בדיוק כמו CACHE ב-sw.js).
+
+   ready: האם קובץ ה-m4a באמת נמצא ב-audio/. פרק בלי ready לא מקבל אוזניות
+   על שם המקום ולא נגן — עדיף שלא יהיה כפתור מאשר כפתור שמוביל להודעה
+   שהפרק עוד לא הועלה. tools/convert-audio.sh מסמן את זה לבד כשהוא מייצר
+   את הקובץ, אז אין מה לעדכן כאן ביד.
    ============================================================ */
 const PODCASTS = {
   feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 8,  rev: 1 },
-  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1 },
-  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 10, rev: 1 },
+  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1, ready: true },
+  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 10, rev: 1, ready: true },
   europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 15, rev: 1 },
-  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 15, rev: 1 },
-  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 25, rev: 1 },
+  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 15, rev: 1, ready: true },
+  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 25, rev: 1, ready: true },
   rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 15, rev: 1 },
   triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 13, rev: 1 },
   gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 9,  rev: 1 },
@@ -798,6 +803,12 @@ function chipsHTML(block) {
 const POD = { id: null, audio: null };
 const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
 
+// פרק שהקובץ שלו עוד לא נמצא ב-audio/ לא קיים מבחינת הממשק — ראו ready למעלה.
+function podReady(area) {
+  const pod = PODCASTS[area];
+  return pod && pod.ready ? pod : null;
+}
+
 /* הפרק נתלה רק על התחנה הראשונה של האזור באותו יום. יום טודנאו, למשל, הוא
    שלוש תחנות שחולקות פרק אחד — הקישור מופיע על מגלשת Hasenhorn בלבד, ולא
    שוב על המפלים ועל הגשר התלוי. הסימון נעשה פעם אחת בטעינה, לפי סדר
@@ -806,7 +817,7 @@ const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
   for (const day of DAYS) {
     const seen = new Set();
     for (const b of day.blocks) {
-      if (!b.area || !PODCASTS[b.area] || seen.has(b.area)) continue;
+      if (!b.area || !podReady(b.area) || seen.has(b.area)) continue;
       seen.add(b.area);
       b.podLead = true;
     }
@@ -814,7 +825,7 @@ const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
 })();
 
 function podcastFor(block) {
-  return block && block.podLead ? (PODCASTS[block.area] || null) : null;
+  return block && block.podLead ? podReady(block.area) : null;
 }
 
 // הכתובת שממנה מנגנים ושלפיה נשמר המטמון — כולל מספר הגרסה של הפרק.
@@ -906,7 +917,7 @@ function podShowMissing() {
 }
 
 function podOpen(id) {
-  const pod = PODCASTS[id];
+  const pod = podReady(id);
   if (!pod) return;
   const el = podEnsureAudio();
   if (POD.id !== id) {
