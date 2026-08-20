@@ -800,8 +800,10 @@ function chipsHTML(block) {
    לא עוצרת השמעה, כל עוד מחזיקים בהפניה אליו.
    ============================================================ */
 
-const POD = { id: null, audio: null };
+const POD = { key: null, id: null, audio: null };
 const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
+const POD_RATE_KEY = "bf2026-pod-rate"; // מהירות ההשמעה — אחת לכל הפרקים
+const POD_RATES = [1, 1.25, 1.5, 1.75];
 
 // פרק שהקובץ שלו עוד לא נמצא ב-audio/ לא קיים מבחינת הממשק — ראו ready למעלה.
 function podReady(area) {
@@ -820,9 +822,19 @@ function podReady(area) {
       if (!b.area || !podReady(b.area) || seen.has(b.area)) continue;
       seen.add(b.area);
       b.podLead = true;
+      // מפתח ייחודי למופע הזה של הפרק. אגם טיטיזי מופיע פעמיים (20.8 ו-23.8),
+      // ובלשונית "מסלול" כל הימים מרונדרים יחד — בלי התאריך במפתח, לחיצה על
+      // הכרטיס של 23.8 פתחה את הנגן בתוך הכרטיס של 20.8, כי החיפוש מחזיר את
+      // ההתאמה הראשונה, והכרטיס שנלחץ נשאר ריק ומוסתר.
+      b.podKey = `${day.date}:${b.area}`;
     }
   }
 })();
+
+// המפתח הוא "תאריך:אזור", והאזור הוא מה שמופיע בטבלת PODCASTS.
+function podAreaOf(key) {
+  return key ? key.slice(key.indexOf(":") + 1) : null;
+}
 
 function podcastFor(block) {
   return block && block.podLead ? podReady(block.area) : null;
@@ -843,13 +855,48 @@ function podSavePos(id, seconds) {
   try { localStorage.setItem(POD_POS_KEY, JSON.stringify(all)); } catch { /* התעלמות */ }
 }
 
+function podLoadRate() {
+  const r = parseFloat(localStorage.getItem(POD_RATE_KEY));
+  return POD_RATES.includes(r) ? r : 1;
+}
+
+function podSaveRate(rate) {
+  try { localStorage.setItem(POD_RATE_KEY, String(rate)); } catch { /* התעלמות */ }
+}
+
+/* חשוב ששני השדות ייקבעו יחד: לפי התקן, טעינת מקור חדש מאפסת את
+   playbackRate לערך של defaultPlaybackRate. קביעת playbackRate לבדה הייתה
+   חוזרת ל-1× בכל מעבר בין פרקים. */
+function podApplyRate(rate) {
+  const el = POD.audio;
+  if (!el) return;
+  el.defaultPlaybackRate = rate;
+  el.playbackRate = rate;
+}
+
+/* כפתורי המהירות הם של האפליקציה ולא של הדפדפן, בכוונה. הפקדים המובנים של
+   <audio> מקצצים כפתורים כשהנגן צר, ומהירות ההשמעה יושבת אצלם בתפריט
+   שלוש הנקודות — זה שנעלם ראשון. ברשימת "המשך היום" הנגן צר ב-76 פיקסלים
+   מכרטיס מלא (עמודת השעה), כך שאותו פרק קיבל תפריט מהירות בכרטיס הנוכחי
+   ולא קיבל אותו ברשימה. בספארי של האייפון אין תפריט כזה בכלל. */
+function podRatesHTML() {
+  const cur = podLoadRate();
+  const btns = POD_RATES.map(r => {
+    const on = r === cur;
+    return `<button type="button" class="pod-rate${on ? " on" : ""}" data-pod-rate="${r}"`
+      + ` aria-pressed="${on}" aria-label="מהירות ${r}">${r}×</button>`;
+  }).join("");
+  return `<div class="pod-rates" role="group" aria-label="מהירות השמעה">`
+    + `<span class="pod-rates-label">מהירות</span>${btns}</div>`;
+}
+
 // כותרת המקום כקישור לפרק. extraHTML נשאר בתוך הכותרת (למשל התחזית המוטבעת).
 function podTitleHTML(block, extraHTML = "") {
   const pod = podcastFor(block);
   const title = escapeHTML(block.title);
   if (!pod) return title + extraHTML;
   const label = escapeHTML(`האזנה לפרק הפודקאסט על ${pod.title}, ${pod.minutes} דקות`);
-  return `<button type="button" class="pod-title" data-pod="${block.area}" aria-expanded="false" aria-label="${label}">`
+  return `<button type="button" class="pod-title" data-pod="${block.podKey}" aria-expanded="false" aria-label="${label}">`
     + `<span class="pod-title-text">${title}</span>`
     + `<span class="pod-cue">${ICON.headphones}${pod.minutes} דק׳</span>`
     + `</button>${extraHTML}`;
@@ -857,7 +904,7 @@ function podTitleHTML(block, extraHTML = "") {
 
 function podPanelHTML(block) {
   if (!podcastFor(block)) return "";
-  return `<div class="pod-panel" data-pod-panel="${block.area}" hidden></div>`;
+  return `<div class="pod-panel" data-pod-panel="${block.podKey}" hidden></div>`;
 }
 
 function podEnsureAudio() {
@@ -871,7 +918,11 @@ function podEnsureAudio() {
   });
   el.addEventListener("ended", () => { if (POD.id) podSavePos(POD.id, 0); });
   el.addEventListener("error", podShowMissing);
+  // רשת ביטחון: יש דפדפנים שמאפסים את המהירות בטעינת מקור חדש גם כש-
+  // defaultPlaybackRate נקבע מראש.
+  el.addEventListener("loadedmetadata", () => podApplyRate(podLoadRate()));
   POD.audio = el;
+  podApplyRate(podLoadRate());
   return el;
 }
 
@@ -889,26 +940,27 @@ function podSetMediaSession(pod) {
 
 // מעביר את הנגן לפאנל הפתוח ומסנכרן את כל הכותרות. נקרא אחרי כל רינדור.
 function podMount() {
-  const audio = POD.id ? podEnsureAudio() : POD.audio;
+  const audio = POD.key ? podEnsureAudio() : POD.audio;
   if (audio && audio.parentNode) audio.parentNode.removeChild(audio);
   $$(".pod-panel").forEach(p => { p.innerHTML = ""; p.hidden = true; });
-  $$(".pod-title").forEach(b => b.setAttribute("aria-expanded", String(!!POD.id && b.dataset.pod === POD.id)));
-  if (!POD.id) return;
+  $$(".pod-title").forEach(b => b.setAttribute("aria-expanded", String(!!POD.key && b.dataset.pod === POD.key)));
+  if (!POD.key) return;
 
   const pod = PODCASTS[POD.id];
-  // אותו אזור יכול להופיע גם ב"עכשיו" וגם ב"מסלול" — מעדיפים את התצוגה הפעילה.
-  const target = $(`.view.active .pod-panel[data-pod-panel="${POD.id}"]`)
-    || $(`.pod-panel[data-pod-panel="${POD.id}"]`);
+  // אותו בלוק מרונדר גם ב"עכשיו" וגם ב"מסלול" — מעדיפים את התצוגה הפעילה.
+  const target = $(`.view.active .pod-panel[data-pod-panel="${POD.key}"]`)
+    || $(`.pod-panel[data-pod-panel="${POD.key}"]`);
   if (!target) return;
 
   target.innerHTML = `<div class="pod-head">${ICON.headphones}<strong>${escapeHTML(pod.title)}</strong>`
     + `<span class="pod-note">פרק לילדים · ${pod.minutes} דק׳</span></div>`;
   target.appendChild(audio);
+  target.insertAdjacentHTML("beforeend", podRatesHTML());
   target.hidden = false;
 }
 
 function podShowMissing() {
-  const target = $(`.pod-panel[data-pod-panel="${POD.id}"]:not([hidden])`);
+  const target = $(`.pod-panel[data-pod-panel="${POD.key}"]:not([hidden])`);
   if (!target || target.querySelector(".pod-missing")) return;
   const note = document.createElement("div");
   note.className = "pod-missing";
@@ -916,10 +968,13 @@ function podShowMissing() {
   target.appendChild(note);
 }
 
-function podOpen(id) {
+function podOpen(key) {
+  const id = podAreaOf(key);
   const pod = podReady(id);
   if (!pod) return;
   const el = podEnsureAudio();
+  // מעבר בין שני המופעים של אותו פרק (טיטיזי ב-20.8 וב-23.8) רק מזיז את
+  // הנגן לכרטיס השני — אותו קובץ, אותו מיקום, בלי לטעון מחדש.
   if (POD.id !== id) {
     el.pause();
     POD.id = id;
@@ -934,18 +989,21 @@ function podOpen(id) {
     }
     podSetMediaSession(pod);
   }
+  POD.key = key;
+  podApplyRate(podLoadRate());
   podMount();
   el.play().catch(() => { /* אם הדפדפן חסם — יש כפתור ניגון בנגן עצמו */ });
 }
 
 function podClose() {
   if (POD.audio) POD.audio.pause();
+  POD.key = null;
   POD.id = null;
   podMount();
 }
 
-function podToggle(id) {
-  if (POD.id === id) podClose(); else podOpen(id);
+function podToggle(key) {
+  if (POD.key === key) podClose(); else podOpen(key);
 }
 
 function tipsHTML(block) {
@@ -2058,6 +2116,19 @@ function init() {
 
   // האזנה מואצלת: "עכשיו" מתרנדר כל דקה, ובלי אצילה היו נערמים מאזינים.
   $("#app").addEventListener("click", e => {
+    const rate = e.target.closest("[data-pod-rate]");
+    if (rate) {
+      const r = parseFloat(rate.dataset.podRate);
+      podSaveRate(r);
+      podApplyRate(r);
+      // עדכון הסימון במקום, ולא רינדור מחדש של הפאנל — כדי לא לגעת בנגן.
+      $$(".pod-rate").forEach(b => {
+        const on = parseFloat(b.dataset.podRate) === r;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
+      return;
+    }
     const title = e.target.closest(".pod-title");
     if (title) podToggle(title.dataset.pod);
   });
