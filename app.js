@@ -130,9 +130,9 @@ const PODCASTS = {
   titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 15, rev: 1, ready: true },
   freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 25, rev: 1, ready: true },
   rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 15, rev: 1 },
-  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 13, rev: 1 },
-  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 9,  rev: 1 },
-  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 13, rev: 1 },
+  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 23, rev: 1, ready: true },
+  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 25, rev: 1, ready: true },
+  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 25, rev: 1, ready: true },
   badeparadies: { title: "Badeparadies",             file: "audio/badeparadies.m4a", minutes: 11, rev: 1 },
   lindt:        { title: "לינדט — עולם השוקולד",     file: "audio/lindt.m4a",        minutes: 14, rev: 1 }
 };
