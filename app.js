@@ -42,6 +42,10 @@ const ICON = {
   refresh: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/></svg>`,
   drop: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`,
   waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`,
+  plus: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  trash: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5V7"/><path d="M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 7"/></svg>`,
+  download: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M5 20h14"/></svg>`,
+  pencil: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>`,
   swap: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="m14 5 3 3-3 3"/><path d="M20 16H7"/><path d="m10 13-3 3 3 3"/></svg>`,
   lock: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10" rx="2.5"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg>`,
   headphones: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18Z"/><path d="M20 14h-2.5a1 1 0 0 0-1 1v3.5a1 1 0 0 0 1 1h1a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>`
@@ -177,7 +181,10 @@ function pickDefaultTrip(index) {
 
 // טעינת קובץ טיול והצבתו במשתנים שכל פונקציות הרינדור קוראות.
 async function loadTrip(id) {
-  const trip = await fetchJSON(`trips/${id}/trip.json`);
+  // טיוטה מקומית גוברת על מה שפורסם: מה שנערך נראה מיד באפליקציה עצמה,
+  // עוד לפני שנפתח עליו Pull Request. טיול שנוצר כאן קיים רק כטיוטה.
+  const draft = edReadDraft(id);
+  const trip = draft ? draft.trip : await fetchJSON(`trips/${id}/trip.json`);
   TRIP_ID = id;
   TRIP = {
     title: trip.title,
@@ -229,9 +236,12 @@ function hebWeekday(dateStr) {
   return HEB_WEEKDAYS[d.getDay()];
 }
 
+const HEB_MONTHS = ["בינואר", "בפברואר", "במרץ", "באפריל", "במאי", "ביוני",
+                    "ביולי", "באוגוסט", "בספטמבר", "באוקטובר", "בנובמבר", "בדצמבר"];
+
 function dayMonth(dateStr) {
   const day = Number(dateStr.slice(8, 10));
-  return `${day} באוגוסט`;
+  return `${day} ${HEB_MONTHS[Number(dateStr.slice(5, 7)) - 1]}`;
 }
 
 function localDateStr(date) {
@@ -495,7 +505,10 @@ function imageHTML(image) {
   const credit = image.credit
     ? `<a class="stop-credit" href="${commonsFileUrl(image.commonsFile)}" target="_blank" rel="noopener">${ICON.camera} ${escapeHTML(image.credit)} · ${escapeHTML(image.license)}, ויקישיתוף</a>`
     : "";
-  return `<img class="stop-img" src="${tripAsset(image.file)}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
+  // תמונה שנבחרה בעורך ועוד לא פורסמה מוצגת ישירות מוויקישיתוף; אחרי
+  // הפרסום היא כבר קובץ בתיקיית הטיול ונטענת מקומית, גם בלי קליטה.
+  const src = image.pending && image.thumb ? image.thumb : tripAsset(image.file);
+  return `<img class="stop-img" src="${src}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
 }
 
 // בלוק "תחנה" מלא — עם תמונה, כתובת, זמן נסיעה, תחזית וכל השאר.
@@ -1346,7 +1359,7 @@ function tripSheetItemHTML(t) {
         <span class="trip-item-title">${escapeHTML(t.title)}</span>
         <span class="trip-item-sub">${escapeHTML(t.subtitle || "")}</span>
       </span>
-      <span class="trip-item-note">${state === "past" ? ICON.lock : ""}${note}</span>
+      <span class="trip-item-note">${t.hasDraft ? `<span class="trip-draft">טיוטה</span>` : ""}${state === "past" ? ICON.lock : ""}${note}</span>
     </button>
   `;
 }
@@ -1361,7 +1374,11 @@ function renderTripSheet() {
     <h2 class="sheet-title">הטיולים שלנו</h2>
     ${live.length ? `<div class="sheet-group">מתוכנן</div>${live.map(tripSheetItemHTML).join("")}` : ""}
     ${past.length ? `<div class="sheet-group">ארכיון</div>${past.map(tripSheetItemHTML).join("")}` : ""}
-    ${TRIP_INDEX.length < 2 ? `<p class="sheet-note">טיול חדש הוא קובץ חדש תחת trips/ — עריכה מתוך האפליקציה מגיעה בשלב הבא.</p>` : ""}
+    <div class="sheet-actions">
+      <button class="sheet-btn primary" data-new-trip>${ICON.plus} טיול חדש</button>
+      <button class="sheet-btn" data-edit-trip>${ICON.pencil} עריכת ${escapeHTML(TRIP.title)}</button>
+    </div>
+    <p class="sheet-note">עריכות נשמרות במכשיר כטיוטה. מה שפורסם משתנה רק כשמפרסמים.</p>
   `;
 }
 
@@ -1372,6 +1389,20 @@ function openTripSheet() {
 
 function closeTripSheet() {
   $("#tripSheet").hidden = true;
+}
+
+// רענון הטיול הפעיל אחרי עריכה — אותו מסלול כמו החלפת טיול, בלי הגיליון.
+async function reloadActiveTrip(id) {
+  TRIP_INDEX = edMergeIndex(TRIP_INDEX.filter(t => !t.localOnly));
+  const target = id || TRIP_ID;
+  if (!TRIP_INDEX.some(t => t.id === target)) { location.reload(); return; }
+  await loadTrip(target);
+  openDays = null;
+  renderNow();
+  renderItinerary();
+  renderInfo();
+  renderWeather();
+  wxFetch();
 }
 
 // החלפת טיול בזמן ריצה: טוענים קובץ אחר ומרנדרים הכול מחדש, בלי רענון דף.
@@ -1402,6 +1433,8 @@ function bindTripSheet() {
   $("#tripSwitch").addEventListener("click", openTripSheet);
   $("#tripSheet").addEventListener("click", e => {
     if (e.target.id === "tripSheet") { closeTripSheet(); return; }
+    if (e.target.closest("[data-new-trip]")) { edNewTrip(); return; }
+    if (e.target.closest("[data-edit-trip]")) { edOpenTrip(TRIP_ID); return; }
     const item = e.target.closest("[data-trip]");
     if (item) switchTrip(item.dataset.trip);
   });
@@ -1416,8 +1449,8 @@ async function init() {
   bindTripSheet();
 
   try {
-    const index = await fetchJSON("trips/index.json");
-    TRIP_INDEX = index.trips || [];
+    const index = await fetchJSON("trips/index.json").catch(() => ({ trips: [] }));
+    TRIP_INDEX = edMergeIndex(index.trips || []);
     const id = pickDefaultTrip(TRIP_INDEX);
     if (!id) throw new Error("no trips in index");
     await loadTrip(id);
