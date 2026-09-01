@@ -1,35 +1,28 @@
 // חשוב: כל שינוי ב-app.js / style.css / index.html מחייב העלאת המספר כאן.
 // ה-Service Worker הוא cache-first, אז בלי זה מכשיר שכבר התקין את האפליקציה
 // ימשיך להריץ את הגרסה הישנה לנצח.
-const CACHE = "bf2026-v13";
+const CACHE = "tp-v1";
 
 // פרקי הפודקאסט יושבים במטמון נפרד ובלי מספר גרסה, כדי שעדכון של האפליקציה
 // לא ימחק אותם — הורדה חוזרת של כל הפרקים היא הרבה מגה-בייט.
-const AUDIO_CACHE = "bf2026-audio";
-const KEEP = [CACHE, AUDIO_CACHE];
+const AUDIO_CACHE = "tp-audio";
+// נתוני הטיולים והתמונות שלהם — נשמרים תוך כדי שימוש, לא בהתקנה, כי הם
+// משתנים לפי הטיול הפעיל ואין טעם להוריד את כולם מראש.
+const TRIPS_CACHE = "tp-trips";
+const KEEP = [CACHE, AUDIO_CACHE, TRIPS_CACHE];
 
+// רק מעטפת האפליקציה. הנתונים של כל טיול יושבים ב-trips/ ונשמרים בזמן ריצה,
+// אחרת כל טיול חדש היה מחייב לגעת ברשימה הזאת.
 const SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
   "./manifest.json",
+  "./trips/index.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png",
-  "./images/ravennaschlucht.jpg",
-  "./images/titisee.jpg",
-  "./images/badeparadies.jpg",
-  "./images/europapark.jpg",
-  "./images/freiburg.jpg",
-  "./images/todtnau-falls.jpg",
-  "./images/blackforestline.jpg",
-  "./images/rulantica.jpg",
-  "./images/triberg.jpg",
-  "./images/vogelpark.jpg",
-  "./images/rheinfall.jpg",
-  "./images/lindt.jpg",
-  "./images/zurich-airport.jpg"
+  "./icons/apple-touch-icon.png"
 ];
 // שימו לב: קבצי audio/ לא נמצאים ב-SHELL בכוונה. הם כמה מגה-בייט כל אחד,
 // ואין סיבה שההתקנה הראשונה תוריד את כולם. פרק נשמר כאן בהאזנה הראשונה
@@ -58,6 +51,36 @@ self.addEventListener("activate", event => {
 });
 
 const isAudio = url => url.pathname.includes("/audio/");
+const isTripData = url => /\/trips\/[^/]*\.json$|\/trips\/[^/]+\/trip\.json$|\/trips\/index\.json$/.test(url.pathname);
+const isTripAsset = url => url.pathname.includes("/trips/") && !isTripData(url) && !isAudio(url);
+
+/* קבצי הטיול הם התוכן עצמו, ולכן רשת-קודם: ברגע שגרסה חדשה מתמזגת, היא
+   מופיעה בלי להעלות את מספר הגרסה של המטמון. אין רשת — חוזרים למה שנשמר. */
+async function handleTripData(request) {
+  const cache = await caches.open(TRIPS_CACHE);
+  try {
+    const res = await fetch(request, { cache: "no-store" });
+    if (res.status === 200) cache.put(request, res.clone());
+    return res;
+  } catch {
+    const cached = await cache.match(request);
+    return cached || new Response(null, { status: 504, statusText: "Offline" });
+  }
+}
+
+// תמונות של טיול — מטמון-קודם, הן לא משתנות אחרי שפורסמו.
+async function handleTripAsset(request) {
+  const cache = await caches.open(TRIPS_CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    const res = await fetch(request);
+    if (res.status === 200) cache.put(request, res.clone());
+    return res;
+  } catch {
+    return new Response(null, { status: 504, statusText: "Offline" });
+  }
+}
 
 /* נגן אודיו לא מבקש את הקובץ במלואו — הוא שולח בקשות Range ומצפה לתשובת 206
    עם החלק שביקש. תשובה כזאת גם אסור לשמור במטמון (cache.put דוחה 206), וגם אם
@@ -138,6 +161,16 @@ self.addEventListener("fetch", event => {
 
   if (isAudio(url)) {
     event.respondWith(handleAudio(event.request));
+    return;
+  }
+
+  if (isTripData(url)) {
+    event.respondWith(handleTripData(event.request));
+    return;
+  }
+
+  if (isTripAsset(url)) {
+    event.respondWith(handleTripAsset(event.request));
     return;
   }
 

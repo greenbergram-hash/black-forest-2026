@@ -3,16 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>היער השחור 2026</title>
+<!-- הכותרת מוחלפת בזמן ריצה לשם הטיול הפעיל (setTripChrome ב-app.js) -->
+<title>הטיולים שלנו</title>
 
 <meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1210" media="(prefers-color-scheme: dark)">
-<meta name="description" content="תוכנית הטיול המשפחתי ביער השחור, 17–24 באוגוסט 2026">
+<meta name="description" content="תוכניות הטיולים המשפחתיים — מסלול, מזג אוויר וניווט, גם בלי קליטה">
 
-<!-- iOS "Add to Home Screen" -->
+<!-- iOS "Add to Home Screen" — השם כאן נקבע בזמן ההתקנה ולא משתנה אחר כך,
+     ולכן הוא כללי ולא שם של טיול מסוים. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="היער השחור">
+<meta name="apple-mobile-web-app-title" content="הטיולים שלנו">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
 <link rel="icon" href="icons/icon-192.png">
@@ -24,16 +26,16 @@
 <header class="topbar" id="topbar">
   <span class="topbar-icon" id="topbarIcon"></span>
   <div class="topbar-text">
-    <strong>היער השחור</strong>
-    <span id="topbarSub">17–24 באוגוסט 2026</span>
+    <strong id="topbarTitle">הטיולים שלנו</strong>
+    <span id="topbarSub"></span>
   </div>
+  <button class="topbar-switch" id="tripSwitch" aria-label="החלפת טיול" aria-haspopup="dialog"></button>
 </header>
 
 <main id="app">
   <section id="view-now" class="view"></section>
   <section id="view-itinerary" class="view"></section>
   <section id="view-weather" class="view"></section>
-  <section id="view-redcard" class="view"></section>
   <section id="view-info" class="view"></section>
 </main>
 
@@ -47,13 +49,15 @@
   <button class="tab" data-view="weather">
     <span class="tab-icon" data-icon="cloud"></span><span>מזג אוויר</span>
   </button>
-  <button class="tab" data-view="redcard">
-    <span class="tab-icon" data-icon="ticket"></span><span>כרטיס אדום</span>
-  </button>
   <button class="tab" data-view="info">
     <span class="tab-icon" data-icon="info"></span><span>מידע</span>
   </button>
 </nav>
+
+<!-- גיליון בחירת הטיול. נשאר ריק עד הפתיחה הראשונה. -->
+<div class="sheet-backdrop" id="tripSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="הטיולים שלנו" id="tripSheetBody"></div>
+</div>
 
 <script src="app.js"></script>
 </body>

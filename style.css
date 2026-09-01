@@ -97,6 +97,82 @@ body {
 .topbar-text strong { font-size: 15px; font-weight: 700; }
 .topbar-text span { font-size: 12px; color: var(--text-muted); }
 
+/* ---- trip switcher ---- */
+.topbar-switch {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.topbar-switch:active { background: var(--surface-2); }
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(20, 22, 20, .38);
+}
+.sheet-backdrop[hidden] { display: none; }
+.sheet {
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 8px 14px calc(18px + var(--safe-bottom));
+  box-shadow: var(--shadow-md);
+}
+.sheet-handle {
+  width: 38px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+}
+.sheet-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+.sheet-group { font-size: 12px; color: var(--text-faint); font-weight: 600; margin: 14px 2px 6px; }
+.sheet-note { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 14px 2px 0; }
+
+.trip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: start;
+  font-family: inherit;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.trip-item.active { border-color: var(--accent); background: var(--accent-soft); }
+.trip-item-icon { color: var(--accent); display: flex; flex-shrink: 0; }
+.trip-item-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.trip-item-title { font-size: 15px; font-weight: 700; }
+.trip-item-sub { font-size: 12.5px; color: var(--text-muted); }
+.trip-item-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 #app {
   flex: 1;
   overflow-y: auto;
@@ -624,95 +700,6 @@ a.plain { color: inherit; text-decoration: none; }
   color: var(--accent);
 }
 .wx-day-rain .icon { width: 12px; height: 12px; }
-
-/* ---- red card ---- */
-.benefit-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  margin-bottom: 8px;
-}
-.benefit-badge.free { background: var(--accent-soft); color: var(--accent); }
-.benefit-badge.discount { background: var(--surface-2); color: var(--text-muted); }
-
-/* ---- red card catalog item (drill-down) ---- */
-details.redcard-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-details.redcard-item[open] { border-color: var(--accent); box-shadow: var(--shadow-sm); }
-details.redcard-item summary {
-  list-style: none;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  cursor: pointer;
-}
-details.redcard-item summary::-webkit-details-marker { display: none; }
-.redcard-item-summary-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.redcard-item-summary-left .benefit-badge { margin-bottom: 0; flex-shrink: 0; }
-.redcard-item-name { font-size: 14.5px; font-weight: 700; letter-spacing: -.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.redcard-item-summary-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.redcard-item-dist { display: flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 600; color: var(--accent); white-space: nowrap; }
-details.redcard-item[open] .day-chevron { transform: rotate(180deg); color: var(--accent); }
-.redcard-item-body { padding: 0 14px 14px; }
-.redcard-item-body p { margin: 0 0 8px; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-.redcard-item-benefit { font-weight: 600; color: var(--text) !important; }
-
-.redcard-controls { margin: 2px 0 16px; }
-.redcard-search {
-  display: block;
-  width: 100%;
-  font-family: inherit;
-  font-size: 14.5px;
-  padding: 11px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.redcard-search::placeholder { color: var(--text-faint); }
-.redcard-select-row { display: flex; gap: 6px; margin-bottom: 8px; }
-.redcard-select {
-  flex: 1;
-  min-width: 0;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-}
-.redcard-group-label { font-size: 12px; color: var(--text-faint); font-weight: 600; margin: 2px 2px 6px; }
-.toggle-group { display: flex; gap: 6px; margin-bottom: 8px; }
-.toggle-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  padding: 9px 8px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text-muted);
-}
-.toggle-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
-.toggle-btn .icon { width: 13px; height: 13px; }
 
 /* ---- podcast: the place name is the link ---- */
 .pod-title {
