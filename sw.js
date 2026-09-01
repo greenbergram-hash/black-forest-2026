@@ -1,7 +1,9 @@
-// חשוב: כל שינוי ב-app.js / style.css / index.html מחייב העלאת המספר כאן.
-// ה-Service Worker הוא cache-first, אז בלי זה מכשיר שכבר התקין את האפליקציה
-// ימשיך להריץ את הגרסה הישנה לנצח.
-const CACHE = "tp-v2";
+// המעטפת מוגשת מהמטמון מיד (כדי שהאפליקציה תיפתח גם בלי קליטה), ובמקביל
+// נמשכת ברקע ונשמרת לפעם הבאה — stale-while-revalidate. קודם זה היה
+// cache-first נטו, ואז כל שינוי ב-app.js חייב העלאת המספר כאן, אחרת מכשיר
+// שכבר התקין את האפליקציה ממשיך להריץ קוד ישן לנצח. המספר עדיין מנקה מטמון
+// ישן בבת אחת, אבל הוא כבר לא התנאי לקבלת עדכון.
+const CACHE = "tp-v3";
 
 // פרקי הפודקאסט יושבים במטמון נפרד ובלי מספר גרסה, כדי שעדכון של האפליקציה
 // לא ימחק אותם — הורדה חוזרת של כל הפרקים היא הרבה מגה-בייט.
@@ -177,15 +179,16 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(res => {
-        // רק 200 שלם נשמר: תשובת 206 חלקית לא ניתנת לאחסון ב-Cache API בכלל.
+      // רק 200 שלם נשמר: תשובת 206 חלקית לא ניתנת לאחסון ב-Cache API בכלל.
+      const fresh = fetch(event.request).then(res => {
         if (res.status === 200) {
           const clone = res.clone();
           caches.open(CACHE).then(cache => cache.put(event.request, clone));
         }
         return res;
       }).catch(() => cached);
+      // יש עותק שמור — מגישים אותו מיד, והמשיכה מהרשת מעדכנת לפעם הבאה.
+      return cached || fresh;
     })
   );
 });

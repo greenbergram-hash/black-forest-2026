@@ -44,6 +44,7 @@ const ICON = {
   waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`,
   plus: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
   trash: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5V7"/><path d="M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 7"/></svg>`,
+  upload: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="m8 13 4-4 4 4"/><path d="M5 4h14"/></svg>`,
   download: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M5 20h14"/></svg>`,
   pencil: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>`,
   swap: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="m14 5 3 3-3 3"/><path d="M20 16H7"/><path d="m10 13-3 3 3 3"/></svg>`,
@@ -282,7 +283,7 @@ function chipsHTML(block) {
    לא עוצרת השמעה, כל עוד מחזיקים בהפניה אליו.
    ============================================================ */
 
-const POD = { key: null, id: null, audio: null };
+const POD = { key: null, id: null, audio: null, pendingUrls: {} };
 // איפה עצרנו בכל פרק — לכל טיול בנפרד. מהירות ההשמעה משותפת לכולם.
 const POD_RATES = [1, 1.25, 1.5, 1.75];
 
@@ -451,17 +452,30 @@ function podShowMissing() {
   target.appendChild(note);
 }
 
-function podOpen(key) {
+/* פרק שנבחר בעורך ועוד לא פורסם קיים רק כקובץ במכשיר, ולכן הכתובת
+   בתיקיית הטיול עוד לא קיימת — מנגנים אותו ישירות מהמחסן המקומי, כדי
+   שאפשר יהיה לשמוע אותו במקום לפני שפותחים עליו Pull Request. */
+async function podPendingUrl(pod) {
+  if (!pod.pending) return null;
+  if (POD.pendingUrls[pod.file]) return POD.pendingUrls[pod.file];
+  const blob = await edAssetGet(TRIP_ID, pod.file);
+  if (!blob) return null;
+  POD.pendingUrls[pod.file] = URL.createObjectURL(blob);
+  return POD.pendingUrls[pod.file];
+}
+
+async function podOpen(key) {
   const id = podAreaOf(key);
   const pod = podReady(id);
   if (!pod) return;
   const el = podEnsureAudio();
+  const pendingUrl = await podPendingUrl(pod);
   // מעבר בין שני המופעים של אותו פרק (טיטיזי ב-20.8 וב-23.8) רק מזיז את
   // הנגן לכרטיס השני — אותו קובץ, אותו מיקום, בלי לטעון מחדש.
   if (POD.id !== id) {
     el.pause();
     POD.id = id;
-    el.src = podUrl(pod);
+    el.src = pendingUrl || podUrl(pod);
     const pos = podLoadPos()[id] || 0;
     if (pos > 0) {
       el.addEventListener("loadedmetadata", function seek() {

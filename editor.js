@@ -479,6 +479,7 @@ function edRender() {
   const host = edHost();
   host.classList.add("on");
 
+  if (ED.publish) { host.innerHTML = edPublishHTML(); return; }
   if (ED.newTrip) { host.innerHTML = edNewTripHTML(); return; }
   if (ED.form) { host.innerHTML = edFormHTML(); edAfterFormRender(); return; }
 
@@ -623,6 +624,7 @@ function edFormHTML() {
         <select data-field="area">${edAreaOptionsHTML(b.area)}</select>
       </label>
       ${siblings.length ? `<div class="ed-warn">${ICON.warn} הפרק משותף גם ל: ${escapeHTML(siblings.join(", "))} — החלפה תשנה אותו גם עבורן.</div>` : ""}
+      ${edEpisodeHTML(b)}
 
       ${isNew ? "" : `<div class="ed-danger"><button data-form-delete>מחיקת הפעילות</button></div>`}
     </div>
@@ -708,6 +710,30 @@ function edPhotoHTML(b) {
   return b.coords ? `<button class="ed-add" data-photo-pick>${ICON.camera} חיפוש תמונה</button>` : "";
 }
 
+/* ניהול הפרק של האזור. הפרק שייך לאזור ולא לפעילות, ולכן ההעלאה כאן
+   משנה אותו לכל הפעילויות באותו אזור — מה שנאמר במפורש למעלה. */
+function edEpisodeHTML(b) {
+  if (!b.area) {
+    return `
+      <label class="ed-field">
+        <span>אזור חדש לפרק (אותיות לטיניות)</span>
+        <input data-new-area value="${escapeHTML(ED.form.newArea || "")}" dir="ltr" placeholder="siena">
+      </label>
+      <button class="ed-add" data-make-area>${ICON.plus} יצירת אזור פרק</button>`;
+  }
+  const pod = ED.trip.podcasts[b.area] || {};
+  return `
+    <div class="ed-episode">
+      <div class="ed-episode-row">
+        <span>${ICON.headphones} ${escapeHTML(pod.title || b.area)}${pod.ready ? ` · ${pod.minutes} דק׳` : " · אין קובץ"}</span>
+        ${pod.pending ? `<span class="ed-tag est">ממתין לפרסום</span>` : ""}
+      </div>
+      <label class="ed-add" for="ed-audio">${ICON.upload} ${pod.ready ? "החלפת קובץ הפרק" : "בחירת קובץ הפרק"}</label>
+      <input id="ed-audio" type="file" accept="audio/*,.m4a,.mp3,.wav" data-audio hidden>
+      <p class="ed-hint">m4a או mp3 שכבר דחוסים. קובץ WAV מ-NotebookLM צריך לעבור דרך tools/convert-audio.sh — הדפדפן לא יודע לקודד AAC.</p>
+    </div>`;
+}
+
 function edAfterFormRender() {
   const el = $("[data-lookup]", edHost());
   if (el && ED.form.focusLookup) { el.focus(); ED.form.focusLookup = false; }
@@ -725,6 +751,18 @@ function edOnInput(e) {
     return;
   }
   if (e.target.matches("[data-lookup]")) { ED.form.query = e.target.value; return; }
+  if (e.target.matches("[data-new-area]")) { ED.form.newArea = e.target.value; return; }
+  if (e.target.matches("[data-audio]") && e.target.files[0]) {
+    edAttachEpisode(ED.form.block.area, e.target.files[0]);
+    return;
+  }
+
+  const gh = e.target.closest("[data-gh]");
+  if (gh) {
+    storeSet(gh.dataset.gh === "token" ? GH.tokenKey : GH.repoKey, e.target.value.trim());
+    if (e.type === "change") edRender();
+    return;
+  }
 
   const nt = e.target.closest("[data-new]");
   if (nt && ED.newTrip) {
@@ -798,7 +836,7 @@ async function edOnClick(e) {
     return;
   }
 
-  if (hit("[data-form-cancel]")) { ED.form = null; edRender(); return; }
+  if (hit("[data-form-cancel]")) { edCancelForm(); return; }
   if (hit("[data-form-save]")) { edSaveForm(); return; }
   if (hit("[data-form-delete]")) {
     edDeleteBlock(ED.form.dayDate, ED.form.index);
@@ -822,6 +860,17 @@ async function edOnClick(e) {
   }
   if (hit("[data-wiki-skip]")) { ED.form.wikiDismissed = true; edRender(); return; }
 
+  if (hit("[data-make-area]")) {
+    const raw = (ED.form.newArea || "").trim() || $("[data-new-area]", edHost())?.value || "";
+    const area = edSlug(raw);
+    if (!area || area === "trip") { alert("צריך מזהה אזור באותיות לטיניות, למשל siena."); return; }
+    ED.trip.podcasts[area] = ED.trip.podcasts[area] || { title: ED.form.block.title || area, file: `audio/${area}.m4a`, rev: 1 };
+    ED.form.block.area = area;
+    edSaveDraft({ snapshot: false });
+    edRender();
+    return;
+  }
+
   if (hit("[data-photo-pick]")) { await edLoadPhotos(); return; }
   if (hit("[data-photo-clear]")) { delete ED.form.block.image; edRender(); return; }
 
@@ -842,7 +891,9 @@ async function edOnClick(e) {
     return;
   }
 
-  if (hit("[data-publish]")) { edPublish(); return; }
+  if (hit("[data-publish]")) { edOpenPublish(); return; }
+  if (hit("[data-pub-cancel]")) { ED.publish = null; edRender(); return; }
+  if (hit("[data-pub-go]")) { await edRunPublish(); return; }
 }
 
 /* ---------- חיפוש והשלמה ---------- */
@@ -884,6 +935,21 @@ async function edLoadPhotos() {
   f.busy = true; edRender();
   f.photos = await edCommonsPhotos(f.block.coords);
   f.busy = false;
+  edRender();
+}
+
+/* יציאה מהטופס בלי לשמור. יצירת אזור פרק והעלאת קובץ נכתבות לטיול מיד
+   (הקובץ צריך מקום לשבת בו), אבל הקישור בין הפעילות לאזור נשמר רק
+   ב"שמירה" — אז ביטול היה משאיר אזור שאף פעילות לא מפנה אליו. */
+function edCancelForm() {
+  const used = new Set();
+  ED.trip.days.forEach(d => d.blocks.forEach(b => { if (b.area) used.add(b.area); }));
+  let removed = 0;
+  for (const area of Object.keys(ED.trip.podcasts || {})) {
+    if (!used.has(area) && !ED.trip.podcasts[area].ready) { delete ED.trip.podcasts[area]; removed++; }
+  }
+  if (removed) edSaveDraft({ snapshot: false });
+  ED.form = null;
   edRender();
 }
 
@@ -1046,6 +1112,368 @@ function edNewTripCreate() {
   edRender();
 }
 
-function edPublish() {
-  alert("פרסום ל-Pull Request עוד לא מחובר.\n\nבינתיים: \"גיבוי\" מוריד את הטיול כקובץ JSON,\nוהוא נשמר במכשיר גם בלי פרסום.");
+
+
+/* ============================================================
+   מחסן נכסים מקומי (IndexedDB)
+   קובץ פרק ששויך לפעילות צריך לשרוד רענון דף עד הפרסום, והוא כמה
+   מגה-בייט — הרבה מעבר למה ש-localStorage יכול להחזיק.
+   ============================================================ */
+
+const ED_DB = "trips-assets";
+const ED_STORE = "files";
+
+function edDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(ED_DB, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(ED_STORE)) req.result.createObjectStore(ED_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function edAssetKey(tripId, path) { return `${tripId}/${path}`; }
+
+async function edAssetPut(tripId, path, blob) {
+  const db = await edDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ED_STORE, "readwrite");
+    tx.objectStore(ED_STORE).put(blob, edAssetKey(tripId, path));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function edAssetGet(tripId, path) {
+  const db = await edDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ED_STORE, "readonly");
+    const req = tx.objectStore(ED_STORE).get(edAssetKey(tripId, path));
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function edAssetDelete(tripId, path) {
+  const db = await edDB();
+  return new Promise(resolve => {
+    const tx = db.transaction(ED_STORE, "readwrite");
+    tx.objectStore(ED_STORE).delete(edAssetKey(tripId, path));
+    tx.oncomplete = () => resolve();
+  });
+}
+
+/* ============================================================
+   פרסום — קומיט אחד וענף חדש, ואז Pull Request
+   דרך ה-Git Data API ולא Contents API: קובצי הפרקים גדולים מ-1MB
+   (המגבלה המתועדת של Contents), וכך גם trip.json, התמונות והאודיו
+   נכנסים יחד בקומיט אחד ולא בשרשרת קומיטים נפרדים.
+   ============================================================ */
+
+const GH = {
+  tokenKey: "tp:gh-token",
+  repoKey: "tp:gh-repo",
+  api: "https://api.github.com"
+};
+
+function ghToken() { return storeGet(GH.tokenKey, ""); }
+function ghRepo() { return storeGet(GH.repoKey, "greenbergram-hash/black-forest-2026"); }
+
+async function ghFetch(path, options = {}) {
+  const res = await fetch(GH.api + path, {
+    ...options,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${ghToken()}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`GitHub ${res.status}: ${text.slice(0, 200)}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+// base64 בחלקים — קובץ פרק של 6MB הופך למערך של מיליוני בתים, ו-
+// String.fromCharCode(...arr) על מערך כזה מפוצץ את מחסנית הקריאות.
+function edToBase64(bytes) {
+  let out = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(out);
+}
+
+async function edBlobToBase64(blob) {
+  return edToBase64(new Uint8Array(await blob.arrayBuffer()));
+}
+
+/* אילו קבצים הפרסום צריך לכתוב: קובץ הטיול, רשומת האינדקס אם היא
+   השתנתה, כל תמונה שנבחרה ועוד לא הועלתה, וכל פרק שממתין. */
+async function edCollectFiles(onStep) {
+  const trip = edClone(ED.trip);
+  const files = [];
+  const dir = `trips/${trip.id}`;
+
+  for (const day of trip.days) {
+    for (const b of day.blocks) {
+      if (b.image && b.image.pending) {
+        onStep(`מוריד תמונה: ${b.image.commonsFile}`);
+        const res = await fetch(b.image.thumb);
+        if (!res.ok) throw new Error("לא הצלחנו להוריד את התמונה " + b.image.commonsFile);
+        const blob = await res.blob();
+        files.push({ path: `${dir}/${b.image.file}`, base64: await edBlobToBase64(blob), size: blob.size });
+        // מה שנשמר בקובץ הטיול הוא רק המבנה שהאפליקציה מרנדרת.
+        b.image = { file: b.image.file, credit: b.image.credit, license: b.image.license, commonsFile: b.image.commonsFile };
+      }
+    }
+  }
+
+  for (const [area, pod] of Object.entries(trip.podcasts || {})) {
+    if (!pod.pending) continue;
+    onStep(`מכין פרק: ${pod.title || area}`);
+    const blob = await edAssetGet(trip.id, pod.file);
+    if (!blob) throw new Error("קובץ הפרק לא נמצא במכשיר: " + area);
+    files.push({ path: `${dir}/${pod.file}`, base64: await edBlobToBase64(blob), size: blob.size });
+    // שדות עבודה של העורך — לא חלק מהנתונים שהאפליקציה קוראת.
+    delete pod.pending;
+    delete pod.sizeLabel;
+  }
+
+  trip.localOnly = false;
+  delete trip.localOnly;
+  files.push({ path: `${dir}/trip.json`, text: JSON.stringify(trip, null, 2) + "\n" });
+  return { trip, files, dir };
+}
+
+async function edPublishRun(onStep) {
+  const repo = ghRepo();
+  const [owner, name] = repo.split("/");
+  if (!owner || !name) throw new Error("שם המאגר לא תקין");
+
+  onStep("קורא את מצב המאגר");
+  const repoInfo = await ghFetch(`/repos/${owner}/${name}`);
+  const baseBranch = repoInfo.default_branch;
+  const ref = await ghFetch(`/repos/${owner}/${name}/git/ref/heads/${baseBranch}`);
+  const baseCommitSha = ref.object.sha;
+  const baseCommit = await ghFetch(`/repos/${owner}/${name}/git/commits/${baseCommitSha}`);
+
+  // שמירה מפני דריסה: אם הקובץ שפורסם השתנה מאז שהטיוטה נוצרה, לא
+  // ממשיכים — עדיף לרענן ולמזג מאשר להעלים שינוי של מישהו אחר.
+  if (ED.meta.basedOn && ED.meta.basedOn !== baseCommitSha) {
+    const changed = await ghFetch(`/repos/${owner}/${name}/compare/${ED.meta.basedOn}...${baseCommitSha}`);
+    const touched = (changed.files || []).some(f => f.filename.startsWith(`trips/${ED.trip.id}/`));
+    if (touched) throw new Error("הטיול הזה השתנה במאגר מאז שהתחלתם לערוך. לרענן את הדף ולהתחיל מהגרסה החדשה.");
+  }
+
+  const { trip, files, dir } = await edCollectFiles(onStep);
+
+  onStep(`מעלה ${files.length} קבצים`);
+  const tree = [];
+  for (const f of files) {
+    const blob = f.base64
+      ? await ghFetch(`/repos/${owner}/${name}/git/blobs`, { method: "POST", body: JSON.stringify({ content: f.base64, encoding: "base64" }) })
+      : await ghFetch(`/repos/${owner}/${name}/git/blobs`, { method: "POST", body: JSON.stringify({ content: f.text, encoding: "utf-8" }) });
+    tree.push({ path: f.path, mode: "100644", type: "blob", sha: blob.sha });
+  }
+
+  // רשומת האינדקס — נכתבת מחדש תמיד, כדי שטיול חדש יופיע ברשימה.
+  const index = await fetchJSON("trips/index.json").catch(() => ({ schemaVersion: 1, trips: [] }));
+  const entry = edIndexEntry(trip);
+  delete entry.localOnly;
+  const others = (index.trips || []).filter(t => t.id !== trip.id);
+  const nextIndex = { ...index, trips: [...others, entry].sort((a, b) => a.start.localeCompare(b.start)) };
+  const indexBlob = await ghFetch(`/repos/${owner}/${name}/git/blobs`, {
+    method: "POST",
+    body: JSON.stringify({ content: JSON.stringify(nextIndex, null, 2) + "\n", encoding: "utf-8" })
+  });
+  tree.push({ path: "trips/index.json", mode: "100644", type: "blob", sha: indexBlob.sha });
+
+  onStep("יוצר קומיט");
+  const newTree = await ghFetch(`/repos/${owner}/${name}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree })
+  });
+  const commit = await ghFetch(`/repos/${owner}/${name}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({
+      message: `Update ${trip.title} (${trip.id})`,
+      tree: newTree.sha,
+      parents: [baseCommitSha]
+    })
+  });
+
+  const branch = `trip/${trip.id}-${Date.now().toString(36)}`;
+  onStep("פותח ענף");
+  await ghFetch(`/repos/${owner}/${name}/git/refs`, {
+    method: "POST",
+    body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: commit.sha })
+  });
+
+  onStep("פותח Pull Request");
+  const pr = await ghFetch(`/repos/${owner}/${name}/pulls`, {
+    method: "POST",
+    body: JSON.stringify({
+      title: `${trip.title} — עדכון מהאפליקציה`,
+      head: branch,
+      base: baseBranch,
+      body: `נוצר מתוך האפליקציה.\n\n${files.map(f => `- \`${f.path}\`${f.size ? ` (${Math.round(f.size / 1024)} ק"ב)` : ""}`).join("\n")}\n- \`trips/index.json\``
+    })
+  });
+
+  // הטיוטה נשארת — מה שנערך ממשיך להופיע באפליקציה עד שה-PR ימוזג.
+  ED.trip = trip;
+  ED.meta.pr = { url: pr.html_url, number: pr.number, branch };
+  ED.meta.trash = [];
+  edSaveDraft({ snapshot: false });
+  return pr;
+}
+
+/* ---------- מסך הפרסום ---------- */
+
+function edPublishHTML() {
+  const p = ED.publish;
+  const pending = edPendingSummary();
+  const hasToken = !!ghToken();
+
+  return `
+    <header class="ed-top">
+      <button class="ed-back" data-pub-cancel>${ICON.chevron} חזרה</button>
+      <strong>פרסום</strong>
+      <button class="ed-publish" data-pub-go ${hasToken && !p.busy ? "" : "disabled"}>${p.busy ? "…" : "פתיחת PR"}</button>
+    </header>
+
+    <div class="ed-body">
+      ${p.done ? `
+        <div class="ed-banner on">נפתח Pull Request #${p.done.number}</div>
+        <p class="ed-hint">השינויים לא באתר עדיין — הם ייכנסו כשתאשרו את המיזוג ב-GitHub. עד אז הם ממשיכים להופיע כאן, במכשיר הזה.</p>
+        <a class="ed-add" href="${escapeHTML(p.done.html_url)}" target="_blank" rel="noopener">${ICON.link} פתיחת ה-PR ב-GitHub</a>
+      ` : `
+        <div class="ed-field"><span>מה ייכנס לקומיט</span></div>
+        <div class="ed-summary">
+          ${pending.map(f => `<div class="ed-summary-row"><span>${f.icon} ${escapeHTML(f.label)}</span><span class="ed-summary-size">${escapeHTML(f.size)}</span></div>`).join("")}
+        </div>
+        ${ED.meta.trash.length ? `<div class="ed-warn">${ICON.warn} ${edCount(ED.meta.trash.length, "פריט אחד בסל יימחק", "שני פריטים בסל יימחקו", "פריטים בסל יימחקו")} לצמיתות.</div>` : ""}
+        <p class="ed-hint">הכול נכנס לקומיט אחד בענף חדש. הטיול החי לא משתנה עד שתאשרו את המיזוג.</p>
+
+        <div class="ed-field"><span>הגדרות GitHub</span></div>
+        <label class="ed-field">
+          <span>מאגר</span>
+          <input data-gh="repo" value="${escapeHTML(ghRepo())}" dir="ltr" placeholder="owner/repo">
+        </label>
+        <label class="ed-field">
+          <span>אסימון גישה (fine-grained, הרשאות Contents ו-Pull requests)</span>
+          <input data-gh="token" type="password" value="${escapeHTML(ghToken())}" dir="ltr" placeholder="github_pat_…">
+        </label>
+        <p class="ed-hint">האסימון נשמר במכשיר הזה בלבד. כדאי להגביל אותו למאגר הזה ולתת לו תאריך תפוגה — אם המכשיר הולך לאיבוד, מבטלים אותו ב-GitHub.</p>
+        ${p.error ? `<div class="ed-warn">${ICON.warn} ${escapeHTML(p.error)}</div>` : ""}
+        ${p.step ? `<p class="ed-hint">${escapeHTML(p.step)}</p>` : ""}
+      `}
+    </div>
+  `;
+}
+
+// ספירה בעברית: "1 פעילויות" נקרא שגוי, ו-2 מקבל צורת זוגי.
+function edCount(n, one, two, many) {
+  return n === 1 ? one : n === 2 ? two : `${n} ${many}`;
+}
+
+function edPendingSummary() {
+  const out = [];
+  let images = 0;
+  ED.trip.days.forEach(d => d.blocks.forEach(b => { if (b.image && b.image.pending) images++; }));
+  const pods = Object.values(ED.trip.podcasts || {}).filter(p => p.pending);
+
+  const stops = ED.trip.days.reduce((n, d) => n + d.blocks.length, 0);
+  out.push({
+    icon: ICON.calendar,
+    label: `trip.json — ${edCount(ED.trip.days.length, "יום אחד", "יומיים", "ימים")}, ${edCount(stops, "פעילות אחת", "שתי פעילויות", "פעילויות")}`,
+    size: ""
+  });
+  if (images) out.push({
+    icon: ICON.camera,
+    label: `${edCount(images, "תמונה אחת", "שתי תמונות", "תמונות")} מוויקישיתוף`,
+    size: images === 1 ? "יורדת בפרסום" : "יורדות בפרסום"
+  });
+  for (const p of pods) out.push({ icon: ICON.headphones, label: p.file, size: p.sizeLabel || "" });
+  out.push({ icon: ICON.link, label: "trips/index.json", size: "" });
+  return out;
+}
+
+function edOpenPublish() {
+  ED.publish = { busy: false, step: "", error: null, done: null };
+  edRender();
+}
+
+async function edRunPublish() {
+  const p = ED.publish;
+  p.busy = true; p.error = null; edRender();
+  try {
+    const pr = await edPublishRun(step => { p.step = step; edRender(); });
+    p.done = pr;
+  } catch (err) {
+    p.error = String(err.message || err);
+  }
+  p.busy = false;
+  p.step = "";
+  edRender();
+}
+
+/* ---------- העלאת פרק ----------
+   הדפדפן כאן לא יודע לקודד AAC (AudioEncoder תומך ב-Opus בלבד), ו-Opus
+   לא מתנגן אמין ב-iOS — בדיוק הסיבה ש-convert-audio.sh מייצר m4a. לכן
+   קובץ דחוס נלקח כמו שהוא, ו-WAV נשלח לסקריפט במקום להמיר כאן חצי-עבודה. */
+
+const ED_AUDIO_MAX = 12 * 1024 * 1024;
+
+async function edAttachEpisode(area, file) {
+  const name = file.name.toLowerCase();
+  const isCompressed = /\.(m4a|mp3|aac|mp4)$/.test(name);
+
+  if (!isCompressed) {
+    alert(`הדפדפן הזה לא יודע לקודד AAC, והמרה ל-Opus לא מתנגנת אמין באייפון.\n\n` +
+      `להריץ במחשב:\n  tools/convert-audio.sh "${file.name}" ${area} ${ED.trip.id}\n\n` +
+      `ואז לבחור כאן את הקובץ שנוצר תחת audio/.`);
+    return;
+  }
+  if (file.size > ED_AUDIO_MAX) {
+    alert(`הקובץ ${Math.round(file.size / 1024 / 1024)} מ״ב — גדול מדי לפרק.\n` +
+      `להריץ אותו דרך tools/convert-audio.sh, שמכווץ ל-AAC מונו 32kbps.`);
+    return;
+  }
+
+  const seconds = await edAudioDuration(file);
+  const pod = ED.trip.podcasts[area] || { title: area, file: `audio/${area}.m4a`, rev: 1 };
+  const replacing = !!pod.ready;
+
+  pod.file = `audio/${area}.m4a`;
+  pod.minutes = Math.max(1, Math.round(seconds / 60));
+  pod.ready = true;
+  pod.pending = true;
+  pod.sizeLabel = `${(file.size / 1024 / 1024).toFixed(1)} מ״ב`;
+  // החלפת פרק שכבר פורסם חייבת להעלות rev — הפרקים נשמרים במטמון לפי
+  // כתובת, ובלי זה מכשיר שכבר הוריד אותו ינגן את הישן לנצח.
+  if (replacing) pod.rev = (pod.rev || 1) + 1;
+
+  ED.trip.podcasts[area] = pod;
+  await edAssetPut(ED.trip.id, pod.file, file);
+  edSaveDraft();
+  edRender();
+}
+
+function edAudioDuration(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const a = new Audio();
+    a.preload = "metadata";
+    a.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(a.duration || 0); };
+    a.onerror = () => { URL.revokeObjectURL(url); resolve(0); };
+    a.src = url;
+  });
 }
