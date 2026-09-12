@@ -1,13 +1,14 @@
 #!/bin/bash
 # המרת פרק פודקאסט שהורד מ-NotebookLM לקובץ שהאפליקציה מנגנת.
 #
-#   tools/convert-audio.sh <קובץ-שהורד> <מזהה-אזור>
+#   tools/convert-audio.sh <קובץ-שהורד> <מזהה-אזור> [מזהה-טיול]
 #   tools/convert-audio.sh ~/Downloads/audio-overview.wav feldberg
 #
+# מזהה הטיול הוא שם התיקייה תחת trips/. אם יש רק טיול אחד, אפשר להשמיט אותו.
+#
 # למה בכלל להמיר: NotebookLM מוריד WAV, שהוא בסביבות 10 מגה-בייט לדקה.
-# 12 פרקים כאלה הם מאות מגה-בייט במאגר שכולו 3.5 מגה-בייט, וגם הורדה
-# כזאת בטלפון בחו"ל היא בזבוז. AAC מונו ב-32kbps נשמע זהה לדיבור ושוקל
-# בסביבות 1.5 מגה-בייט לפרק.
+# 12 פרקים כאלה הם מאות מגה-בייט, וגם הורדה כזאת בטלפון בחו"ל היא בזבוז.
+# AAC מונו ב-32kbps נשמע זהה לדיבור ושוקל כמה מגה-בייט לפרק.
 #
 # הכלי afconvert מגיע עם macOS, אז אין מה להתקין (ffmpeg לא נדרש).
 
@@ -15,11 +16,11 @@ set -euo pipefail
 
 SRC="${1:-}"
 AREA="${2:-}"
+TRIP_ID="${3:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT="$ROOT/audio/$AREA.m4a"
 
 if [ -z "$SRC" ] || [ -z "$AREA" ]; then
-  echo "שימוש: tools/convert-audio.sh <קובץ-שהורד> <מזהה-אזור>" >&2
+  echo "שימוש: tools/convert-audio.sh <קובץ-שהורד> <מזהה-אזור> [מזהה-טיול]" >&2
   echo "לדוגמה: tools/convert-audio.sh ~/Downloads/audio-overview.wav feldberg" >&2
   exit 1
 fi
@@ -29,16 +30,39 @@ if [ ! -f "$SRC" ]; then
   exit 1
 fi
 
-# המזהה חייב להתאים לשורה בטבלת PODCASTS שב-app.js, אחרת האפליקציה
-# תחפש שם קובץ אחר ותציג "הפרק עוד לא הועלה".
-if ! grep -q "^  $AREA: *{" "$ROOT/app.js"; then
-  echo "המזהה \"$AREA\" לא מופיע בטבלת PODCASTS שב-app.js." >&2
-  echo "המזהים הקיימים:" >&2
-  grep -oE "^  [a-z]+: *\{ title" "$ROOT/app.js" | awk '{print "  - " $1}' | tr -d ':' >&2
+# בלי מזהה טיול מפורש — אם יש בדיוק טיול אחד, הוא הברירה הטבעית.
+if [ -z "$TRIP_ID" ]; then
+  COUNT=$(find "$ROOT/trips" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+  if [ "$COUNT" = "1" ]; then
+    TRIP_ID="$(basename "$(find "$ROOT/trips" -mindepth 1 -maxdepth 1 -type d)")"
+  else
+    echo "יש יותר מטיול אחד — צריך לציין מזהה טיול כפרמטר שלישי:" >&2
+    find "$ROOT/trips" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sed 's/^/  - /' >&2
+    exit 1
+  fi
+fi
+
+TRIP_JSON="$ROOT/trips/$TRIP_ID/trip.json"
+OUT="$ROOT/trips/$TRIP_ID/audio/$AREA.m4a"
+
+if [ ! -f "$TRIP_JSON" ]; then
+  echo "לא נמצא קובץ טיול: trips/$TRIP_ID/trip.json" >&2
   exit 1
 fi
 
-mkdir -p "$ROOT/audio"
+# המזהה חייב להתאים לרשומה ב-podcasts שבקובץ הטיול, אחרת האפליקציה
+# תחפש שם קובץ אחר ותציג "הפרק עוד לא הועלה".
+if ! node -e "process.exit(require('$TRIP_JSON').podcasts?.['$AREA'] ? 0 : 1)"; then
+  echo "המזהה \"$AREA\" לא מופיע ב-podcasts של trips/$TRIP_ID/trip.json." >&2
+  echo "המזהים הקיימים:" >&2
+  node -e "Object.keys(require('$TRIP_JSON').podcasts || {}).forEach(k => console.error('  - ' + k))"
+  exit 1
+fi
+
+mkdir -p "$ROOT/trips/$TRIP_ID/audio"
+
+REPLACING=0
+[ -f "$OUT" ] && REPLACING=1
 
 # ההמרה היא בשני שלבים, וזה לא סתם:
 # NotebookLM מייצא לפעמים WAV ולפעמים m4a דחוס. כשהמקור כבר דחוס (AAC),
@@ -60,26 +84,31 @@ afconvert -f WAVE -d LEI16 --mix -c 1 "$SRC" "$TMP"
 # ‎-s 3 (VBR) בכוונה לא כאן — הוא מתעלם מ-‎-b ומנפח את הקובץ פי אחד וחצי.
 afconvert -f m4af -d aac -b 32000 "$TMP" "$OUT"
 
-# מכאן והלאה הפרק קיים, אז מסמנים אותו כזמין ב-app.js. בלי ready האפליקציה
-# לא מציגה עליו אוזניות בכלל, וזאת בכוונה — הסימון הידני נשכח, והמשתמש היה
-# מקבל כפתור שמוביל להודעה "הפרק עוד לא הועלה".
-if ! grep -q "^  $AREA: *{.*ready: true" "$ROOT/app.js"; then
-  # התוספת נכנסת אחרי rev, בסוף הרשומה — אותו סדר שדות בכל השורות.
-  /usr/bin/sed -i '' -E "s/^(  $AREA: *\{.*rev: [0-9]+)( \})/\1, ready: true\2/" "$ROOT/app.js"
-  if grep -q "^  $AREA: *{.*ready: true" "$ROOT/app.js"; then
-    echo "סומן ב-app.js: הפרק \"$AREA\" זמין עכשיו באפליקציה (ready: true)."
-  else
-    echo "שימו לב: לא הצלחתי לסמן ready: true בשורה של \"$AREA\" ב-app.js —" >&2
-    echo "בלי זה הפרק לא יופיע באפליקציה. להוסיף ידנית בסוף הרשומה." >&2
-  fi
-fi
-
 SIZE=$(du -h "$OUT" | cut -f1 | tr -d ' ')
 SECS=$(afinfo "$OUT" | awk -F': ' '/estimated duration/ {printf "%.0f", $2}')
 MINS=$((SECS / 60))
 REST=$((SECS % 60))
 
-echo "נוצר: audio/$AREA.m4a · $SIZE · ${MINS}:$(printf '%02d' $REST)"
-echo
-echo "אם זו החלפה של פרק שכבר הועלה בעבר — להעלות את rev של \"$AREA\" ב-app.js ב-1,"
-echo "אחרת מכשיר שכבר הוריד אותו ימשיך לנגן את הגרסה הישנה."
+# עדכון הרשומה בקובץ הטיול. שלושת הדברים האלה נשכחים כשעושים אותם ביד:
+#   ready   — בלעדיו האפליקציה לא מציגה אוזניות על שם המקום בכלל.
+#   minutes — המספר שמוצג למשתמש; שיהיה האורך האמיתי ולא הערכה מהתכנון.
+#   rev     — בהחלפת פרק קיים חובה להעלות אותו, אחרת מכשיר שכבר הוריד את
+#             הפרק ימשיך לנגן את הגרסה הישנה לנצח (המטמון הוא לפי כתובת).
+node -e '
+const fs = require("fs");
+const [file, area, secs, replacing] = process.argv.slice(1);
+const trip = JSON.parse(fs.readFileSync(file, "utf8"));
+const pod = trip.podcasts[area];
+const before = { minutes: pod.minutes, rev: pod.rev || 1, ready: !!pod.ready };
+pod.minutes = Math.max(1, Math.round(Number(secs) / 60));
+pod.ready = true;
+if (replacing === "1" && before.ready) pod.rev = before.rev + 1;
+fs.writeFileSync(file, JSON.stringify(trip, null, 2) + "\n");
+const notes = [];
+if (!before.ready) notes.push("סומן כזמין (ready)");
+if (before.minutes !== pod.minutes) notes.push(`אורך ${before.minutes} ← ${pod.minutes} דק׳`);
+if (before.rev !== pod.rev) notes.push(`rev ${before.rev} ← ${pod.rev}`);
+console.log(notes.length ? "עודכן בקובץ הטיול: " + notes.join(" · ") : "קובץ הטיול כבר היה מעודכן.");
+' "$TRIP_JSON" "$AREA" "$SECS" "$REPLACING"
+
+echo "נוצר: trips/$TRIP_ID/audio/$AREA.m4a · $SIZE · ${MINS}:$(printf '%02d' $REST)"

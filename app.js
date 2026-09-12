@@ -1,43 +1,23 @@
 /* ============================================================
-   היער השחור 2026 — נתוני הטיול
-   רוב הנתונים מוטמעים בקוד; קריאת הרשת היחידה בפועל היא תחזית מזג האוויר
-   (Open-Meteo, בלי מפתח API) בלשונית "מזג אוויר". חוץ מזה, אין קריאות רשת
-   אחרי הטעינה הראשונה (חוץ מקישורי מפות/וויז/מידע חיצוניים).
+   מנוע הטיולים — הנתונים לא נמצאים כאן
+   כל טיול הוא קובץ נתונים ב-trips/<מזהה>/trip.json, והרשימה של כולם
+   ב-trips/index.json. הקובץ הזה רק מרנדר את מה שנטען, כך שטיול חדש הוא
+   קובץ חדש ולא שינוי בקוד.
+
+   קריאות הרשת: קובץ הטיול עצמו, ותחזית מזג האוויר (Open-Meteo, בלי מפתח
+   API). חוץ מזה אין קריאות אחרי הטעינה הראשונה — קישורי מפות/וויז נפתחים
+   בחוץ, וה-Service Worker מגיש הכול מהמטמון כשאין קליטה.
    ============================================================ */
 
-const TRIP = {
-  start: "2026-08-17",
-  end: "2026-08-24",
-  hotel: {
-    name: "Hotel Schlehdorn",
-    address: "Am Sommerberg 1, 79868 Feldberg (Schwarzwald)-Altglashütten, Germany",
-    coords: { lat: 47.8555, lng: 8.1069, elev: 950 }
-  },
-  flightIn: { city: "ציריך", date: "2026-08-17", time: "12:30", note: "נסיעה למלון: כשעה ורבע עד שעה וחצי" },
-  flightOut: { city: "ציריך", date: "2026-08-24", time: "22:00", note: "לוודא את השעה המדויקת מול הכרטיס בפועל" }
-};
-
-// רשימת לפני-הטיול — נשמרת ב-localStorage כך שהסימונים נשארים במכשיר.
-const CHECKLIST = [
-  "לוודא את חלון הזמן של Badeparadies ליום ראשון 23.8 — לפי התוכנית מגיעים ב-16:00",
-  "להוריד את אפליקציית Europa-Park, לסמן מועדפים ולתכנן Virtual Line (VL) למתקנים המרכזיים",
-  "להזמין מראש כרטיס + חלון זמן למוזיאון לינדט (ביקוש גבוה מאוד)",
-  "להזמין מראש סדנת שוקולד בלינדט, אם עושים אותה ביום האחרון",
-  "להביא מגבות מהמלון לרולנטיקה, ל-Badeparadies ול-Keidel (או לשכור במקום)",
-  "בגדי ים זמינים גם ביום פרייבורג (20.8) — Keidel בסוף היום",
-  "לקחת נעליים סגורות / סנדלי מים לשביל החושים בגוטאך (בוץ, אבנים, נחלים)",
-  "לבדוק תחזית לפני מגלשת Hasenhorn ב-18.8 — היא לא פועלת בסופת רעמים או ברוח חזקה",
-  "לתכנן מראש את ארוחות יום ראשון — הרבה מסעדות בגרמניה סגורות בימי ראשון"
-];
-
-const GENERAL_TIPS = [
-  "הרבה מסעדות בגרמניה סגורות בימי ראשון — ב-23.8 אתם ב-Badeparadies עד הערב, ויש שם אוכל, אז זה מכוסה.",
-  "מוזיאון ה-FIFA בציריך סגור בימי שני — ומכיוון שה-24.8 הוא יום שני, באותו יום זה לינדט או כלום.",
-  "אגם טיטיזי מופיע פעמיים בתוכנית כבלוק רשות — ב-20.8 בבוקר וב-23.8 אחרי מפלי הריין. עושים אותו ביום שבו מזג האוויר טוב יותר, לא בשניהם.",
-  "שוק הקתדרלה בפרייבורג נסגר סביב 13:00 ולא פועל בימי ראשון — הוא רלוונטי ב-20.8 רק אם מדלגים על האגם ומגיעים מוקדם.",
-  "במסלולים עם מעברי נחל (כמו בגוטאך) — לקחת נעלי מים או סנדלים.",
-  "זמני הנסיעה בכל האפליקציה הם הערכות שנבדקו מול Google Maps מראש — כדאי לפתוח את \"מסלול הנסיעה של היום\" בפועל לפני היציאה, אם יש קליטה, לזמן מדויק בזמן אמת."
-];
+// הטיול הפעיל. מתמלא ב-loadTrip() לפני הרינדור הראשון, כך שכל פונקציות
+// הרינדור שלמטה ממשיכות לקרוא את אותם שמות שהיו כאן כשהנתונים היו בקוד.
+let TRIP = null;        // { start, end, base, flightIn, flightOut }
+let DAYS = [];          // היומן עצמו
+let CHECKLIST = [];     // רשימת לפני-הטיול
+let GENERAL_TIPS = [];  // "כדאי לדעת"
+let PODCASTS = {};      // פרקים לפי אזור
+let TRIP_INDEX = [];    // רשימת כל הטיולים, מ-trips/index.json
+let TRIP_ID = null;     // מזהה הטיול הפעיל — גם שם התיקייה וגם מרחב השמות באחסון
 
 /* ============================================================
    אייקונים (SVG קווי, יורשים צבע מהטקסט הסובב)
@@ -62,6 +42,13 @@ const ICON = {
   refresh: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/></svg>`,
   drop: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>`,
   waze: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 10 7-10 7 2.5-7L9 4Z" stroke-linejoin="round"/></svg>`,
+  plus: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  trash: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9.5 7V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5V7"/><path d="M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 7"/></svg>`,
+  upload: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9"/><path d="m8 13 4-4 4 4"/><path d="M5 4h14"/></svg>`,
+  download: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M5 20h14"/></svg>`,
+  pencil: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/></svg>`,
+  swap: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="m14 5 3 3-3 3"/><path d="M20 16H7"/><path d="m10 13-3 3 3 3"/></svg>`,
+  lock: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10" rx="2.5"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg>`,
   headphones: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18Z"/><path d="M20 14h-2.5a1 1 0 0 0-1 1v3.5a1 1 0 0 0 1 1h1a1.5 1.5 0 0 0 1.5-1.5Z"/></svg>`
 };
 
@@ -91,10 +78,6 @@ function haversineKm(a, b) {
   return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
 }
 
-function itemCoords(item) {
-  return TOWN_COORDS[item.postal] || null;
-}
-
 function formatDistance(km) {
   if (km == null) return "";
   return (km < 10 ? km.toFixed(1) : Math.round(km)) + ' ק"מ';
@@ -104,12 +87,9 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
 
 /* ============================================================
    פודקאסטים לילדים — פרק לכל אזור פעילות, להאזנה בדרך לשם.
-   הקבצים מיוצרים ב-NotebookLM מחומרי המקור שב-podcast-scripts/, מומרים
-   ל-m4a עם tools/convert-audio.sh ונשמרים ב-audio/ באותו שם.
-   minutes = אורך היעד, נגזר מזמן הנסיעה לאותו אזור. אם הפרק שיצא ארוך
-   יותר זה בסדר — הנגן זוכר איפה עצרנו וממשיך משם בפעם הבאה.
-   ברגע שקובץ הפרק קיים, לעדכן כאן את האורך האמיתי שלו: המספר הזה מוצג
-   למשתמש על שם המקום ("11 דק׳"), ואין טעם שהוא יבטיח משהו אחר מהקובץ.
+   הטבלה עצמה יושבת ב-trip.json של הטיול תחת podcasts, וקבצי ה-m4a
+   בתיקיית audio/ של אותו טיול.
+   minutes = אורך הפרק בדקות — המספר הזה מוצג למשתמש על שם המקום.
    בלוק מקבל פרק דרך השדה area, וכמה בלוקים באותו אזור חולקים פרק אחד
    (מגלשת Hasenhorn, המפלים והגשר התלוי הם כולם "טודנאו").
 
@@ -117,627 +97,141 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
    הזה ב-1. הפרקים נשמרים במטמון לפי כתובת, אז בלי זה מכשיר שכבר הוריד את
    הפרק ימשיך לנגן את הגרסה הישנה לנצח (בדיוק כמו CACHE ב-sw.js).
 
-   ready: האם קובץ ה-m4a באמת נמצא ב-audio/. פרק בלי ready לא מקבל אוזניות
-   על שם המקום ולא נגן — עדיף שלא יהיה כפתור מאשר כפתור שמוביל להודעה
-   שהפרק עוד לא הועלה. tools/convert-audio.sh מסמן את זה לבד כשהוא מייצר
-   את הקובץ, אז אין מה לעדכן כאן ביד.
+   ready: האם קובץ ה-m4a באמת נמצא. פרק בלי ready לא מקבל אוזניות על שם
+   המקום ולא נגן — עדיף שלא יהיה כפתור מאשר כפתור שמוביל להודעה שהפרק עוד
+   לא הועלה.
    ============================================================ */
-const PODCASTS = {
-  feldberg:     { title: "פלדברג ופאנדורנה",        file: "audio/feldberg.m4a",     minutes: 8,  rev: 1 },
-  todtnau:      { title: "טודנאו — מגלשה, מפלים וגשר", file: "audio/todtnau.m4a",   minutes: 11, rev: 1, ready: true },
-  vogelpark:    { title: "פארק הציפורים והקופים",    file: "audio/vogelpark.m4a",    minutes: 10, rev: 1, ready: true },
-  europapark:   { title: "Europa-Park",              file: "audio/europapark.m4a",   minutes: 15, rev: 1 },
-  titisee:      { title: "אגם טיטיזי",               file: "audio/titisee.m4a",      minutes: 15, rev: 1, ready: true },
-  freiburg:     { title: "פרייבורג",                 file: "audio/freiburg.m4a",     minutes: 25, rev: 1, ready: true },
-  rulantica:    { title: "רולנטיקה",                 file: "audio/rulantica.m4a",    minutes: 15, rev: 1 },
-  triberg:      { title: "טריברג ושעוני הקוקייה",    file: "audio/triberg.m4a",      minutes: 23, rev: 1, ready: true },
-  gutach:       { title: "גוטאך — שביל החושים",      file: "audio/gutach.m4a",       minutes: 25, rev: 1, ready: true },
-  rheinfall:    { title: "מפלי הריין",               file: "audio/rheinfall.m4a",    minutes: 25, rev: 1, ready: true },
-  badeparadies: { title: "Badeparadies",             file: "audio/badeparadies.m4a", minutes: 11, rev: 1 },
-  lindt:        { title: "לינדט — עולם השוקולד",     file: "audio/lindt.m4a",        minutes: 14, rev: 1 }
-};
-
-/* לכל יום — blocks כרונולוגי. start/end בפורמט "HH:MM" (שעון מקומי).
-   approx:true אומר שהמסמך המקורי לא נתן שעה מדויקת — זו הערכה סבירה.
-   בלוק עם address הוא "תחנה" אמיתית (עם מפה, תמונה, זמן נסיעה מהתחנה הקודמת).
-   בלוק בלי address הוא מידע נלווה בלבד (בלי מפה/תמונה/זמן נסיעה).
-   drive: {time, dist, from} — זמן/מרחק נסיעה מהתחנה הקודמת (או מהמלון, לתחנה הראשונה של היום).
-   returnLeg ברמת היום: זמן/מרחק חזרה למלון בסוף היום (לא קיים ביום שיש בו טיסה בסוף). */
-const DAYS = [
-  {
-    date: "2026-08-17",
-    title: "הגעה",
-    place: "ציריך → Hotel Schlehdorn",
-    driveNote: "נחיתה 12:30, נסיעה של כשעה ורבע עד שעה וחצי למלון",
-    blocks: [
-      {
-        start: "12:30", end: "14:00", approx: false,
-        title: "נחיתה בציריך",
-        desc: "נסיעה מהשדה למלון, כשעה ורבע עד שעה וחצי.",
-      },
-      {
-        start: "14:30", end: "18:00", approx: true,
-        title: "Fundorena (\"פאנדורנה\")",
-        area: "feldberg",
-        desc: "מתחם טרמפולינות, חבלים וטיפוס בפלדברג. שימו לב: השם הרשמי הוא Fundorena (לא Pandorena כפי שכתוב לפעמים). או פשוט להתארגן ולנוח במלון אחרי יום נסיעה.",
-        address: "Fundorena, Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
-        coords: { lat: 47.8747, lng: 8.0233, elev: 1230 },
-        wxPlace: "Feldberg (Schwarzwald), Germany",
-        indoor: true,
-        drive: { time: "כ-12 דקות", dist: "כ-8 ק\"מ", from: "מהמלון" },
-        infoUrl: "https://fundorena.de/",
-        tips: [{ text: "יום ראשון של הטיול — אין שום בעיה לא לעשות כלום חוץ מלהתארגן." }]
-      }
-    ],
-    returnLeg: { time: "כ-12 דקות", dist: "כ-8 ק\"מ", from: "מ-Fundorena", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-18",
-    title: "טודנאו + פארק הציפורים",
-    place: "טודנאו (בוקר) · שטיינן (אחה\"צ)",
-    driveNote: "כ-28 דקות לטודנאו · משם כ-40 דקות בעמק הוויזנטל (B317) לשטיינן",
-    blocks: [
-      {
-        start: "09:00", end: "10:00", approx: false,
-        title: "מגלשת הקיץ Hasenhorn",
-        area: "todtnau",
-        desc: "מגלשת קיץ באורך 2.9 ק\"מ — מהארוכות והמרשימות בגרמניה. עולים ברכבל הכיסא ויורדים במזחלת על מסילה. מגיעים בפתיחה בכוונה: בסופי שבוע ובחופשות נוצרים תורים ארוכים.",
-        address: "Brandenbergstr. 3, 79674 Todtnau, Germany",
-        coords: { lat: 47.83, lng: 7.939, elev: 660 },
-        wxPlace: "Todtnau, Germany",
-        drive: { time: "כ-28 דקות", dist: "כ-24 ק\"מ", from: "מהמלון" },
-        hours: "09:00–16:30 בקיץ",
-        infoUrl: "https://www.hasenhorn-rodelbahn.de/en/",
-        tips: [
-          { text: "נסיעה עצמאית רק מגיל 8 ומגובה 1.40 מ׳. עם מבוגר על אותה מזחלת — מגיל 3 ומגובה 95 ס\"מ, כך שהילד בן ה-5 רוכב צמוד ולא לבד.", warn: true },
-          { text: "לא פועלת בסופת רעמים, ברוח חזקה או בכפור — שווה לבדוק את התחזית לפני שיוצאים." }
-        ]
-      },
-      {
-        start: "10:15", end: "11:30", approx: true,
-        title: "מפלי טודנאו",
-        area: "todtnau",
-        desc: "הכניסה התחתונה (מומלצת עם ילדים קטנים) בכביש L126 — \"מסלול אדום\" נוח ומתון, כ-10 דק׳ למפל הראשי, הלוך-חזור קלאסי. יש גם כניסה עליונה, ליד טודנאוברג, עם ירידה תלולה יותר — העלייה בחזרה עלולה להיות מאתגרת לרגליים קטנות. טיפ לשני רכבים: להשאיר רכב אחד למטה, לנסוע עם כולם למעלה וללכת את כל המסלול בירידה בלבד.",
-        address: "Parkplatz Todtnauer Wasserfall, L126, 79674 Todtnau-Aftersteg, Germany",
-        coords: { lat: 47.8266, lng: 7.9469, elev: 700 },
-        wxPlace: "Todtnau, Germany",
-        drive: { time: "כ-6 דקות", dist: "כ-4 ק\"מ", from: "ממגלשת Hasenhorn" },
-        image: { file: "images/todtnau-falls.jpg", credit: "Freiburg1120", license: "CC BY-SA 3.0", commonsFile: "Todtnauer_Wasserfall.jpg" },
-        infoUrl: "https://goblackforest.co.il/מפלי-טודנאו/"
-      },
-      {
-        start: "11:30", end: "12:45", approx: true,
-        title: "הגשר התלוי Blackforestline",
-        area: "todtnau",
-        desc: "כניסה נפרדת משלו (אבל בפועל ממש ליד המפלים — כדקה נסיעה) — נוף פנורמי וחוויית אדרנלין.",
-        address: "Außer Ort 38, 79674 Todtnau, Germany",
-        coords: { lat: 47.8283, lng: 7.945, elev: 730 },
-        wxPlace: "Todtnau, Germany",
-        drive: { time: "כ-דקה", dist: "כ-80 מ׳ בלבד", from: "ממפלי טודנאו" },
-        image: { file: "images/blackforestline.jpg", credit: "Daniel Reust", license: "CC BY-SA 4.0", commonsFile: "Hängebrücke_\"Blackforestline\"_Todtnau.jpg" },
-        price: "כרטיס קומבו (גשר + מפל): כ-12€ מבוגר, כ-9€ ילד",
-        hours: "8:00–20:30 בקיץ, כניסה אחרונה 19:00. קופה מאוישת/הנחות רק 10:00–16:00 — מעבר לזה רק מכונות, בלי הנחות.",
-        infoUrl: "https://goblackforest.co.il/blackforestline/",
-        tips: [{ text: "זו נקודת תצפית פנורמית — ביום מעונן נמוך רואים ממנה הרבה פחות. שווה להציץ בתחזית לפני שקונים את הקומבו." }]
-      },
-      {
-        start: "13:45", end: "17:00", approx: true,
-        title: "פארק הציפורים והקופים בשטיינן",
-        area: "vogelpark",
-        desc: "פארק מעולה, לא גדול מדי — אחת ההפתעות החיוביות של היער השחור. מגיעים לסבב אחר הצהריים: מופע עופות דורסים ב-15:00, וקופים שמסתובבים חופשי עם האכלה ב-16:00. (יש גם סבב בוקר ב-11:00 וב-12:00, אבל היום מתחיל בטודנאו.)",
-        address: "Hofener Str. 60, 79585 Steinen, Germany",
-        coords: { lat: 47.6472, lng: 7.7386, elev: 330 },
-        wxPlace: "Steinen, Baden-Württemberg, Germany",
-        drive: { time: "כ-40 דקות", dist: "כ-35 ק\"מ", from: "מהגשר התלוי, בעמק הוויזנטל" },
-        image: { file: "images/vogelpark.jpg", credit: "Taxiarchos228 / Wladyslaw Sojka", license: "Free Art License 1.3", commonsFile: "Steinen_-_Vogelpark1.jpg" },
-        price: "מבוגר 20€, ילד (4–11) 10€",
-        hours: "10:00–18:00 בחופשת הקיץ",
-        infoUrl: "https://goblackforest.co.il/פארק-הציפורים-והקופים/",
-        tips: [{ text: "המופעים בחוץ — בגשם חזק הם עלולים להתבטל. אם התחזית גרועה לאחה\"צ, שווה להקדים ולתפוס את סבב 11:00/12:00 במקום." }]
-      }
-    ],
-    returnLeg: { time: "כ-57 דקות", dist: "כ-49 ק\"מ", from: "מפארק הציפורים", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-19",
-    title: "Europa-Park",
-    place: "Rust",
-    driveNote: "כ-1:10–1:20 שעות נסיעה מהמלון",
-    blocks: [
-      {
-        start: "09:00", end: "18:00", approx: false,
-        title: "יום מלא ב-Europa-Park",
-        area: "europapark",
-        desc: "יום רביעי נבחר בכוונה — יחד עם יום שישי, זה היום הכי פחות עמוס בפארק (סופ\"ש הכי צפוף). טיפ: להגיע בפתיחה.",
-        address: "Europa-Park-Straße 2, 77977 Rust, Germany",
-        coords: { lat: 48.266, lng: 7.722, elev: 160 },
-        wxPlace: "Rust, Baden-Württemberg, Germany",
-        drive: { time: "כ-1:20 שעות", dist: "כ-76 ק\"מ", from: "מהמלון" },
-        image: { file: "images/europapark.jpg", credit: "Gabriel Rinaldi", license: "CC BY-SA 4.0", commonsFile: "Haupteingang_(main_entrance)_Europa-Park_Rust.JPG" },
-        price: "כ-34–38€ ליום (הערכה 2026, תלוי בתאריך)",
-        hours: "9:00–18:00 (לפחות) בקיץ",
-        infoUrl: "https://www.europapark.de/en",
-        tips: [
-          { text: "הכרטיס מקושר לתאריך ספציפי — קנייה בקופה (אם יש מקום) עולה 10€ יותר לאדם, וימי שיא נגמרים בכרטיסים.", warn: true },
-          { text: "להוריד את האפליקציה מראש, לסמן מועדפים, ולהזמין Virtual Line (VL) למתקנים המרכזיים." }
-        ]
-      },
-      {
-        start: null, end: null, approx: true,
-        title: "רכבות שחובה",
-        desc: "Voltron · Blue Fire · Wodan · Silver Star"
-      },
-      {
-        start: null, end: null, approx: true,
-        title: "עוד שווה",
-        desc: "Voletarium (סימולטור טיסה, ליד הכניסה), Cancan, Pegasus, Euro-Mir, Fjord (אבובים למשפחה), Pirates in Batavia (שיט), Arthur."
-      }
-    ],
-    returnLeg: { time: "כ-1:10 שעות", dist: "כ-78 ק\"מ", from: "מ-Europa-Park", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-20",
-    title: "טיטיזה + פרייבורג",
-    place: "אגם טיטיזי (רשות) · פרייבורג",
-    driveNote: "האגם כ-12 דקות מהמלון · פרייבורג כ-45 דקות מהאגם",
-    blocks: [
-      {
-        start: "10:00", end: "12:00", approx: true,
-        title: "אגם טיטיזי (רשות)",
-        area: "titisee",
-        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום ראשון 23.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר, ואם שני הימים אפורים וקרים — אפשר פשוט לוותר.",
-        address: "Seestraße, 79822 Titisee-Neustadt, Germany",
-        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
-        wxPlace: "Titisee-Neustadt, Germany",
-        drive: { time: "כ-12 דקות", dist: "כ-10 ק\"מ", from: "מהמלון" },
-        image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
-        infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
-        tips: [
-          { text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." },
-          { text: "אם מוותרים על האגם ויוצאים ישר לפרייבורג, מגיעים בזמן לשוק הקתדרלה לפני שהוא נסגר סביב 13:00." },
-          { text: "לוודא את שעות ההשכרה של סירות הפדלים לפני שמגיעים." }
-        ]
-      },
-      {
-        start: "13:30", end: "16:00", approx: true,
-        title: "פרייבורג — העיר העתיקה",
-        area: "freiburg",
-        desc: "כיכר המונסטר, תעלות המים הקטנות שברחובות (Bächle), וקניות ב-Kaiser-Joseph-Straße (\"Ka-Jo\"). שוק הקתדרלה (\"מינסטרמארקט\") ב-Münsterplatz פועל כל בוקר חוץ מיום ראשון ונסגר סביב 13:00 — צד צפוני שוק איכרים (תוצרת מקומית, פירות יער, דבש, פרחים), צד דרומי תבלינים, כלי עץ, מזכרות ואוכל רחוב.",
-        address: "Münsterplatz 1, 79098 Freiburg im Breisgau, Germany",
-        coords: { lat: 47.9955, lng: 7.8522, elev: 280 },
-        wxPlace: "Freiburg im Breisgau, Germany",
-        drive: { time: "כ-45 דקות", dist: "כ-32 ק\"מ", from: "מאגם טיטיזי" },
-        image: { file: "images/freiburg.jpg", credit: "Sven Puth", license: "CC BY-SA 4.0", commonsFile: "Freiburg_-_Münsterplatz.jpg" },
-        infoUrl: "https://goblackforest.co.il/שוק-פרייבורג/",
-        tips: [{ text: "בהגעה ב-13:30 השוק כבר סגור — הוא רלוונטי רק אם מדלגים על האגם ומגיעים לפני 13:00.", warn: true }]
-      },
-      {
-        start: "16:00", end: "19:00", approx: true,
-        title: "Keidel Mineral-Thermalbad",
-        area: "freiburg",
-        desc: "מרחצאות מינרליים תרמיים בשכונת St. Georgen שבדרום פרייבורג. בריכות פנים וחוץ במים חמים, בריכת חוויה חיצונית עם תעלת זרם ומיטות בועות, ומגרש משחקים בחוץ. סיום טוב ליום עירוני — ובמיוחד אם יורד גשם.",
-        address: "An den Heilquellen 4, 79111 Freiburg im Breisgau, Germany",
-        coords: { lat: 47.9739, lng: 7.8203, elev: 240 },
-        wxPlace: "Freiburg im Breisgau, Germany",
-        indoor: true,
-        drive: { time: "כ-12 דקות", dist: "כ-7 ק\"מ", from: "ממרכז פרייבורג" },
-        price: "ילדים 4–13: כ-9.50€ כרטיס יום",
-        hours: "09:00–22:00 בכל יום · אזור הסאונה מ-10:00",
-        infoUrl: "https://www.keideltherme.de/informationen/",
-        tips: [{ text: "לקחת בגדי ים ומגבות מהמלון." }]
-      }
-    ],
-    returnLeg: { time: "כ-55 דקות", dist: "כ-42 ק\"מ", from: "מ-Keidel", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-21",
-    title: "רולנטיקה",
-    place: "Rust",
-    driveNote: "אותו אזור כמו Europa-Park",
-    blocks: [
-      {
-        start: "10:00", end: "18:00", approx: true,
-        title: "פארק המים רולנטיקה",
-        area: "rulantica",
-        desc: "יום שישי נבחר בכוונה, כמו רביעי — אחד הימים הפחות עמוסים. כרטיס נפרד מ-Europa-Park.",
-        address: "Roland-Mack-Ring 1, 77977 Rust, Germany",
-        coords: { lat: 48.2597, lng: 7.73, elev: 160 },
-        wxPlace: "Rust, Baden-Württemberg, Germany",
-        indoor: true,
-        drive: { time: "כ-1:22 שעות", dist: "כ-74 ק\"מ", from: "מהמלון" },
-        image: { file: "images/rulantica.jpg", credit: "Simone Graffi", license: "CC0 / נחלת הכלל", commonsFile: "Rulantica_EuropaPark.jpg" },
-        hours: "בד\"כ 09:30/10:00–22:00 (לבדוק באתר הרשמי לפי התאריך)",
-        price: "יום: ילד כ-38–54€, מבוגר כ-41–54€ · \"Moonlight\" (19:00–22:00) הכי זול, ילד כ-28–34€ · מתחת לגיל 4 חינם · 0–3 חינם",
-        infoUrl: "https://www.europapark.de/en/rulantica/info/plan-your-visit/opening-hours",
-        tips: [
-          { text: "להזמין כרטיסים מראש — הפארק מתמלא כמעט כל יום.", warn: true },
-          { text: "הלוקרים חינם דרך צמיד Rula-Band, שמשמש גם לתשלום בפארק." },
-          { text: "החניה בתשלום — לשלם מראש באתר/אפליקציה." },
-          { text: "אסור בקבוקי זכוכית או צידניות גדולות; מים, בקבוק רב-פעמי וחטיפים קלים מותר." },
-          { text: "להביא מגבות מהמלון, או לשכור במקום." },
-          { text: "טמפרטורת המים 30–32°C." },
-          { text: "ילדים עד גיל 12 נכנסים חינם ביום ההולדת שלהם (עם דרכון)." }
-        ]
-      }
-    ],
-    returnLeg: { time: "כ-1:08 שעות", dist: "כ-76 ק\"מ", from: "מ-Rulantica", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-22",
-    title: "טריברג + גוטאך",
-    place: "טריברג · גוטאך",
-    driveNote: "כ-54 דקות נסיעה מהמלון",
-    blocks: [
-      {
-        start: "09:30", end: "12:00", approx: true,
-        title: "טריברג",
-        area: "triberg",
-        desc: "מפלי טריברג — המפורסמים ביער השחור — פלוס שעוני קוקייה ענקיים ומרכז עיירה קלאסי.",
-        address: "Hauptstraße 85, 78098 Triberg im Schwarzwald, Germany",
-        coords: { lat: 48.1297, lng: 8.2306, elev: 700 },
-        wxPlace: "Triberg im Schwarzwald, Germany",
-        drive: { time: "כ-54 דקות", dist: "כ-55 ק\"מ", from: "מהמלון" },
-        image: { file: "images/triberg.jpg", credit: "Arminia", license: "CC BY-SA 3.0", commonsFile: "Triberger_Wasserfall2.JPG" },
-        price: "כניסה למפלים: מבוגר 7–8€, כרטיס משפחתי כ-20€, ילדים עד גיל 6 חינם (בד\"כ מזומן בלבד). אותו כרטיס מזכה גם בכניסה ל-Schwarzwaldmuseum ול-Triberg-Land.",
-        hours: "הקופה מאוישת כ-9:00–19:00",
-        infoUrl: "https://www.triberg.de/tourismus-freizeit/tourismus-freizeit/natur-erlebnis/deutschlands-hoechste-wasserfaelle",
-        tips: [{ text: "מחוץ לשעות הקופה (בוקר מוקדם או ערב) הכניסה למפלים חופשית — וגם פחות עמוס." }]
-      },
-      {
-        start: "13:00", end: "15:30", approx: true,
-        title: "גוטאך — שביל החושים",
-        area: "gutach",
-        desc: "מסלול מעגלי, בין שעה לשלוש שעות לפי קצב. הליכה על דשא, בוץ, אבנים וחול, מוצל ברובו, עם תחנות חוש (מישוש, ריח, ראייה). שווה גם עם ילדים גדולים יותר.",
-        address: "Hauptstr. 103, 77793 Gutach im Schwarzwald, Germany",
-        coords: { lat: 48.2461, lng: 8.1917, elev: 290 },
-        wxPlace: "Gutach im Schwarzwald, Germany",
-        drive: { time: "כ-25 דקות", dist: "כ-16 ק\"מ", from: "מטריברג" },
-        infoUrl: "https://www.parkmitallensinnen.de/",
-        tips: [
-          { text: "קחו נעלי מים/סנדלים למי שלא נוח לו ללכת יחף על אבנים." },
-          { text: "קחו מים — לא מסלול קצר." },
-          { text: "מסעדה יוונית מומלצת, \"אלכסנדרוס\", 3 דקות נסיעה משם." }
-        ]
-      },
-      {
-        start: "15:30", end: "16:30", approx: true,
-        title: "Sommerrodelbahn גוטאך (רשות)",
-        area: "gutach",
-        desc: "מגלשת קיץ נוספת, בד\"כ פחות עמוסה מזו שבטודנאו. כניסה חופשית, משלמים רק לפי נסיעה.",
-        address: "Singersbach 1a, 77793 Gutach im Schwarzwald, Germany",
-        coords: { lat: 48.24, lng: 8.185, elev: 320 },
-        wxPlace: "Gutach im Schwarzwald, Germany",
-        drive: { time: "כ-3 דקות", dist: "כ-1.6 ק\"מ", from: "משביל החושים" },
-        hours: "פתוח מ-10:00 (מ-9:00 בחופשת הקיץ)",
-        infoUrl: "https://www.sommerrodelbahn-gutach.de/en/",
-        tips: [{ text: "גיל מינימום לנסיעה לבד הוא 8 — הילד בן ה-5 יכול לנסוע רק כנוסע צמוד למבוגר על אותה מזחלת, לא לבד.", warn: true }]
-      }
-    ],
-    dayNote: "שקלו לקצר את היום — 3 עצירות וכשעה נסיעה בין הראשונה לאחרונה. אם הזמן לוחץ, שעה בשביל גוטאך מספיקה.",
-    returnLeg: { time: "כ-1:15 שעות", dist: "כ-69 ק\"מ", from: "מ-Sommerrodelbahn", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-23",
-    title: "מפלי הריין + Badeparadies",
-    place: "נוישאוזן אם ריינפאל · טיטיזה-נוישטט",
-    driveNote: "כ-56 דקות למפלי הריין · כשעה חזרה לאזור טיטיזה",
-    blocks: [
-      {
-        start: "10:30", end: "12:30", approx: true,
-        title: "מפלי הריין",
-        area: "rheinfall",
-        desc: "המפל הגדול ביותר באירופה — מרשים מאוד. החובה: השיט שמגיע לסלע במרכז המפל. יש פארק חבלים בקרבת מקום, כנראה לא מתאים לקטנים.",
-        address: "Rheinfall, 8212 Neuhausen am Rheinfall, Switzerland",
-        coords: { lat: 47.6779, lng: 8.6152, elev: 390 },
-        wxPlace: "Neuhausen am Rheinfall, Switzerland",
-        drive: { time: "כ-56 דקות", dist: "כ-56 ק\"מ", from: "מהמלון" },
-        image: { file: "images/rheinfall.jpg", credit: "CrazyD", license: "CC BY-SA 3.0", commonsFile: "Rheinfall_bei_Schaffhausen_02.JPG" },
-        infoUrl: "https://rheinfall.ch/en/",
-        tips: [
-          { text: "השיט לסלע יכול להיות עוצמתי/מפחיד לילד בן 5 — שווה לבדוק מולו לפני שעולים. החניה ליד המפל בתשלום, כמה פרנקים שוויצריים לשעה." },
-          { text: "לא להגיע מוקדם מדי — בשעות הבוקר המוקדמות האזור נוטה להיות מעונן וקריר, ומ-11:00 מתבהר ומתחמם." }
-        ]
-      },
-      {
-        start: "14:00", end: "15:30", approx: true,
-        title: "אגם טיטיזי (רשות)",
-        area: "titisee",
-        desc: "האגם התיירותי המפורסם ביותר ביער השחור — שיט בסירות פדלים/חשמליות, טיילת, גלידה. הבלוק הזה אופציונלי, והוא מופיע גם ביום חמישי 20.8: עושים אותו ביום שבו מזג האוויר נראה טוב יותר. היתרון כאן — האגם שלוש דקות מ-Badeparadies, אז אפשר להחליט על המקום.",
-        address: "Seestraße, 79822 Titisee-Neustadt, Germany",
-        coords: { lat: 47.9008, lng: 8.147, elev: 850 },
-        wxPlace: "Titisee-Neustadt, Germany",
-        drive: { time: "כ-1 שעה", dist: "כ-70 ק\"מ", from: "ממפלי הריין, מעבר גבול חזרה לגרמניה" },
-        image: { file: "images/titisee.jpg", credit: "Christian Maier", license: "CC BY-SA 3.0", commonsFile: "Titisee-blick_von_hochfirst.jpg" },
-        infoUrl: "https://www.hochschwarzwald.de/en/attractions/promenade-seestrasse-at-lake-titisee-54ccf30e86",
-        tips: [{ text: "יפה, אבל מלכודת תיירים — שעה־שעתיים מספיקות, לא יותר." }]
-      },
-      {
-        start: "16:00", end: "20:00", approx: true,
-        title: "Badeparadies Schwarzwald",
-        area: "badeparadies",
-        desc: "פארק המים הטוב באזור. אזור Galaxy עם עשרות מגלשות, מתאים לילדים ולמתבגרים; יש גם ספא למבוגרים. פתוח עד 22:00, אז גם כניסה ב-16:00 נותנת יום מלא.",
-        address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
-        coords: { lat: 47.9089, lng: 8.1637, elev: 860 },
-        wxPlace: "Titisee-Neustadt, Germany",
-        indoor: true,
-        drive: { time: "כ-3 דקות", dist: "כ-1 ק\"מ", from: "מאגם טיטיזי" },
-        image: { file: "images/badeparadies.jpg", credit: "qwesy qwesy", license: "CC BY 3.0", commonsFile: "Galaxy_Schwarzwald_(Badeparadies_Schwarzwald_in_Titisee)_-_panoramio.jpg" },
-        price: "כ-22€ (4 שעות) / כ-30€ (יום) לנפש",
-        hours: "9:00–22:00 בכל יום בחופשת הקיץ",
-        infoUrl: "https://www.badeparadies-schwarzwald.de/en/",
-        tips: [
-          { text: "הכרטיסים כבר קנויים ליום ראשון אחר הצהריים — לוודא את חלון הזמן המדויק מול ההזמנה, במיוחד אם הוא כרטיס 4 שעות.", warn: true },
-          { text: "יום ראשון והרבה מסעדות סגורות — יש אוכל בתוך הפארק, וזה פותר את ארוחת הערב." },
-          { text: "להביא מגבות מהמלון, או לשכור במקום." }
-        ]
-      }
-    ],
-    returnLeg: { time: "כ-11 דקות", dist: "כ-11 ק\"מ", from: "מ-Badeparadies", label: "חזרה למלון" }
-  },
-  {
-    date: "2026-08-24",
-    title: "לינדט + טיסה הביתה",
-    place: "קילכברג ← נתב\"ג ציריך",
-    driveNote: "כ-1:50 שעות מהמלון לקילכברג, ועוד כ-31 דקות לנתב\"ג",
-    blocks: [
-      {
-        start: "11:30", end: "16:00", approx: true,
-        title: "Lindt Home of Chocolate",
-        area: "lindt",
-        desc: "מזרקת השוקולד, החנות והקפה פתוחים לכולם, גם בלי כרטיס למוזיאון.",
-        address: "Schokoladenplatz 1, 8802 Kilchberg, Switzerland",
-        coords: { lat: 47.3231, lng: 8.5453, elev: 410 },
-        wxPlace: "Kilchberg, Zürich, Switzerland",
-        indoor: true,
-        drive: { time: "כ-1:50 שעות", dist: "כ-145 ק\"מ", from: "מהמלון" },
-        image: { file: "images/lindt.jpg", credit: "Brian Shamblen", license: "CC BY 2.0", commonsFile: "Two_story_chocolate_fountain_in_the_lobby_of_the_Lindt_factory_in_Zurich,_Switzerland_(52167915483).jpg" },
-        tips: [
-          { text: "מוזיאון ה-FIFA סגור בימי שני, וה-24.8 הוא יום שני — אז היום זה לינדט, אין ברירה אחרת.", warn: true },
-          { text: "ביקוש גבוה מאוד — להזמין כרטיס וחלון זמן מראש." },
-          { text: "אם עושים גם סדנת שוקולד — גם אותה צריך להזמין מראש." }
-        ]
-      },
-      {
-        start: "17:00", end: "22:00", approx: true,
-        title: "טיסה הביתה מציריך",
-        desc: "נסיעה לנתב\"ג ציריך, ואז המראה ב-22:00. לוודא את השעה המדויקת מול הכרטיס בפועל, קרוב יותר לתאריך.",
-        address: "Zürich Airport (ZRH), Flughafenstrasse, 8058 Zürich-Flughafen, Switzerland",
-        coords: { lat: 47.4502, lng: 8.5618, elev: 430 },
-        wxPlace: "Kloten (Zürich Airport), Switzerland",
-        indoor: true,
-        drive: { time: "כ-31 דקות", dist: "כ-19 ק\"מ", from: "מ-Lindt Home of Chocolate" },
-        image: { file: "images/zurich-airport.jpg", credit: "Designalltag", license: "CC BY-SA 4.0", commonsFile: "Flughafen_Zuerich.jpg" },
-        infoUrl: "https://www.flughafen-zuerich.ch/en/passengers"
-      }
-    ],
-    dayNote: "מפלי הריין עברו ליום ראשון 23.8, אז היום הזה קליל ויש בו הרבה זמן פנוי לפני הטיסה. זמן הנסיעה מהמלון לקילכברג הוא הערכה — שווה לפתוח את \"מסלול הנסיעה של היום\" ולוודא בבוקר."
-    // אין returnLeg ביום הזה — מסתיים בשדה התעופה, לא חוזרים למלון.
-  }
-];
 
 /* ============================================================
-   כרטיס האדום — Hochschwarzwald Card
-   כל ההטבות מהרשימה הרשמית 2026 (מוצג בקיץ בלבד — פריטי חורף הוסרו).
-   קואורדינטות ב-TOWN_COORDS הן מרכז-עיר משוער לפי מיקוד, למיון מרחק אווירי
-   בלבד — לא לניווט. פתיחת "מפה" בכל כרטיס פותחת כתובת מדויקת ב-Google Maps.
-   שדות בפריט: name, cat, type ("free"|"discount"), benefit (טקסט ההטבה),
-   address, postal (למיון מרחק), phone, site, note (הערה/סייג), family (bool).
+   טעינת טיולים ואחסון מקומי
+   כל מה שנשמר במכשיר יושב תחת מרחב שמות של הטיול ("tp:<מזהה>:..."),
+   כדי שסימוני צ'ק-ליסט ומיקומי האזנה של טיול אחד לא ידרסו את של השני.
+   מצב שמשותף לכל הטיולים (הלשונית האחרונה, מהירות ההשמעה) יושב תחת "tp:".
    ============================================================ */
 
-const HOTEL_COORDS = { lat: 47.8601, lng: 8.1075 }; // Hotel Schlehdorn, Altglashütten
+const STORE_PREFIX = "tp:";
 
-const TOWN_COORDS = {
-  "79868": { lat: 47.8608, lng: 8.1064 }, // Feldberg
-  "79822": { lat: 47.9174, lng: 8.1524 }, // Titisee-Neustadt
-  "79859": { lat: 47.8241, lng: 8.1808 }, // Schluchsee
-  "79874": { lat: 47.9294, lng: 8.0264 }, // Breitnau
-  "79865": { lat: 47.7994, lng: 8.1214 }, // Grafenhausen / Rothaus
-  "79274": { lat: 48.0011, lng: 8.1067 }, // St. Märgen
-  "79843": { lat: 47.8836, lng: 8.3436 }, // Löffingen / Dittishausen
-  "79837": { lat: 47.7597, lng: 8.1278 }, // St. Blasien / Menzenschwand
-  "79848": { lat: 47.8264, lng: 8.3325 }, // Bonndorf
-  "78120": { lat: 48.0503, lng: 8.2081 }, // Furtwangen
-  "78112": { lat: 48.1272, lng: 8.3308 }, // St. Georgen
-  "78136": { lat: 48.1206, lng: 8.2181 }, // Schonach
-  "78141": { lat: 48.1039, lng: 8.1961 }, // Schönwald
-  "79199": { lat: 47.9836, lng: 7.9736 }, // Kirchzarten
-  "79254": { lat: 47.9214, lng: 7.9803 }, // Oberried
-  "79674": { lat: 47.8317, lng: 7.9364 }, // Todtnau
-  "79737": { lat: 47.6497, lng: 8.0122 }, // Herrischried
-  "79777": { lat: 47.7167, lng: 8.3000 }, // Ühlingen-Birkendorf
-  "79183": { lat: 48.0956, lng: 7.9639 }, // Waldkirch
-  "77966": { lat: 48.3167, lng: 7.8500 }, // Kappel-Grafenhausen
-  "79780": { lat: 47.7394, lng: 8.4394 }, // Stühlingen
-  "79682": { lat: 47.7442, lng: 7.9611 }, // Todtmoos
-  "79276": { lat: 48.0244, lng: 7.9522 }, // Reute (Freiburg)
-  "78089": { lat: 48.0575, lng: 8.3364 }, // Unterkirnach
-  "79856": { lat: 47.9058, lng: 8.1017 }, // Hinterzarten
-  "78126": { lat: 48.0975, lng: 8.4364 }, // Königsfeld
-  "79871": { lat: 47.8747, lng: 8.1719 }, // Eisenbach
-  "79853": { lat: 47.8672, lng: 8.2000 }  // Lenzkirch
-};
+// חותמת גרסה, מוצגת בלשונית "מידע". מעלים אותה בכל דחיפה — כשמישהו אומר
+// "אצלי זה לא עובד", זו הדרך לדעת אם הוא בכלל מריץ את הקוד הנוכחי.
+const APP_BUILD = "2026-09-12.9";
 
-const RED_CARD_INFO = {
-  title: "כרטיס האדום — Hochschwarzwald Card",
-  eligibilityNote: "המלון שלכם (Hotel Schlehdorn) הוא בית הארחה שותף, וכל שהייה של 2 לילות ומעלה מזכה בכרטיס בחינם — אתם שוהים 7 לילות, אז זה אוטומטי לגמרי. אין צורך לרכוש שום דבר.",
-  activationSteps: [
-    "אחרי ההזמנה המלון אמור לשלוח מייל הפעלה עם קישור לרישום — אם לא הגיע, לבדוק בספאם או לשאול בקבלה עם ההגעה.",
-    "בהרשמה כל בן משפחה, כולל הילדים, מקבל קוד QR אישי משלו.",
-    "הכרטיס דיגיטלי לגמרי — מציגים את קוד ה-QR מהטלפון בכל אטרקציה.",
-    "כדאי להירשם לפני היום הראשון (17.8) — כבר באותו יום יש הטבה ב-Fundorena."
-  ],
-  links: [
-    { label: "האתר הרשמי של הכרטיס", url: "https://www.hochschwarzwald.de/en/red-card" },
-    { label: "פורטל ההרשמה וההזמנות", url: "https://mein.hochschwarzwald.de" },
-    { label: "כל ההטבות באתר הרשמי (כולל תמונות ומפה)", url: "https://www.hochschwarzwald.de/en/red-card/red-card-attractions" }
-  ]
-};
+// ה-Service Worker מגיש את המעטפת מהמטמון ומעדכן ברקע; כשהוא מגלה שהקוד
+// השתנה, הדף הזה כבר רץ עם הישן — אז הוא שולח הודעה ומציעים רענון.
+// המאזין נרשם כאן, לפני כל await: ברשת מהירה העדכון ברקע מסתיים לפני
+// ש-init() בכלל מגיע לרישום מאוחר יותר, וההודעה הייתה הולכת לאיבוד.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "shell-updated") showUpdateToast();
+  });
+}
 
-// התאמות מאומתות מול DAYS — הטבות שכבר חלות על עצירות בתוכנית הקיימת.
-const RED_CARD_PLANNED = [
-  {
-    dayDate: "2026-08-17", dayTitle: "הגעה", stopTitle: "Fundorena — פארק החבלים המקורה",
-    type: "free", benefit: "שעה חינם בפארק החבלים המקורה (Indoor-Hochseilpark, מגיל 5).",
-    originalNote: "ערך משוער לפי מחירון האתר: כ-18€ לאדם.",
-    caveat: null,
-    address: "Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
-    site: "https://fundorena.de/"
-  },
-  {
-    dayDate: "2026-08-17", dayTitle: "הגעה", stopTitle: "Fundorena — טרמפולינות / בולדרינג",
-    type: "free", benefit: "שעה חינם בפארק הטרמפולינות (מגיל 2) או בקיר הבולדרינג (מגיל 5) — לבחירה. גרביים/נעלי בולדרינג בתוספת 4€.",
-    originalNote: "ערך משוער לפי מחירון האתר: כ-15.50€ לאדם.",
-    caveat: "שתי ההטבות של Fundorena (טיפוס + טרמפולינות/בולדר) בתוקף בו-זמנית — כל בן משפחה יכול לנצל את שתיהן.",
-    address: "Dr.-Pilet-Spur 11, 79868 Feldberg, Germany",
-    site: "https://fundorena.de/"
-  },
-  {
-    dayDate: "2026-08-20", dayTitle: "טיטיזה + פרייבורג", stopTitle: "שיט בסירה באגם טיטיזי",
-    type: "free", benefit: "שיט סיבוב חינם עם אחת משתי חברות השיט באגם (Bootsbetrieb Schweizer או Drubba) — תלוי מזג אוויר, אפריל–אוקטובר.",
-    originalNote: null,
-    caveat: "בלוק האגם הוא רשות ומופיע גם ב-23.8 אחרי מפלי הריין — ההטבה תקפה בכל יום שבו תגיעו לאגם. בנוסף: זה סיבוב מאורגן בסירת שיט, לא זהה להשכרת סירת פדלים/חשמלית עצמאית. אם רוצים גם וגם, זו הטבה נוספת ולא תחליף.",
-    address: "Seestraße 33, 79822 Titisee-Neustadt, Germany",
-    site: "https://www.bootsbetrieb-schweizer-titisee.de/"
-  },
-  {
-    dayDate: "2026-08-23", dayTitle: "מפלי הריין + Badeparadies", stopTitle: "Badeparadies Schwarzwald",
-    type: "discount", benefit: "30% הנחה על כרטיס 4 שעות ל-Galaxy או Palmenoase.",
-    originalNote: "מחיר מקורי לפי התוכנית: כ-22€ לאדם (4 שעות) ← אחרי הנחה כ-15.4€.",
-    caveat: "בטקסט הרשמי מופיע \"ab 16 J.\" (מגיל 16) — לא ברור אם זה חל על Palmenoase (אזור ספא למבוגרים) בלבד או על ההנחה כולה. כדאי לוודא בקבלה או בפורטל הכרטיס לפני שמסתמכים על ההנחה לכל המשפחה. בנוסף: תוספת 6€ לאדם על כרטיס יום מלא, ובסופ״ש כרטיס משולב בלבד.",
-    address: "Am Badeparadies 1, 79822 Titisee-Neustadt, Germany",
-    site: "https://www.badeparadies-schwarzwald.de/en/"
-  },
-  {
-    dayDate: "2026-08-18", dayTitle: "טודנאו + פארק הציפורים", stopTitle: "הגשר התלוי Blackforestline",
-    type: "free", benefit: "כניסה חינם לגשר התלוי (פעם אחת).",
-    originalNote: "בתוכנית המקורית מופיע כרטיס קומבו גשר+מפל בעלות של כ-12€ מבוגר / 9€ ילד.",
-    caveat: "ההטבה מכסה רק את הגשר עצמו — לא נמצא אזכור לכניסה למפלי טודנאו בתוך הטבת הכרטיס. כדאי לבדוק בקופה אם אפשר לשלם רק על חלק המפל, או אם המחיר המשולב עדיין רלוונטי.",
-    address: "Außer Ort 38, 79674 Todtnauberg, Germany",
-    site: "https://blackforestline.de/"
-  }
-];
+function globalKey(name) { return STORE_PREFIX + name; }
+function tripKey(name) { return `${STORE_PREFIX}${TRIP_ID}:${name}`; }
 
-const CATEGORY_LABELS = {
-  "leisure-sport": "פנאי וספורט",
-  "pools-lakes": "בריכות ואגמים",
-  "nature-bike": "טבע ואופניים",
-  "museums-tours": "מוזיאונים וסיורים",
-  "escape-vr": "משחקי בריחה ו-VR",
-  "culinary": "אוכל ושתייה",
-  "golf": "גולף"
-};
+// localStorage זורק כשהמכסה מלאה או כשהאחסון חסום — אף אחת מהקריאות כאן
+// לא קריטית מספיק כדי להפיל את האפליקציה בגללה.
+function storeGet(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : JSON.parse(raw);
+  } catch { return fallback; }
+}
 
-// כל שאר הטבות הכרטיס (קיץ + כל השנה) שלא נכללות כבר ב-RED_CARD_PLANNED.
-// תגית family=false ניתנה רק כשהטקסט הרשמי מציין גיל 18+ במפורש, או שמדובר
-// במגרש גולף/יין/אלכוהול — בכל שאר המקרים ברירת המחדל היא family=true.
-// setting: "indoor" | "outdoor" | "mixed" — לפי אופי הפעילות.
-// reservation: true כשההטבה עצמה או ההערה מציינות הזמנה/הרשמה/תיאום מראש כתנאי.
-// desc: תיאור קצר של המקום עצמו (לא של ההטבה) — לתצוגת ה-drill-down.
-const RED_CARD_CATALOG = [
-  // --- פנאי וספורט ---
-  { name: "Funny-World פארק שעשועים", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "פארק שעשועים משפחתי עם מתקנים, קרוסלות ופעילויות מקורות ובחוץ, מתאים לילדים בכל הגילאים.", address: "Allmendstr. 1, 77966 Kappel-Grafenhausen, Germany", postal: "77966", town: "קאפל-גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7822 445990", site: "https://www.funny-world.de/", family: true },
-  { name: "Spielscheune Unterkirnach — אסם משחקים מקורה", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "אסם משחקים מקורה גדול לילדים קטנים, עם מתקני טיפוס, מגלשות ופינות משחק.", address: "Schlossbergweg 4, 78089 Unterkirnach, Germany", postal: "78089", town: "אונטרקירנאך", setting: "indoor", reservation: false, phone: "+49 7721 800855", site: "https://www.spielscheune-unterkirnach.de/", family: true },
-  { name: "Blattert Mühle — Schnitzeljagd (ציד אוצרות בטחנה)", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם, בלי הרשמה מראש — בשעות הפתיחה של הקורנhaus.", desc: "ציד אוצרות משפחתי בשטח טחנת הקמח ההיסטורית של בונדורף.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "outdoor", reservation: false, phone: "+49 7703 318", site: "https://www.blattert-muehle.de/", family: true },
-  { name: "Lasertag Base טיטיזה", cat: "leisure-sport", type: "free", benefit: "15 דקות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "מתחם לייזר-טאג מקורה בטיטיזה, פעילות אקשן קבוצתית לילדים גדולים יותר ומבוגרים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: true, phone: "+49 7651 9331170", family: true },
-  { name: "Tatzmania — פארק חיות והרפתקאות", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "פארק חיות והרפתקאות בלופינגן עם בעלי חיים, מתקני שעשועים ומופעים.", address: "Wildpark 3, 79843 Löffingen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 8068144", site: "https://www.tatzmania.com/", family: true },
-  { name: "Brauereigasthof Rothaus", cat: "leisure-sport", type: "free", benefit: "כניסה חינם ל-\"Zäpfle Heimat\" כולל משקה 0.33 ליטר (בירה או חלופה אחרת).", desc: "מרכז מבקרים ומסעדה של מבשלת הבירה המפורסמת רוטהאוס.", address: "Rothaus 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 522-0", site: "https://www.rothaus.de/", family: true },
-  { name: "Spaßpark Hochschwarzwald", cat: "leisure-sport", type: "free", benefit: "כרטיס Card-Gaudi חינם ל-3 שעות בקיץ, כולל Loopy-Ball ופוטבול-גולף/ביליארד.", desc: "פארק פנאי בשלוכזה עם פעילויות קיץ כמו כדור-ענק (Loopy-Ball) ופוטבול-גולף.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 9882916", site: "https://www.spasspark.de/", family: true },
-  { name: "Abenteuer Golfpark Hochschwarzwald (מיני-גולף הרפתקאות)", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מיני-גולף הרפתקאות בלנצקירך-קאפל, מסלול חוץ צבעוני למשפחות.", address: "Am Kurgarten 1, 79853 Lenzkirch-Kappel, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 7641 6588", site: "https://www.abenteuergolfpark.de/", family: true },
-  { name: "תיאטרון ב-Kurhaus טיטיזה", cat: "leisure-sport", type: "free", benefit: "כרטיס חינם למופע לבחירה — לפי מקום פנוי בקופת הערב, בלי הזמנה מראש.", desc: "אולם תיאטרון קטן בבית הקורהאוס של טיטיזה, עם הצגות ומופעים מתחלפים.", address: "Strandbadstr. 4, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7652 1206 8125", family: true },
-  { name: "Krone Theater Kino נוישטט", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם (פרקט), פעם אחת — לא כולל אירועים מיוחדים.", desc: "בית קולנוע עצמאי במרכז טיטיזה-נוישטט.", address: "Hirschenbuckel 2, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7651 1387", site: "https://www.krone-theater.de/", family: true },
-  { name: "Kino im Höfle לנצקירך", cat: "leisure-sport", type: "free", benefit: "כרטיס קולנוע חינם, פעם אחת.", desc: "בית קולנוע קטן ומקומי בלנצקירך.", address: "Im Höfle 11, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "indoor", reservation: false, phone: "+49 7653 962220", family: true },
-  { name: "Feldbergbahn — הרכבל", cat: "leisure-sport", type: "free", benefit: "עלייה וירידה חינם ברכבל, כולל כניסה למגדל פלדברג.", desc: "רכבל העולה לפסגת הפלדברג, ההר הגבוה ביותר ביער השחור, עם נוף פנורמי ומגדל תצפית.", address: "Dr.-Pilet-Spur, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "outdoor", reservation: false, site: "https://www.feldberg-erlebnis.de/", note: "לא בתוכנית הנוכחית — קל לשלב ביום קליל, כמו יום פארק הציפורים.", family: true },
-  { name: "SUP בחוף Windgfällweiher", cat: "leisure-sport", type: "free", benefit: "60 דקות גלישת SUP חינם, פעם אחת — תלוי מזג אוויר.", desc: "חוף אגם קטן בלנצקירך עם אפשרות לגלישת SUP.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
-  { name: "Rothaus-Express — רכבת פנורמה", cat: "leisure-sport", type: "free", benefit: "סיור פנורמה חינם, פעם אחת — לפי מקום פנוי.", desc: "רכבת תיירותית פתוחה שמסתובבת בנוף שסביב מבשלת רוטהאוס.", address: "Sonnhalde 14, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 152 03441239", site: "https://www.rothausexpress.de/", family: true },
-  { name: "מיני-גולף St. Georgen", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בסנט גאורגן.", address: "Spittelbergstr. 19d, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "outdoor", reservation: false, phone: "+49 7724 870", family: true },
-  { name: "מיני-גולף Schönwald", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשנוואלד.", address: "Ludwig-van-Beethoven-Str., 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: false, phone: "+49 1525 1092775", family: true },
-  { name: "מיני-גולף Schonach", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשונאך.", address: "Hauptstraße 6, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "outdoor", reservation: false, phone: "+49 7722 9650050", family: true },
-  { name: "מיני-גולף Schluchsee", cat: "leisure-sport", type: "free", benefit: "משחק חינם, פעם אחת.", desc: "מסלול מיני-גולף חוץ קלאסי, פעילות קלה ומשפחתית בשלוכזה.", address: "Auf der Wacht 1, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 988 2916", family: true },
-  { name: "Schwarzwaldzoo Waldkirch", cat: "leisure-sport", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "גן חיות קטן ונעים בוולדקירך, ליד פרייבורג.", address: "Am Buchenbühl 8a, 79183 Waldkirch, Germany", postal: "79183", town: "וולדקירך", setting: "outdoor", reservation: false, phone: "+49 7681 8961", site: "https://www.schwarzwaldzoo.de/", note: "קרוב לפרייבורג — אפשר לשלב ביום פרייבורג/טודנאו אם נשאר זמן.", family: true },
-  { name: "Action Forest Offroad Park טיטיזה", cat: "leisure-sport", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד.", desc: "מסלול רכבי שטח (Offroad) בטיטיזה, לילדים ומבוגרים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", family: true },
-  { name: "Action Forest Kletterwald (פארק חבלים)", cat: "leisure-sport", type: "free", benefit: "3 שעות חינם בפארק החבלים.", desc: "פארק חבלים בחוץ בטיטיזה, עם מסלולים בגבהים שונים בין העצים.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 9331170", family: true },
-  { name: "סדנת שעון קוקייה עצמאית — stattMuseum פורטוואנגן", cat: "leisure-sport", type: "free", benefit: "השתתפות חינם בהכנת שעון קוקייה, בהרשמה מראש (מגיל 16, ילדים עד 10 עם מלווה).", desc: "סדנה עצמאית להרכבת שעון קוקייה משלכם, ב-stattMuseum בפורטוואנגן.", address: "Friedrichstr. 3, 78120 Furtwangen, Germany", postal: "78120", town: "פורטוואנגן", setting: "indoor", reservation: true, phone: "+49 7723 9202 800", note: "טלפון/מייל להרשמה מראש, ב-Mo-Fr 9:00-14:30.", family: true },
-  { name: "Bogensportzentrum — קשתות", cat: "leisure-sport", type: "free", benefit: "2 שעות קשתות חינם באולם, כולל הדרכה וציוד — לא כולל מסלול חוץ.", desc: "אולם קשתות מקצועי באייזנבך, עם הדרכה לכל הרמות.", address: "Hauptstr. 55, 79871 Eisenbach, Germany", postal: "79871", town: "אייזנבך", setting: "indoor", reservation: true, phone: "+49 7657 471", note: "הרשמה טלפונית מראש, שעות ירי 10:00 / 12:00 / 14:00.", family: true },
+function storeSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* מכסת אחסון */ }
+}
 
-  // --- בריכות ואגמים ---
-  { name: "Hallenbad Breitnau (בריכה מקורה + סאונה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם לבריכה ולסאונה, פעם אחת.", desc: "בריכה מקורה קטנה בברייטנאו, עם סאונה.", address: "Dorfstr. 3, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: false, phone: "+49 7652 910950", family: true },
-  { name: "Hallenbad Löffingen-Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה קהילתית בשכונת דיטישאוזן שבלפינגן.", address: "Taborstr. 33, 79843 Löffingen-Dittishausen, Germany", postal: "79843", town: "לפינגן", setting: "indoor", reservation: false, phone: "+49 7654 493", family: true },
-  { name: "Hallenbad St. Georgen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה עירונית בסנט גאורגן.", address: "Im Hochwald 6, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "indoor", reservation: false, phone: "+49 7724 87358", family: true },
-  { name: "Hallenbad Schluchsee-Schönenbach", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "בריכה מקורה קטנה בשכונת שנבך שבשלוכזה.", address: "Weiherstr. 4, 79859 Schluchsee-Schönenbach, Germany", postal: "79859", town: "שלוכזה", setting: "indoor", reservation: false, phone: "+49 7747 511", family: true },
-  { name: "בריכת חוץ עירונית בונדורף", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — מתחילת הקיץ עד סוף חופשת הקיץ.", desc: "בריכת חוץ קהילתית בלב בונדורף, פתוחה בקיץ.", address: "Schwimmbadstr. 11, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "outdoor", reservation: false, phone: "+49 7703 8034", family: true },
-  { name: "Waldbad Löffingen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ בטבע, בשולי היער ליד לפינגן.", address: "Welschland, 79843 Löffingen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 8266", family: true },
-  { name: "Freibad Dittishausen", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ שכונתית קטנה בדיטישאוזן.", address: "Schwimmbadstr. 30, 79843 Löffingen-Dittishausen, Germany", postal: "79843", town: "לפינגן", setting: "outdoor", reservation: false, phone: "+49 7654 808801", family: true },
-  { name: "Freibad Lenzkirch", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בלנצקירך.", address: "Friedhofstr. 11, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 7653 400", family: true },
-  { name: "Freibad נוישטט (טיטיזה)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בטיטיזה-נוישטט.", address: "Gutachstraße 33, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: false, phone: "+49 7651 9331121", family: true },
-  { name: "Naturena-Badesee", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "אגם רחצה טבעי באילינגן-בירקנדורף.", address: "Im Tal 1, 79777 Ühlingen-Birkendorf, Germany", postal: "79777", town: "אילינגן-בירקנדורף", setting: "outdoor", reservation: false, phone: "+49 7743 919727", family: true },
-  { name: "Naturfreibad Klosterweiher (סנט גאורגן)", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע קטנה בסנט גאורגן.", address: "Brigachstr. 2, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "outdoor", reservation: false, phone: "+49 7724 87386", family: true },
-  { name: "Naturfreibad סנט מרגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע כפרית בסנט מרגן.", address: "Sportplatz 4, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "outdoor", reservation: false, phone: "+49 7669 91180", family: true },
-  { name: "Naturfreibad שנוואלד", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת טבע כפרית בשנוואלד.", address: "Ludwig-van-Beethoven-Str. 15, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: false, phone: "+49 173 2874525", family: true },
-  { name: "Bregtalbad פורטוואנגן", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ לאורך נהר הברג, בפורטוואנגן.", address: "Jahnstraße 11, 78120 Furtwangen, Germany", postal: "78120", town: "פורטוואנגן", setting: "outdoor", reservation: false, phone: "+49 7723 9149709", family: true },
-  { name: "aqua fun שלוכזה", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "בריכת חוץ עירונית בשלוכזה, ליד האגם.", address: "Freiburger Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 7731", family: true },
-  { name: "חוף רחצה Windgfällweiher", cat: "pools-lakes", type: "free", benefit: "כניסה חינם, פעם אחת — תלוי מזג אוויר.", desc: "חוף רחצה טבעי על אגם קטן בלנצקירך.", address: "Raitenbucher Str. 37, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: false, phone: "+49 176 98285016", site: "https://www.strandbad-windgfaellweiher.de/", family: true },
+// נכסי הטיול (תמונות, פרקים) יושבים בתיקייה שלו, והנתיבים בקובץ הטיול
+// יחסיים אליה — כך שאותו קובץ עובד לכל טיול בלי נתיבים מוחלטים.
+function tripAsset(path) {
+  return `trips/${TRIP_ID}/${path}`;
+}
 
-  // --- טבע ואופניים ---
-  { name: "טיול/ליטוף אלפקות — Haberjockelshof", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בטיול אלפקות או ליטוף אלפקות, לפי זמינות — הרשמה בפורטל הכרטיס.", desc: "חוות אלפקות בטיטיזה-נוישטט, עם טיולים מודרכים או ליטוף בחצר.", address: "Schwärzenbach 24, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, site: "https://www.haberjockelshof.de/", note: "נקודת מפגש 10:00, רק לפי זמינות.", family: true },
-  { name: "סיור עשבי בר עם טעימה", cat: "nature-bike", type: "free", benefit: "השתתפות חינם, מיקומים משתנים.", desc: "סיור רגלי מודרך ללימוד צמחי בר אכילים ברחבי האזור, כולל טעימה.", address: "מיקומים משתנים, Hochschwarzwald, Germany", postal: "79868", town: "פלדברג (ואזור)", setting: "outdoor", reservation: true, note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
-  { name: "סדנת משחות טבעיות", cat: "nature-bike", type: "free", benefit: "השתתפות חינם — מתקיים בשנוואלד.", desc: "סדנת הכנת משחות טבעיות מצמחי מרפא, בשנוואלד.", address: "Schönwald, 78141, Germany", postal: "78141", town: "שנוואלד", setting: "indoor", reservation: true, note: "תאריכים ופרטים בפורטל הכרטיס mein.hochschwarzwald.de.", family: true },
-  { name: "Tannenmühle — סיור בטחנה + חיות מחמד", cat: "nature-bike", type: "free", benefit: "כניסה חינם לסיור בטחנה ולפינת החיות ללטיפה, פעם אחת.", desc: "טחנת קמח היסטורית בגרפנהאוזן, עם סיור וגם פינת חיות ללטיפה.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "mixed", reservation: false, phone: "+49 7748 215", site: "https://www.tannenmuehle.de/", family: true },
-  { name: "סיורי E-MTB", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסיור E-MTB מודרך, פעם אחת.", desc: "סיור אופניים חשמליים מודרך באזור שלוכזה.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "Kids Bike Basics", cat: "nature-bike", type: "free", benefit: "השתתפות חינם בסדנת רכיבה לילדים, פעם אחת.", desc: "סדנת יסודות רכיבה על אופניים לילדים, בשלוכזה.", address: "Fischbacher Str. 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7656 9882916", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "Bikepark Todtnau — קורס טעימה", cat: "nature-bike", type: "free", benefit: "קורס טעימה חינם בפארק האופניים.", desc: "קורס טעימה בפארק האופניים ההררי של טודנאו.", address: "Brandenbergstr. 2, 79674 Todtnau, Germany", postal: "79674", town: "טודנאו", setting: "outdoor", reservation: true, phone: "+49 7671 959 9999", note: "הרשמה מראש בפורטל הכרטיס בלבד.", family: true },
-  { name: "השכרת אופניים חשמליים — Tannenmühle (גרפנהאוזן)", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 12, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בגרפנהאוזן.", address: "Tannenmühleweg 5, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "outdoor", reservation: false, phone: "+49 7748 215", family: true },
-  { name: "השכרת אופניים חשמליים — פלדברג", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בפלדברג.", address: "Dr.-Pilet-Spur 1, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "outdoor", reservation: false, phone: "+49 7676 422", family: true },
-  { name: "השכרת אופניים חשמליים — Sport Lehr טודנאו", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בטודנאו.", address: "Friedrichstraße 7, 79674 Todtnau, Germany", postal: "79674", town: "טודנאו", setting: "outdoor", reservation: false, phone: "+49 7671 317", family: true },
-  { name: "השכרת אופניים חשמליים — Thoma Sports טיטיזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בטיטיזה-נוישטט.", address: "Seestraße 2, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: false, phone: "+49 7651 9724967", family: true },
-  { name: "השכרת אופניים חשמליים — Spaßpark שלוכזה", cat: "nature-bike", type: "free", benefit: "3 שעות השכרה חינם, מגיל 16, לפי זמינות.", desc: "השכרת אופני חשמל ל-3 שעות בשלוכזה.", address: "Fischbacher Straße 16, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 7656 9882878", family: true },
-  { name: "השכרת אופניים חשמליים — שנוואלד", cat: "nature-bike", type: "free", benefit: "השכרה ליום שלם, חינם, מגיל 16 — בהרשמה מראש בלבד.", desc: "השכרת אופני חשמל ליום שלם בשנוואלד.", address: "Franz-Schubert-Straße 3, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: true, phone: "+49 7652 12067400", family: true },
-  { name: "השכרת סירת פדלים — Müllers Bootsvermietung שלוכזה", cat: "nature-bike", type: "free", benefit: "30 דקות חינם, עד 4 אנשים בסירה — תלוי מזג אוויר.", desc: "השכרת סירות פדלים על אגם שלוכזה, ליד הסכר.", address: "An der Staumauer 1, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: false, phone: "+49 170 3803299", note: "זה באגם שלוכזה, לא טיטיזה — אופציה נוספת אם רוצים גם השכרת סירת פדלים עצמאית.", family: true },
+/* מעבר חד-פעמי מהמפתחות של הגרסה שבה היה טיול אחד מוטמע בקוד ("bf2026-*").
+   בלי זה, מי שכבר סימן צ'ק-ליסט או האזין לחצי פרק היה מאבד את זה בשדרוג. */
+function migrateLegacyStorage() {
+  if (storeGet(globalKey("migrated-bf2026"))) return;
+  const move = (from, to) => {
+    try {
+      const raw = localStorage.getItem(from);
+      if (raw != null && localStorage.getItem(to) == null) localStorage.setItem(to, raw);
+      localStorage.removeItem(from);
+    } catch { /* התעלמות */ }
+  };
+  move("bf2026-checklist", `${STORE_PREFIX}black-forest-2026:checklist`);
+  move("bf2026-pod-pos", `${STORE_PREFIX}black-forest-2026:pod-pos`);
+  move("bf2026-pod-rate", globalKey("pod-rate"));
+  move("bf2026-lasttab", globalKey("lasttab"));
+  // הכרטיס האדום ירד מהאפליקציה — המפתחות שלו כבר לא נקראים בשום מקום.
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith("bf2026-"))
+      .forEach(k => localStorage.removeItem(k));
+  } catch { /* התעלמות */ }
+  storeSet(globalKey("migrated-bf2026"), true);
+}
 
-  // --- מוזיאונים וסיורים ---
-  { name: "Blattert Mühle — סדנת פרצלה קטנה", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בהכנת פרצל, בהרשמה מראש חובה.", desc: "סדנה להכנת פרצל קטן בטחנת בונדורף ההיסטורית.", address: "Konstantin-Fehrenbach-Str. 34, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: true, phone: "+49 7703 318", note: "הזמנה מראש חובה דרך mein.hochschwarzwald.de.", family: true },
-  { name: "מוזיאון Le Petit Salon Winterhalter", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון קטן במנצנשוואנד, המציג אוסף פרטי.", address: "Hinterdorfstraße 15, 79837 Menzenschwand, Germany", postal: "79837", town: "מנצנשוואנד", setting: "indoor", reservation: false, phone: "+49 7675 9296988", family: true },
-  { name: "Kloster Museum סנט מרגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון המנזר של סנט מרגן, על ההיסטוריה הדתית של האזור.", address: "Rathausplatz 1, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "indoor", reservation: false, phone: "+49 7669 91180", family: true },
-  { name: "Oldtimer Museum Lafette", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — ה'-ב', 10:30-18:30.", desc: "אוסף מכוניות עתיקות (אולדטיימרים) בטיטיזה-נוישטט.", address: "Heiligbrunnenstr. 10, 79822 Titisee-Neustadt, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: false, phone: "+49 7652 360", family: true },
-  { name: "Schwarzwälder Skimuseum הינטרצרטן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון ההיסטוריה של ספורט הסקי ביער השחור, בהינטרצרטן.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", town: "הינטרצרטן", setting: "indoor", reservation: false, phone: "+49 7652 982192", family: true },
-  { name: "Deutsches Phonomuseum סנט גאורגן", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון גרמני להיסטוריית הפונוגרף ומכשירי ההשמעה, בסנט גאורגן.", address: "Bärenplatz 1, 78112 St. Georgen, Germany", postal: "78112", town: "סנט גאורגן", setting: "indoor", reservation: false, phone: "+49 7724 87320", family: true },
-  { name: "Kreismuseum סנט בלאזין", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון מחוזי על היסטוריית האזור, בסנט בלאזין.", address: "Am Kurgarten 1-3, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: false, phone: "+49 7672 41437", family: true },
-  { name: "Volkskundemuseum Hüsli", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון פולקלור בבית איכרים היסטורי בגרפנהאוזן.", address: "Am Hüsli 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 212", family: true },
-  { name: "Haus der Natur — פלדברג", cat: "museums-tours", type: "free", benefit: "כניסה חינם לתערוכה, פעם אחת.", desc: "מרכז מבקרים ותערוכת טבע על שמורת הטבע של הפלדברג.", address: "Dr.-Pilet-Spur 4, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: false, phone: "+49 7676 933630", family: true },
-  { name: "Schwarzwaldhaus der Sinne — מוזיאון חוויתי", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון חוויתי לחושים בגרפנהאוזן, מתאים לילדים.", address: "Schulstr. 1, 79865 Grafenhausen, Germany", postal: "79865", town: "גרפנהאוזן", setting: "indoor", reservation: false, phone: "+49 7748 52048", family: true },
-  { name: "סיור בקתדרלת סנט בלאזין", cat: "museums-tours", type: "free", benefit: "סיור מודרך חינם, פעם אחת — הרשמה במשרד התיירות המקומי.", desc: "סיור מודרך בקתדרלה הבארוקית המרשימה של סנט בלאזין.", address: "Fürstabt-Gerber-Str. 16, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: true, phone: "+49 7672 41437", family: true },
-  { name: "Freilichtmuseum Klausenhof הרישריד", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת.", desc: "מוזיאון פתוח (חוץ) עם חוות ובתים היסטוריים, בהרישריד.", address: "Lindenweg 3, 79737 Herrischried, Germany", postal: "79737", town: "הרישריד", setting: "outdoor", reservation: false, family: true },
-  { name: "מוזיאון טבע Kalchreuter — Glashütte", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — רק בשבת הראשונה בחודש, 14:00-16:00.", desc: "אוסף מינרלים פרטי קטן בגלאסהיטה שליד בונדורף.", address: "Glashütte 4, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: false, phone: "+49 7653 6660", note: "שעות פתיחה מצומצמות — לוודא תאריך לפני שיוצאים.", family: true },
-  { name: "תערוכת זכוכית ב-Kurhaus שלוכזה", cat: "museums-tours", type: "free", benefit: "כניסה חינם, פעם אחת — יש להירשם במשרד התיירות המקומי.", desc: "תערוכת זכוכית אמנותית בבית הקורהאוס של שלוכזה.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "indoor", reservation: true, phone: "+49 7562 1206 0", family: true },
-  { name: "סיורי תיאטרון רחוב — Freiburg Living History", cat: "museums-tours", type: "free", benefit: "השתתפות חינם בסיור שחקנים בפרייבורג — ו' 18:00 (\"מכשפת פרייבורג\"), ש' 18:00 (\"הנוודת\").", desc: "סיור שחקנים תיאטרלי ברחובות פרייבורג העתיקה, בערבי שישי ושבת.", address: "Hinter-den-Eichen 12/1, 79276 Reute, Germany", postal: "79276", town: "רויטה (פרייבורג)", setting: "outdoor", reservation: false, phone: "+49 176 432 114 19", note: "תוכן מיועד למבוגרים יותר (עלילות מימי הביניים) — לשקול לפי גיל הילדים.", family: false },
+async function fetchJSON(url) {
+  const res = await fetch(url, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
+  return res.json();
+}
 
-  // --- משחקי בריחה ו-VR ---
-  { name: "Outdoor-Escape — Die doppelte Biergit (Brauerei Rothaus)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב מבשלת רוטהאוס.", address: "Hauptstr. 38a, 79199 Kirchzarten, Germany", postal: "79199", town: "קירכצרטן", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "המיקום בפועל: Brauerei Rothaus. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Das verlorene Dorf (שלוכזה)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב שלוכזה.", address: "Fischbacher Str. 7, 79859 Schluchsee, Germany", postal: "79859", town: "שלוכזה", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: משרד התיירות שלוכזה. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Das Rätsel der Zeit (לנצקירך)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב לנצקירך.", address: "Am Kurgarten 1, 79853 Lenzkirch, Germany", postal: "79853", town: "לנצקירך", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: Abenteuer Golfpark לנצקירך. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Outdoor-Escape — Die vier Tode des falschen Mönchs (סנט מרגן)", cat: "escape-vr", type: "discount", benefit: "מחיר מוזל, הזמנה מקוונת בלבד, ב'-ה'.", desc: "משחק בריחה בחוץ (Outdoor-Escape) לקבוצה, עם רמזים בשטח סביב סנט מרגן.", address: "79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "outdoor", reservation: true, phone: "+49 7661 98 93 790", note: "נקודת יציאה: Hotel \"Der Hirschen\", סנט מרגן. הזמנה דרך berggeheimnis.com.", family: true },
-  { name: "Explor Games — Tico & Itza (הרפתקת משפחות)", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", desc: "משחק הרפתקה דיגיטלי מודרך טאבלט, לכל המשפחה, יוצא מטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
-  { name: "Explor Games — Lenofi und die Legende von Guta", cat: "escape-vr", type: "free", benefit: "השאלת טאבלט חינם לעד 5 אנשים + משחק אחד, פעם אחת.", desc: "משחק הרפתקה דיגיטלי מודרך טאבלט נוסף, יוצא מטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "outdoor", reservation: true, phone: "+49 7651 82560", note: "להזמין מראש, בין 10:00-16:00.", family: true },
-  { name: "Lasertag Base — 15 דקות חינם", cat: "escape-vr", type: "free", benefit: "15 דקות לייזר-טאג חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "מתחם לייזר-טאג מקורה בטיטיזה.", address: "Neustädter Str. 41, 79822 Titisee, Germany", postal: "79822", town: "טיטיזה-נוישטט", setting: "indoor", reservation: true, phone: "+49 7651 9331170", family: true },
-  { name: "Operation Mindfall — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "חדר בריחה מקורה בהופגוט שטרנן שליד ברייטנאו.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: true, phone: "+49 7652 9010", family: true },
-  { name: "Magic Portal — חדר בריחה", cat: "escape-vr", type: "free", benefit: "השתתפות חינם, פעם אחת — הזמנה מקוונת בלבד.", desc: "חדר בריחה נוסף בהופגוט שטרנן, נושא קסם.", address: "Höllsteig 76, 79874 Breitnau, Germany", postal: "79874", town: "ברייטנאו", setting: "indoor", reservation: true, phone: "+49 7652 9010", family: true },
-  { name: "Anni's Schwarzwaldgeheimnis — טיול-בריחה", cat: "escape-vr", type: "free", benefit: "טיול-בריחה בטבע, חינם — בתיאום מראש בלבד.", desc: "טיול-בריחה בטבע סביב שנוואלד, פתרון חידות תוך כדי הליכה.", address: "Franz-Schubert-Str. 3, 78141 Schönwald, Germany", postal: "78141", town: "שנוואלד", setting: "outdoor", reservation: true, phone: "+49 7652 12067400", family: true },
-  { name: "VR Point Mr. Modicap — חוויית VR", cat: "escape-vr", type: "free", benefit: "25 דקות מציאות מדומה חינם — רק בתיאום טלפוני, ימי ו'/ש'.", desc: "חוויית מציאות מדומה (VR) בשונאך.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "indoor", reservation: true, phone: "+49 7722 868 9968", note: "בזמן זה החדר-הצג הזמני נמצא ב-VR Arena Triberg.", family: true },
-  { name: "VR-Experience קפיצת סקי — מוזיאון הסקי הינטרצרטן", cat: "escape-vr", type: "free", benefit: "שימוש חינם, פעם אחת.", desc: "סימולטור VR לקפיצות סקי, בתוך מוזיאון הסקי בהינטרצרטן.", address: "Erlenbrucker Straße 35, 79856 Hinterzarten, Germany", postal: "79856", town: "הינטרצרטן", setting: "indoor", reservation: false, phone: "+49 7652 982192", family: true },
-  { name: "VR קפיצת סקי — מגדל הקפיצה בשונאך", cat: "escape-vr", type: "free", benefit: "השתתפות חינם — רק בתיאום מראש, ימי ו' 15:00.", desc: "חוויית VR נוספת לקפיצות סקי, במגדל הקפיצה של שונאך.", address: "Bürgermeister-Kuner-Str. 12, 78136 Schonach, Germany", postal: "78136", town: "שונאך", setting: "indoor", reservation: true, family: true },
+/* איזה טיול לפתוח: מה שנבחר בפעם הקודמת, אחרת הטיול שהיום נמצא בתוכו,
+   אחרת הטיול הקרוב שעוד לא התחיל, ואם הכול מאחורינו — האחרון שהיה. */
+function pickDefaultTrip(index) {
+  const saved = storeGet(globalKey("active-trip"));
+  if (saved && index.some(t => t.id === saved)) return saved;
 
-  // --- אוכל ושתייה ---
-  { name: "Heinz Wagner Sekt Manufaktur", cat: "culinary", type: "free", benefit: "סיור מודרך + טעימת שמפניה חינם, כולל שובר קנייה בשווי 5€.", desc: "יקב שמפניה משפחתי בסנט בלאזין, עם סיורים וטעימות.", address: "Albtalstr. 14, 79837 St. Blasien, Germany", postal: "79837", town: "סנט בלאזין", setting: "indoor", reservation: true, phone: "+49 7672 922 663 0", note: "יין תוסס — הרשמה טלפונית מראש חובה.", family: false },
-  { name: "בירה עם אומני הבירה", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת בירה, לפי זמינות והרשמה מראש.", desc: "מפגש טעימת בירה עם אומנים מקומיים, בפלדברג.", address: "Feldbergstr. 5, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: true, phone: "+49 151 44626615", note: "אלכוהול — הרשמה מראש חובה דרך mein.hochschwarzwald.de.", family: false },
-  { name: "Gscheiter Beck — מוזיאון שנאפס", cat: "culinary", type: "free", benefit: "כניסה חינם למוזיאון + טעימת שנאפס, מגיל 18 בלבד.", desc: "מוזיאון שנאפס קטן בפלדברג, עם טעימה למבוגרים.", address: "Bahnhofstraße 3, 79868 Feldberg, Germany", postal: "79868", town: "פלדברג", setting: "indoor", reservation: false, phone: "+49 7655 341", note: "מגבלת גיל 18+ מפורשת.", family: false },
-  { name: "Café Zimmermann — סדנת עוגת יער שחור", cat: "culinary", type: "free", benefit: "השתתפות חינם בהכנת עוגת דובדבנים שחורה, כולל פרוסה וקפה — כל שבועיים בימי ג'.", desc: "בית קפה בטודמוס, עם סדנת הכנת עוגת יער שחור מסורתית.", address: "Kurparkweg 2, 79682 Todtmoos, Germany", postal: "79682", town: "טודמוס", setting: "indoor", reservation: true, phone: "+49 7674 90570", note: "הרשמה חובה עד יום ב' 17:30.", family: true },
-  { name: "Schwarzwaldimkerei und Brennerei Herb", cat: "culinary", type: "free", benefit: "סיור מזקקה + טעימה חינם, מגיל 18 בלבד — כל שבועיים בימי ו' 16:00.", desc: "מזקקה ודבוראות משפחתית בבונדורף.", address: "Tiroler Str. 8, 79848 Bonndorf, Germany", postal: "79848", town: "בונדורף", setting: "indoor", reservation: true, phone: "+49 7653 6660", note: "מגבלת גיל 18+ מפורשת. הרשמה מראש חובה.", family: false },
-  { name: "טעימת תה — סנט מרגן", cat: "culinary", type: "free", benefit: "השתתפות חינם בטעימת תה, פעם אחת.", desc: "טעימת תה בסנט מרגן.", address: "Feldbergstraße 2, 79274 St. Märgen, Germany", postal: "79274", town: "סנט מרגן", setting: "indoor", reservation: true, phone: "+49 7669 939826", note: "הרשמה חובה יום לפני — ג'/ה' מ-15:00, ש' מ-10:00.", family: true },
+  const today = localDateStr(new Date());
+  const current = index.find(t => t.start <= today && today <= t.end);
+  if (current) return current.id;
 
-  // --- גולף ---
-  { name: "Freiburger Golfplatz", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", desc: "מגרש גולף 18 חורים ליד קירכצרטן, קרוב לפרייבורג.", address: "Krüttweg 1, 79199 Kirchzarten, Germany", postal: "79199", town: "קירכצרטן", setting: "outdoor", reservation: false, phone: "+49 7661 98470", family: false },
-  { name: "Golfclub Königsfeld", cat: "golf", type: "free", benefit: "גרין-פי חינם ל-18 חורים, פעם אחת.", desc: "מגרש גולף 18 חורים בקניגספלד.", address: "Angelmoos 20, 78126 Königsfeld, Germany", postal: "78126", town: "קניגספלד", setting: "outdoor", reservation: false, phone: "+49 7725 9396-0", family: false },
-  { name: "Golfclub Obere Alp (שטילינגן)", cat: "golf", type: "free", benefit: "גרין-פי חינם, פעם אחת — אפשרויות ל-18 חורים, 9 חורים, או 18 חורים על מגרש 9 החורים.", desc: "מגרש גולף בשטילינגן, עם אפשרות ל-9 או 18 חורים.", address: "Am Golfplatz 1-3, 79780 Stühlingen, Germany", postal: "79780", town: "שטילינגן", setting: "outdoor", reservation: false, phone: "+49 7703 92030", family: false }
-];
+  const upcoming = index.filter(t => t.start > today).sort((a, b) => a.start.localeCompare(b.start));
+  if (upcoming.length) return upcoming[0].id;
+
+  const past = index.filter(t => t.end < today).sort((a, b) => b.end.localeCompare(a.end));
+  return past.length ? past[0].id : (index[0] && index[0].id) || null;
+}
+
+// טעינת קובץ טיול והצבתו במשתנים שכל פונקציות הרינדור קוראות.
+async function loadTrip(id) {
+  // טיוטה מקומית גוברת על מה שפורסם: מה שנערך נראה מיד באפליקציה עצמה,
+  // עוד לפני שנפתח עליו Pull Request. טיול שנוצר כאן קיים רק כטיוטה.
+  const draft = edReadDraft(id);
+  const trip = draft ? draft.trip : await fetchJSON(`trips/${id}/trip.json`);
+  TRIP_ID = id;
+  TRIP = {
+    title: trip.title,
+    subtitle: trip.subtitle || "",
+    start: trip.start,
+    end: trip.end,
+    base: trip.base,
+    flightIn: trip.flightIn || null,
+    flightOut: trip.flightOut || null
+  };
+  DAYS = trip.days || [];
+  CHECKLIST = trip.checklist || [];
+  GENERAL_TIPS = trip.tips || [];
+  PODCASTS = trip.podcasts || {};
+  markPodcastLeads();
+
+  WX.cacheKey = tripKey("weather");
+  WX.store = null;
+  WX.status = "idle";
+
+  storeSet(globalKey("active-trip"), id);
+  setTripChrome(trip);
+  return trip;
+}
+
+// כותרת הסרגל העליון וכותרת הדף — לפי הטיול שנטען, לא לפי index.html.
+function setTripChrome(trip) {
+  $("#topbarTitle").textContent = trip.title;
+  $("#topbarSub").textContent = trip.subtitle || "";
+  $("#topbarIcon").innerHTML = ICON[trip.icon] || ICON.tree;
+  document.title = trip.subtitle ? `${trip.title} · ${trip.subtitle}` : trip.title;
+}
 
 /* ============================================================
    פונקציות עזר לרינדור
@@ -757,9 +251,12 @@ function hebWeekday(dateStr) {
   return HEB_WEEKDAYS[d.getDay()];
 }
 
+const HEB_MONTHS = ["בינואר", "בפברואר", "במרץ", "באפריל", "במאי", "ביוני",
+                    "ביולי", "באוגוסט", "בספטמבר", "באוקטובר", "בנובמבר", "בדצמבר"];
+
 function dayMonth(dateStr) {
   const day = Number(dateStr.slice(8, 10));
-  return `${day} באוגוסט`;
+  return `${day} ${HEB_MONTHS[Number(dateStr.slice(5, 7)) - 1]}`;
 }
 
 function localDateStr(date) {
@@ -800,9 +297,8 @@ function chipsHTML(block) {
    לא עוצרת השמעה, כל עוד מחזיקים בהפניה אליו.
    ============================================================ */
 
-const POD = { key: null, id: null, audio: null };
-const POD_POS_KEY = "bf2026-pod-pos";   // איפה עצרנו בכל פרק
-const POD_RATE_KEY = "bf2026-pod-rate"; // מהירות ההשמעה — אחת לכל הפרקים
+const POD = { key: null, id: null, audio: null, pendingUrls: {} };
+// איפה עצרנו בכל פרק — לכל טיול בנפרד. מהירות ההשמעה משותפת לכולם.
 const POD_RATES = [1, 1.25, 1.5, 1.75];
 
 // פרק שהקובץ שלו עוד לא נמצא ב-audio/ לא קיים מבחינת הממשק — ראו ready למעלה.
@@ -814,8 +310,10 @@ function podReady(area) {
 /* הפרק נתלה רק על התחנה הראשונה של האזור באותו יום. יום טודנאו, למשל, הוא
    שלוש תחנות שחולקות פרק אחד — הקישור מופיע על מגלשת Hasenhorn בלבד, ולא
    שוב על המפלים ועל הגשר התלוי. הסימון נעשה פעם אחת בטעינה, לפי סדר
-   הבלוקים ביום, כך שאגם טיטיזי שמופיע בשני ימים מקבל קישור בכל אחד מהם. */
-(function markPodcastLeads() {
+   הבלוקים ביום, כך שאגם טיטיזי שמופיע בשני ימים מקבל קישור בכל אחד מהם.
+   נקראת מ-loadTrip() אחרי שהיומן נטען — לא בזמן טעינת הקובץ, כי אז DAYS
+   עוד ריק. */
+function markPodcastLeads() {
   for (const day of DAYS) {
     const seen = new Set();
     for (const b of day.blocks) {
@@ -829,7 +327,7 @@ function podReady(area) {
       b.podKey = `${day.date}:${b.area}`;
     }
   }
-})();
+}
 
 // המפתח הוא "תאריך:אזור", והאזור הוא מה שמופיע בטבלת PODCASTS.
 function podAreaOf(key) {
@@ -842,26 +340,26 @@ function podcastFor(block) {
 
 // הכתובת שממנה מנגנים ושלפיה נשמר המטמון — כולל מספר הגרסה של הפרק.
 function podUrl(pod) {
-  return `${pod.file}?v=${pod.rev || 1}`;
+  return `${tripAsset(pod.file)}?v=${pod.rev || 1}`;
 }
 
 function podLoadPos() {
-  try { return JSON.parse(localStorage.getItem(POD_POS_KEY)) || {}; } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(tripKey("pod-pos"))) || {}; } catch { return {}; }
 }
 
 function podSavePos(id, seconds) {
   const all = podLoadPos();
   all[id] = Math.floor(seconds);
-  try { localStorage.setItem(POD_POS_KEY, JSON.stringify(all)); } catch { /* התעלמות */ }
+  try { localStorage.setItem(tripKey("pod-pos"), JSON.stringify(all)); } catch { /* התעלמות */ }
 }
 
 function podLoadRate() {
-  const r = parseFloat(localStorage.getItem(POD_RATE_KEY));
+  const r = parseFloat(localStorage.getItem(globalKey("pod-rate")));
   return POD_RATES.includes(r) ? r : 1;
 }
 
 function podSaveRate(rate) {
-  try { localStorage.setItem(POD_RATE_KEY, String(rate)); } catch { /* התעלמות */ }
+  try { localStorage.setItem(globalKey("pod-rate"), String(rate)); } catch { /* התעלמות */ }
 }
 
 /* חשוב ששני השדות ייקבעו יחד: לפי התקן, טעינת מקור חדש מאפסת את
@@ -932,7 +430,7 @@ function podSetMediaSession(pod) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: pod.title,
       artist: "פודקאסט לילדים",
-      album: "היער השחור 2026",
+      album: TRIP.title,
       artwork: [{ src: "icons/icon-512.png", sizes: "512x512", type: "image/png" }]
     });
   } catch { /* התעלמות — אין תמיכה */ }
@@ -968,17 +466,30 @@ function podShowMissing() {
   target.appendChild(note);
 }
 
-function podOpen(key) {
+/* פרק שנבחר בעורך ועוד לא פורסם קיים רק כקובץ במכשיר, ולכן הכתובת
+   בתיקיית הטיול עוד לא קיימת — מנגנים אותו ישירות מהמחסן המקומי, כדי
+   שאפשר יהיה לשמוע אותו במקום לפני שפותחים עליו Pull Request. */
+async function podPendingUrl(pod) {
+  if (!pod.pending) return null;
+  if (POD.pendingUrls[pod.file]) return POD.pendingUrls[pod.file];
+  const blob = await edAssetGet(TRIP_ID, pod.file);
+  if (!blob) return null;
+  POD.pendingUrls[pod.file] = URL.createObjectURL(blob);
+  return POD.pendingUrls[pod.file];
+}
+
+async function podOpen(key) {
   const id = podAreaOf(key);
   const pod = podReady(id);
   if (!pod) return;
   const el = podEnsureAudio();
+  const pendingUrl = await podPendingUrl(pod);
   // מעבר בין שני המופעים של אותו פרק (טיטיזי ב-20.8 וב-23.8) רק מזיז את
   // הנגן לכרטיס השני — אותו קובץ, אותו מיקום, בלי לטעון מחדש.
   if (POD.id !== id) {
     el.pause();
     POD.id = id;
-    el.src = podUrl(pod);
+    el.src = pendingUrl || podUrl(pod);
     const pos = podLoadPos()[id] || 0;
     if (pos > 0) {
       el.addEventListener("loadedmetadata", function seek() {
@@ -1022,7 +533,10 @@ function imageHTML(image) {
   const credit = image.credit
     ? `<a class="stop-credit" href="${commonsFileUrl(image.commonsFile)}" target="_blank" rel="noopener">${ICON.camera} ${escapeHTML(image.credit)} · ${escapeHTML(image.license)}, ויקישיתוף</a>`
     : "";
-  return `<img class="stop-img" src="${image.file}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
+  // תמונה שנבחרה בעורך ועוד לא פורסמה מוצגת ישירות מוויקישיתוף; אחרי
+  // הפרסום היא כבר קובץ בתיקיית הטיול ונטענת מקומית, גם בלי קליטה.
+  const src = image.pending && image.thumb ? image.thumb : tripAsset(image.file);
+  return `<img class="stop-img" src="${src}" alt="" loading="lazy" onerror="this.style.display='none'">${credit}`;
 }
 
 // בלוק "תחנה" מלא — עם תמונה, כתובת, זמן נסיעה, תחזית וכל השאר.
@@ -1076,11 +590,13 @@ function dayStopsHTML(day) {
 }
 
 function dayRouteLink(day) {
-  const stops = day.blocks.filter(b => b.address).map(b => b.address);
+  // תחנה שהיא הבסיס עצמו (Aqua Mundo בתוך הפארק, ערב הגעה) לא מצדיקה
+  // מסלול — בלעדיה היה נוצר כפתור שמנווט מהפארק אל הפארק.
+  const stops = day.blocks.filter(b => b.address && b.address !== TRIP.base.address).map(b => b.address);
   if (!stops.length) return null;
   const full = day.returnLeg
-    ? [TRIP.hotel.address, ...stops, TRIP.hotel.address]
-    : [TRIP.hotel.address, ...stops];
+    ? [TRIP.base.address, ...stops, TRIP.base.address]
+    : [TRIP.base.address, ...stops];
   const origin = full[0];
   const destination = full[full.length - 1];
   const waypoints = full.slice(1, -1);
@@ -1133,7 +649,12 @@ function renderItinerary() {
     `;
   }).join("");
 
-  $("#view-itinerary").innerHTML = `<h2 class="mini-list-title" style="margin-top:0">המסלול המלא</h2>${html}`;
+  $("#view-itinerary").innerHTML = `
+    <div class="view-head">
+      <h2 class="mini-list-title" style="margin:0">המסלול המלא</h2>
+      <button class="edit-btn" data-edit-current>${ICON.pencil} עריכה</button>
+    </div>
+    ${html}`;
 
   // שמירת מצב פתוח/סגור, כדי לשחזר אותו אחרי רינדור מחדש (למשל כשהתחזית מתעדכנת).
   $$("details.day").forEach(el => {
@@ -1162,30 +683,33 @@ function renderNow() {
     view.innerHTML = `
       <div class="countdown">
         <div class="num">${daysToGo}</div>
-        <div class="label">${daysLabel} עד היער השחור</div>
+        <div class="label">${daysLabel} עד ${escapeHTML(TRIP.title)}</div>
       </div>
       <div class="card">
-        <strong>${escapeHTML(TRIP.hotel.name)}</strong><br>
-        <span style="color:var(--text-muted);font-size:14px">${escapeHTML(TRIP.hotel.address)}</span>
+        <strong>${escapeHTML(TRIP.base.name)}</strong><br>
+        <span style="color:var(--text-muted);font-size:14px">${escapeHTML(TRIP.base.address)}</span>
         <div class="chips">
-          <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
-          <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
+          <a class="chip map" href="${mapLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
+          <a class="chip waze" href="${wazeLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
         </div>
       </div>
       <h2 class="mini-list-title">לפני שנוסעים</h2>
       ${renderChecklistHTML()}
+      <button class="route-btn" data-edit-current style="margin-top:16px">${ICON.pencil} עריכת התוכנית</button>
     `;
     bindChecklist();
     return;
   }
 
   if (todayStr > TRIP.end) {
+    const others = TRIP_INDEX.filter(t => t.id !== TRIP_ID).length;
     view.innerHTML = `
       <div class="countdown">
         <div class="num">${ICON.tree}</div>
         <div class="label">הטיול נגמר — מקווים שהיה כיף!</div>
       </div>
       <div class="empty-note">המסלול המלא עדיין כאן, תחת "מסלול", אם בא לכם להיזכר.</div>
+      ${others ? `<button class="route-btn" data-open-trips>${ICON.swap} מעבר לטיול אחר</button>` : ""}
     `;
     return;
   }
@@ -1291,8 +815,8 @@ function renderNow() {
     ${restHTML ? `<h2 class="mini-list-title">המשך היום</h2><div class="card">${restHTML}</div>` : ""}
     ${returnHTML}
     <div class="chips" style="margin-top:16px">
-      <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} ${escapeHTML(TRIP.hotel.name)}</a>
-      <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
+      <a class="chip map" href="${mapLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.pin} ${escapeHTML(TRIP.base.name)}</a>
+      <a class="chip waze" href="${wazeLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
     </div>
   `;
 
@@ -1304,7 +828,7 @@ function renderNow() {
    ============================================================ */
 
 function renderChecklistHTML() {
-  const done = JSON.parse(localStorage.getItem("bf2026-checklist") || "{}");
+  const done = JSON.parse(localStorage.getItem(tripKey("checklist")) || "{}");
   return `
     <div class="card">
       ${CHECKLIST.map((item, i) => `
@@ -1321,43 +845,60 @@ function bindChecklist() {
   $$(".check-item").forEach(el => {
     el.addEventListener("change", () => {
       const idx = el.dataset.idx;
-      const done = JSON.parse(localStorage.getItem("bf2026-checklist") || "{}");
+      const done = JSON.parse(localStorage.getItem(tripKey("checklist")) || "{}");
       const checked = $("input", el).checked;
       done[idx] = checked;
-      localStorage.setItem("bf2026-checklist", JSON.stringify(done));
+      localStorage.setItem(tripKey("checklist"), JSON.stringify(done));
       el.classList.toggle("checked", checked);
     });
   });
+}
+
+// כותרת מקום הלינה לפי סוגו — לא כל טיול יושב במלון.
+const BASE_LABELS = { hotel: "המלון", apartment: "הדירה", house: "הבית", camp: "המחנה" };
+
+// טיסות מוצגות רק אם הן קיימות בקובץ הטיול: לטיול בארץ אין נחיתה והמראה,
+// והקוד הישן קרס על TRIP.flightIn.date כשהשדה חסר.
+function flightsSectionHTML() {
+  const { flightIn, flightOut } = TRIP;
+  if (!flightIn && !flightOut) return "";
+  const row = (f, label) => f
+    ? `<div class="info-row"><span class="k">${label} — ${hebWeekday(f.date)}, ${dayMonth(f.date)}</span><span class="v">${escapeHTML(f.city)}, ${escapeHTML(f.time)}</span></div>`
+    : "";
+  const note = (flightOut && flightOut.note) || (flightIn && flightIn.note);
+  return `
+    <div class="info-section">
+      <h2>טיסות</h2>
+      <div class="card">
+        ${row(flightIn, "נחיתה")}
+        ${row(flightOut, "טיסת חזרה")}
+        ${note ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(note)}</span></div>` : ""}
+      </div>
+    </div>
+  `;
 }
 
 function renderInfo() {
   const view = $("#view-info");
   view.innerHTML = `
     <div class="info-section">
-      <h2>המלון</h2>
+      <h2>${BASE_LABELS[TRIP.base.kind] || "מקום הלינה"}</h2>
       <div class="card">
-        <div class="info-row"><span class="k">שם</span><span class="v">${escapeHTML(TRIP.hotel.name)}</span></div>
-        <div class="info-row"><span class="k">כתובת</span><span class="v">${escapeHTML(TRIP.hotel.address)}</span></div>
+        <div class="info-row"><span class="k">שם</span><span class="v">${escapeHTML(TRIP.base.name)}</span></div>
+        <div class="info-row"><span class="k">כתובת</span><span class="v">${escapeHTML(TRIP.base.address)}</span></div>
         <div class="chips">
-          <a class="chip map" href="${mapLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.pin} פתיחה במפות</a>
-          <a class="chip waze" href="${wazeLink(TRIP.hotel.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
+          <a class="chip map" href="${mapLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.pin} פתיחה במפות</a>
+          <a class="chip waze" href="${wazeLink(TRIP.base.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
         </div>
       </div>
     </div>
 
-    <div class="info-section">
-      <h2>טיסות</h2>
-      <div class="card">
-        <div class="info-row"><span class="k">נחיתה — ${hebWeekday(TRIP.flightIn.date)}, ${dayMonth(TRIP.flightIn.date)}</span><span class="v">${TRIP.flightIn.city}, ${TRIP.flightIn.time}</span></div>
-        <div class="info-row"><span class="k">טיסת חזרה — ${hebWeekday(TRIP.flightOut.date)}, ${dayMonth(TRIP.flightOut.date)}</span><span class="v">${TRIP.flightOut.city}, ${TRIP.flightOut.time}</span></div>
-        <div class="tip">${ICON.bulb}<span>${escapeHTML(TRIP.flightOut.note)}</span></div>
-      </div>
-    </div>
+    ${flightsSectionHTML()}
 
-    <div class="info-section">
+    ${CHECKLIST.length ? `<div class="info-section">
       <h2>לפני שנוסעים</h2>
       ${renderChecklistHTML()}
-    </div>
+    </div>` : ""}
 
     <div class="info-section">
       <h2>על התחזית</h2>
@@ -1371,12 +912,14 @@ function renderInfo() {
       </div>
     </div>
 
-    <div class="info-section">
+    <p class="build-stamp">גרסה ${APP_BUILD} · טיול ${escapeHTML(TRIP_ID)}</p>
+
+    ${GENERAL_TIPS.length ? `<div class="info-section">
       <h2>כדאי לדעת</h2>
       <div class="card">
         ${GENERAL_TIPS.map(t => `<div class="tip">${ICON.bulb}<span>${escapeHTML(t)}</span></div>`).join("")}
       </div>
-    </div>
+    </div>` : ""}
   `;
   bindChecklist();
 }
@@ -1392,7 +935,7 @@ function renderInfo() {
 
 const WX = {
   api: "https://api.open-meteo.com/v1/forecast",
-  cacheKey: "bf2026-weather-v1",
+  cacheKey: null,             // נקבע ב-loadTrip() לפי הטיול הפעיל
   maxAgeMs: 30 * 60 * 1000,   // אחרי חצי שעה התחזית נחשבת מיושנת ונמשכת מחדש
   horizonDays: 15,            // Open-Meteo נותן תחזית עד ~16 יום קדימה
   store: null,                // { fetchedAt, range, byPoint }
@@ -1800,287 +1343,27 @@ function renderWeather() {
   bindWxRefresh();
 }
 
-/* ============================================================
-   תצוגת כרטיס האדום
-   ============================================================ */
-
-let redCardSortMode = localStorage.getItem("bf2026-redcard-sort") || "hotel";
-let redCardFilterMode = localStorage.getItem("bf2026-redcard-filter") || "all";
-let redCardCategory = localStorage.getItem("bf2026-redcard-category") || "all";
-let redCardTown = localStorage.getItem("bf2026-redcard-town") || "all";
-let redCardSetting = localStorage.getItem("bf2026-redcard-setting") || "all";
-let redCardReservation = localStorage.getItem("bf2026-redcard-reservation") || "all";
-let redCardSearchQuery = "";
-let redCardSearchDebounce = null;
-let redCardLiveCoords = null;
-let redCardLiveError = null;
-
-const REDCARD_CATEGORY_ORDER = ["leisure-sport", "pools-lakes", "nature-bike", "museums-tours", "escape-vr", "culinary", "golf"];
-
-function redCardTownOptions() {
-  return Array.from(new Set(RED_CARD_CATALOG.map(i => i.town))).sort((a, b) => a.localeCompare(b, "he"));
-}
-
-function redCardMatchesSearch(item, query) {
-  if (!query) return true;
-  const hay = `${item.name} ${item.desc} ${item.town} ${CATEGORY_LABELS[item.cat]}`.toLowerCase();
-  return hay.includes(query.toLowerCase());
-}
-
-function benefitBadgeHTML(item) {
-  return item.type === "free"
-    ? `<span class="benefit-badge free">חינם</span>`
-    : `<span class="benefit-badge discount">בהנחה</span>`;
-}
-
-function redCardPlannedItemHTML(item) {
-  return `
-    <div class="stop">
-      <div class="stop-body">
-        <div class="stop-time">${escapeHTML(item.dayTitle)} · ${dayMonth(item.dayDate)}</div>
-        ${benefitBadgeHTML(item)}
-        <h3>${escapeHTML(item.stopTitle)}</h3>
-        <p>${escapeHTML(item.benefit)}</p>
-        ${item.originalNote ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(item.originalNote)}</span></div>` : ""}
-        ${item.caveat ? `<div class="tip warn">${ICON.warn}<span>${escapeHTML(item.caveat)}</span></div>` : ""}
-        <div class="chips">
-          <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
-          <a class="chip waze" href="${wazeLink(item.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
-          ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function redCardCatalogItemHTML(item, dist) {
-  const distLabel = redCardSortMode === "live" && redCardLiveCoords ? "מהמיקום שלי" : "מהמלון";
-  return `
-    <details class="redcard-item">
-      <summary>
-        <span class="redcard-item-summary-left">
-          ${benefitBadgeHTML(item)}
-          <span class="redcard-item-name">${escapeHTML(item.name)}</span>
-        </span>
-        <span class="redcard-item-summary-right">
-          ${dist != null ? `<span class="redcard-item-dist">${ICON.route} ${formatDistance(dist)} ${distLabel}</span>` : ""}
-          <span class="day-chevron">${ICON.chevron}</span>
-        </span>
-      </summary>
-      <div class="redcard-item-body">
-        <p>${escapeHTML(item.desc)}</p>
-        <p class="redcard-item-benefit">${item.type === "free" ? "מה מקבלים עם הכרטיס" : "ההנחה עם הכרטיס"}: ${escapeHTML(item.benefit)}</p>
-        ${item.note ? `<div class="tip">${ICON.bulb}<span>${escapeHTML(item.note)}</span></div>` : ""}
-        <div class="chips">
-          <a class="chip map" href="${mapLink(item.address)}" target="_blank" rel="noopener">${ICON.pin} מפה</a>
-          <a class="chip waze" href="${wazeLink(item.address)}" target="_blank" rel="noopener">${ICON.waze} Waze</a>
-          ${item.site ? `<a class="chip info" href="${escapeHTML(item.site)}" target="_blank" rel="noopener">${ICON.link} אתר</a>` : ""}
-        </div>
-      </div>
-    </details>
-  `;
-}
-
-function renderRedCardCatalog() {
-  const container = $("#redcard-catalog-list");
-  if (!container) return;
-
-  let items = RED_CARD_CATALOG.slice();
-  if (redCardFilterMode === "family") items = items.filter(i => i.family);
-  if (redCardCategory !== "all") items = items.filter(i => i.cat === redCardCategory);
-  if (redCardTown !== "all") items = items.filter(i => i.town === redCardTown);
-  if (redCardSetting !== "all") items = items.filter(i => i.setting === redCardSetting || i.setting === "mixed");
-  if (redCardReservation === "no-reservation") items = items.filter(i => !i.reservation);
-  if (redCardSearchQuery) items = items.filter(i => redCardMatchesSearch(i, redCardSearchQuery));
-
-  const refPoint = (redCardSortMode === "live" && redCardLiveCoords) ? redCardLiveCoords : HOTEL_COORDS;
-  const withDist = items.map(item => {
-    const coords = itemCoords(item);
-    return { item, dist: coords ? haversineKm(refPoint, coords) : null };
-  });
-  withDist.sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
-
-  let html = "";
-  if (redCardCategory === "all") {
-    for (const cat of REDCARD_CATEGORY_ORDER) {
-      const catItems = withDist.filter(x => x.item.cat === cat);
-      if (!catItems.length) continue;
-      html += `<h3 class="mini-list-title">${escapeHTML(CATEGORY_LABELS[cat])}</h3>`;
-      html += catItems.map(x => redCardCatalogItemHTML(x.item, x.dist)).join("");
-    }
-  } else {
-    html = withDist.map(x => redCardCatalogItemHTML(x.item, x.dist)).join("");
-  }
-  container.innerHTML = html || `<div class="empty-note">אין תוצאות עם הסינון הנוכחי — נסו לרוקן חלק מהמסננים.</div>`;
-}
-
-function renderRedCard() {
-  const infoHTML = `
-    <div class="card">
-      <h3>${escapeHTML(RED_CARD_INFO.title)}</h3>
-      <p>${escapeHTML(RED_CARD_INFO.eligibilityNote)}</p>
-      ${RED_CARD_INFO.activationSteps.map(s => `<div class="tip">${ICON.bulb}<span>${escapeHTML(s)}</span></div>`).join("")}
-      <div class="chips">
-        ${RED_CARD_INFO.links.map(l => `<a class="chip info" href="${escapeHTML(l.url)}" target="_blank" rel="noopener">${ICON.link} ${escapeHTML(l.label)}</a>`).join("")}
-      </div>
-    </div>
-  `;
-
-  const plannedHTML = `
-    <h2 class="mini-list-title" style="margin-top:0">כלול כבר בתוכנית שלכם</h2>
-    ${RED_CARD_PLANNED.map(redCardPlannedItemHTML).join("")}
-  `;
-
-  const townOptions = redCardTownOptions();
-  const controlsHTML = `
-    <div class="redcard-controls">
-      <input type="search" id="redcard-search" class="redcard-search" placeholder="חיפוש — שם, עיר או קטגוריה…" value="${escapeHTML(redCardSearchQuery)}">
-      <div class="redcard-select-row">
-        <select id="redcard-category-select" class="redcard-select">
-          <option value="all" ${redCardCategory === "all" ? "selected" : ""}>כל הקטגוריות</option>
-          ${REDCARD_CATEGORY_ORDER.map(cat => `<option value="${cat}" ${redCardCategory === cat ? "selected" : ""}>${escapeHTML(CATEGORY_LABELS[cat])}</option>`).join("")}
-        </select>
-        <select id="redcard-town-select" class="redcard-select">
-          <option value="all" ${redCardTown === "all" ? "selected" : ""}>כל הערים</option>
-          ${townOptions.map(t => `<option value="${escapeHTML(t)}" ${redCardTown === t ? "selected" : ""}>${escapeHTML(t)}</option>`).join("")}
-        </select>
-      </div>
-      <div class="toggle-group" id="redcard-sort-group">
-        <button class="toggle-btn ${redCardSortMode === "hotel" ? "active" : ""}" data-sort="hotel">מרחק מהמלון</button>
-        <button class="toggle-btn ${redCardSortMode === "live" ? "active" : ""}" data-sort="live">${ICON.target}<span>המיקום שלי עכשיו</span></button>
-      </div>
-      <div class="toggle-group" id="redcard-filter-group">
-        <button class="toggle-btn ${redCardFilterMode === "all" ? "active" : ""}" data-filter="all">הכל</button>
-        <button class="toggle-btn ${redCardFilterMode === "family" ? "active" : ""}" data-filter="family">מתאים למשפחות</button>
-      </div>
-      <div class="redcard-group-label">סוג מקום</div>
-      <div class="toggle-group" id="redcard-setting-group">
-        <button class="toggle-btn ${redCardSetting === "all" ? "active" : ""}" data-setting="all">הכל</button>
-        <button class="toggle-btn ${redCardSetting === "indoor" ? "active" : ""}" data-setting="indoor">מקורה</button>
-        <button class="toggle-btn ${redCardSetting === "outdoor" ? "active" : ""}" data-setting="outdoor">בחוץ</button>
-      </div>
-      <div class="redcard-group-label">הזמנה מראש</div>
-      <div class="toggle-group" id="redcard-reservation-group">
-        <button class="toggle-btn ${redCardReservation === "all" ? "active" : ""}" data-reservation="all">הכל</button>
-        <button class="toggle-btn ${redCardReservation === "no-reservation" ? "active" : ""}" data-reservation="no-reservation">בלי הזמנה מראש</button>
-      </div>
-      ${redCardLiveError ? `<div class="empty-note" style="padding:6px 0;font-size:12.5px">${escapeHTML(redCardLiveError)}</div>` : ""}
-    </div>
-  `;
-
-  $("#view-redcard").innerHTML = `
-    ${infoHTML}
-    ${plannedHTML}
-    <h2 class="mini-list-title">עוד הטבות בכרטיס (מרחק אווירי, לא זמן נסיעה)</h2>
-    ${controlsHTML}
-    <div id="redcard-catalog-list"></div>
-  `;
-
-  renderRedCardCatalog();
-  bindRedCard();
-}
-
-function bindRedCard() {
-  const searchInput = $("#redcard-search");
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      clearTimeout(redCardSearchDebounce);
-      const val = searchInput.value;
-      redCardSearchDebounce = setTimeout(() => {
-        redCardSearchQuery = val;
-        renderRedCardCatalog();
-      }, 150);
-    });
-  }
-
-  const categorySelect = $("#redcard-category-select");
-  if (categorySelect) {
-    categorySelect.addEventListener("change", () => {
-      redCardCategory = categorySelect.value;
-      localStorage.setItem("bf2026-redcard-category", redCardCategory);
-      renderRedCard();
-    });
-  }
-
-  const townSelect = $("#redcard-town-select");
-  if (townSelect) {
-    townSelect.addEventListener("change", () => {
-      redCardTown = townSelect.value;
-      localStorage.setItem("bf2026-redcard-town", redCardTown);
-      renderRedCard();
-    });
-  }
-
-  $$("#redcard-sort-group .toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const mode = btn.dataset.sort;
-      if (mode !== "live") {
-        redCardSortMode = "hotel";
-        redCardLiveError = null;
-        localStorage.setItem("bf2026-redcard-sort", "hotel");
-        renderRedCard();
-        return;
-      }
-      if (!("geolocation" in navigator)) {
-        redCardLiveError = "הדפדפן לא תומך באיתור מיקום — ממשיכים למיין לפי מרחק מהמלון.";
-        redCardSortMode = "hotel";
-        renderRedCard();
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          redCardLiveCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          redCardLiveError = null;
-          redCardSortMode = "live";
-          localStorage.setItem("bf2026-redcard-sort", "live");
-          renderRedCard();
-        },
-        () => {
-          redCardLiveError = "לא הצלחנו לקבל הרשאת מיקום — ממשיכים למיין לפי מרחק מהמלון.";
-          redCardSortMode = "hotel";
-          localStorage.setItem("bf2026-redcard-sort", "hotel");
-          renderRedCard();
-        },
-        { timeout: 8000 }
-      );
-    });
-  });
-
-  $$("#redcard-filter-group .toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      redCardFilterMode = btn.dataset.filter;
-      localStorage.setItem("bf2026-redcard-filter", redCardFilterMode);
-      renderRedCard();
-    });
-  });
-
-  $$("#redcard-setting-group .toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      redCardSetting = btn.dataset.setting;
-      localStorage.setItem("bf2026-redcard-setting", redCardSetting);
-      renderRedCard();
-    });
-  });
-
-  $$("#redcard-reservation-group .toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      redCardReservation = btn.dataset.reservation;
-      localStorage.setItem("bf2026-redcard-reservation", redCardReservation);
-      renderRedCard();
-    });
-  });
-}
 
 /* ============================================================
    טאבים + אתחול
    ============================================================ */
+
+function showUpdateToast() {
+  if ($("#updateToast")) return;
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="update-toast" id="updateToast">
+      <span>יש גרסה חדשה של האפליקציה</span>
+      <button type="button">רענון</button>
+    </div>`);
+  $("#updateToast button").addEventListener("click", () => location.reload());
+}
 
 function showView(name) {
   $$(".view").forEach(v => v.classList.remove("active"));
   $(`#view-${name}`).classList.add("active");
   $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));
   $("#app").scrollTop = 0;
-  localStorage.setItem("bf2026-lasttab", name);
+  localStorage.setItem(globalKey("lasttab"), name);
   podMount();   // אם פרק מתנגן, הנגן עובר לתצוגה שנפתחה עכשיו
 }
 
@@ -2099,9 +1382,132 @@ function rerenderWeatherViews() {
   if (app) app.scrollTop = scroll;
 }
 
-function init() {
-  $("#topbarIcon").innerHTML = ICON.tree;
+/* ============================================================
+   גיליון בחירת הטיול
+   ============================================================ */
+
+function tripStatusOf(t) {
+  const today = localDateStr(new Date());
+  if (today < t.start) return "planned";
+  if (today > t.end) return "past";
+  return "current";
+}
+
+function tripSheetItemHTML(t) {
+  const state = tripStatusOf(t);
+  const active = t.id === TRIP_ID;
+  const days = Math.round((new Date(t.start + "T00:00:00") - new Date(localDateStr(new Date()) + "T00:00:00")) / 86400000);
+  const note = state === "current" ? "מתרחש עכשיו"
+    : state === "planned" ? (days === 1 ? "מחר" : `עוד ${days} ימים`)
+    : "הסתיים";
+  return `
+    <button class="trip-item ${active ? "active" : ""}" data-trip="${escapeHTML(t.id)}">
+      <span class="trip-item-icon">${ICON[t.icon] || ICON.tree}</span>
+      <span class="trip-item-text">
+        <span class="trip-item-title">${escapeHTML(t.title)}</span>
+        <span class="trip-item-sub">${escapeHTML(t.subtitle || "")}</span>
+      </span>
+      <span class="trip-item-note">${t.hasDraft ? `<span class="trip-draft">טיוטה</span>` : ""}${state === "past" ? ICON.lock : ""}${note}</span>
+    </button>
+  `;
+}
+
+function renderTripSheet() {
+  const today = localDateStr(new Date());
+  const live = TRIP_INDEX.filter(t => t.end >= today).sort((a, b) => a.start.localeCompare(b.start));
+  const past = TRIP_INDEX.filter(t => t.end < today).sort((a, b) => b.end.localeCompare(a.end));
+
+  $("#tripSheetBody").innerHTML = `
+    <div class="sheet-handle"></div>
+    <h2 class="sheet-title">הטיולים שלנו</h2>
+    ${live.length ? `<div class="sheet-group">מתוכנן</div>${live.map(tripSheetItemHTML).join("")}` : ""}
+    ${past.length ? `<div class="sheet-group">ארכיון</div>${past.map(tripSheetItemHTML).join("")}` : ""}
+    <div class="sheet-actions">
+      <button class="sheet-btn primary" data-new-trip>${ICON.plus} טיול חדש</button>
+      <button class="sheet-btn" data-edit-trip>${ICON.pencil} עריכת ${escapeHTML(TRIP.title)}</button>
+    </div>
+    <p class="sheet-note">עריכות נשמרות במכשיר כטיוטה. מה שפורסם משתנה רק כשמפרסמים.</p>
+  `;
+}
+
+function openTripSheet() {
+  renderTripSheet();
+  $("#tripSheet").hidden = false;
+}
+
+function closeTripSheet() {
+  $("#tripSheet").hidden = true;
+}
+
+// רענון הטיול הפעיל אחרי עריכה — אותו מסלול כמו החלפת טיול, בלי הגיליון.
+async function reloadActiveTrip(id) {
+  TRIP_INDEX = edMergeIndex(TRIP_INDEX.filter(t => !t.localOnly));
+  const target = id || TRIP_ID;
+  if (!TRIP_INDEX.some(t => t.id === target)) { location.reload(); return; }
+  await loadTrip(target);
+  openDays = null;
+  renderNow();
+  renderItinerary();
+  renderInfo();
+  renderWeather();
+  wxFetch();
+}
+
+// החלפת טיול בזמן ריצה: טוענים קובץ אחר ומרנדרים הכול מחדש, בלי רענון דף.
+async function switchTrip(id) {
+  if (id === TRIP_ID) { closeTripSheet(); return; }
+  podClose();
+  try {
+    await loadTrip(id);
+  } catch (err) {
+    $("#tripSheetBody").insertAdjacentHTML("beforeend",
+      `<p class="sheet-note">לא הצלחנו לטעון את הטיול הזה. אולי אין קליטה והוא עוד לא נשמר במכשיר.</p>`);
+    return;
+  }
+  closeTripSheet();
+  openDays = null;
+  WX.store = wxLoadCache();
+  WX.status = WX.store ? "ok" : "idle";
+  renderNow();
+  renderItinerary();
+  renderInfo();
+  renderWeather();
+  showView("now");
+  wxFetch();
+}
+
+function bindTripSheet() {
+  $("#tripSwitch").innerHTML = ICON.swap;
+  $("#tripSwitch").addEventListener("click", openTripSheet);
+  $("#tripSheet").addEventListener("click", e => {
+    if (e.target.id === "tripSheet") { closeTripSheet(); return; }
+    if (e.target.closest("[data-new-trip]")) { edNewTrip(); return; }
+    if (e.target.closest("[data-edit-trip]")) { edOpenTrip(TRIP_ID); return; }
+    const item = e.target.closest("[data-trip]");
+    if (item) switchTrip(item.dataset.trip);
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !$("#tripSheet").hidden) closeTripSheet();
+  });
+}
+
+async function init() {
   $$(".tab-icon").forEach(el => { el.innerHTML = ICON[el.dataset.icon]; });
+  migrateLegacyStorage();
+  bindTripSheet();
+
+  try {
+    const index = await fetchJSON("trips/index.json").catch(() => ({ trips: [] }));
+    TRIP_INDEX = edMergeIndex(index.trips || []);
+    const id = pickDefaultTrip(TRIP_INDEX);
+    if (!id) throw new Error("no trips in index");
+    await loadTrip(id);
+  } catch (err) {
+    $("#view-now").innerHTML = `<div class="empty-note">לא הצלחנו לטעון את רשימת הטיולים. אם אין קליטה, נסו שוב כשתהיה.</div>`;
+    $("#view-now").classList.add("active");
+    console.error(err);
+    return;
+  }
 
   // תחזית שמורה מהפעם הקודמת — מוצגת מיד, גם בלי רשת.
   WX.store = wxLoadCache();
@@ -2109,7 +1515,6 @@ function init() {
 
   renderNow();
   renderItinerary();
-  renderRedCard();
   renderInfo();
   renderWeather();
   showView("now");
@@ -2130,13 +1535,18 @@ function init() {
       return;
     }
     const title = e.target.closest(".pod-title");
-    if (title) podToggle(title.dataset.pod);
+    if (title) { podToggle(title.dataset.pod); return; }
+    if (e.target.closest("[data-open-trips]")) { openTripSheet(); return; }
+    if (e.target.closest("[data-edit-current]")) edOpenTrip(TRIP_ID);
   });
 
+  // ההרשמה נדחית לסוף הטעינה כדי לא להתחרות על הרשת עם הרינדור הראשון.
+  // init() הוא async ומחכה לקובץ הטיול, כך שאירוע load עלול כבר לקרות עד
+  // שמגיעים לכאן — ואז מאזין ל-load לבדו לא היה נקרא לעולם.
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
-    });
+    const registerSW = () => navigator.serviceWorker.register("sw.js").catch(() => {});
+    if (document.readyState === "complete") registerSW();
+    else window.addEventListener("load", registerSW, { once: true });
   }
 
   // כל שינוי במצב התחזית (טעינה/הצלחה/כישלון) מרנדר מחדש.

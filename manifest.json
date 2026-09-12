@@ -1,7 +1,7 @@
 {
-  "name": "היער השחור 2026",
-  "short_name": "היער השחור",
-  "description": "תוכנית הטיול המשפחתי ביער השחור, 17–24 באוגוסט 2026",
+  "name": "הטיולים שלנו",
+  "short_name": "טיולים",
+  "description": "תוכניות הטיולים המשפחתיים — מסלול, מזג אוויר וניווט, גם בלי קליטה",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -11,9 +11,29 @@
   "lang": "he",
   "dir": "rtl",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
