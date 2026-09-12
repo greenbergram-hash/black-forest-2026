@@ -111,6 +111,20 @@ const HEB_WEEKDAYS = ["יום ראשון", "יום שני", "יום שלישי",
 
 const STORE_PREFIX = "tp:";
 
+// חותמת גרסה, מוצגת בלשונית "מידע". מעלים אותה בכל דחיפה — כשמישהו אומר
+// "אצלי זה לא עובד", זו הדרך לדעת אם הוא בכלל מריץ את הקוד הנוכחי.
+const APP_BUILD = "2026-09-12.9";
+
+// ה-Service Worker מגיש את המעטפת מהמטמון ומעדכן ברקע; כשהוא מגלה שהקוד
+// השתנה, הדף הזה כבר רץ עם הישן — אז הוא שולח הודעה ומציעים רענון.
+// המאזין נרשם כאן, לפני כל await: ברשת מהירה העדכון ברקע מסתיים לפני
+// ש-init() בכלל מגיע לרישום מאוחר יותר, וההודעה הייתה הולכת לאיבוד.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "shell-updated") showUpdateToast();
+  });
+}
+
 function globalKey(name) { return STORE_PREFIX + name; }
 function tripKey(name) { return `${STORE_PREFIX}${TRIP_ID}:${name}`; }
 
@@ -635,7 +649,12 @@ function renderItinerary() {
     `;
   }).join("");
 
-  $("#view-itinerary").innerHTML = `<h2 class="mini-list-title" style="margin-top:0">המסלול המלא</h2>${html}`;
+  $("#view-itinerary").innerHTML = `
+    <div class="view-head">
+      <h2 class="mini-list-title" style="margin:0">המסלול המלא</h2>
+      <button class="edit-btn" data-edit-current>${ICON.pencil} עריכה</button>
+    </div>
+    ${html}`;
 
   // שמירת מצב פתוח/סגור, כדי לשחזר אותו אחרי רינדור מחדש (למשל כשהתחזית מתעדכנת).
   $$("details.day").forEach(el => {
@@ -676,6 +695,7 @@ function renderNow() {
       </div>
       <h2 class="mini-list-title">לפני שנוסעים</h2>
       ${renderChecklistHTML()}
+      <button class="route-btn" data-edit-current style="margin-top:16px">${ICON.pencil} עריכת התוכנית</button>
     `;
     bindChecklist();
     return;
@@ -891,6 +911,8 @@ function renderInfo() {
         <div class="tip">${ICON.bulb}<span>תחזית ליום 7–8 קדימה היא כיוון כללי, לא הבטחה — ככל שמתקרבים היא מתייצבת. שווה להסתכל שוב בכל בוקר.</span></div>
       </div>
     </div>
+
+    <p class="build-stamp">גרסה ${APP_BUILD} · טיול ${escapeHTML(TRIP_ID)}</p>
 
     ${GENERAL_TIPS.length ? `<div class="info-section">
       <h2>כדאי לדעת</h2>
@@ -1326,6 +1348,16 @@ function renderWeather() {
    טאבים + אתחול
    ============================================================ */
 
+function showUpdateToast() {
+  if ($("#updateToast")) return;
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="update-toast" id="updateToast">
+      <span>יש גרסה חדשה של האפליקציה</span>
+      <button type="button">רענון</button>
+    </div>`);
+  $("#updateToast button").addEventListener("click", () => location.reload());
+}
+
 function showView(name) {
   $$(".view").forEach(v => v.classList.remove("active"));
   $(`#view-${name}`).classList.add("active");
@@ -1504,7 +1536,8 @@ async function init() {
     }
     const title = e.target.closest(".pod-title");
     if (title) { podToggle(title.dataset.pod); return; }
-    if (e.target.closest("[data-open-trips]")) openTripSheet();
+    if (e.target.closest("[data-open-trips]")) { openTripSheet(); return; }
+    if (e.target.closest("[data-edit-current]")) edOpenTrip(TRIP_ID);
   });
 
   // ההרשמה נדחית לסוף הטעינה כדי לא להתחרות על הרשת עם הרינדור הראשון.

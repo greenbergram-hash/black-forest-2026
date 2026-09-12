@@ -54,6 +54,36 @@ self.addEventListener("activate", event => {
 });
 
 const isAudio = url => url.pathname.includes("/audio/");
+const isShell = url => /\/(app|editor)\.js$|\/style\.css$|\/index\.html$|\/$/.test(url.pathname);
+
+// השוואה לפי כותרות — ETag או Last-Modified. GitHub Pages ו-http.server
+// של פייתון שולחים לפחות אחת מהן; בלי אף אחת לא מכריזים על שינוי.
+function changed(cached, fresh) {
+  for (const h of ["etag", "last-modified"]) {
+    const a = cached.headers.get(h), b = fresh.headers.get(h);
+    if (a && b) return a !== b;
+  }
+  return false;
+}
+
+let notified = false;
+// יומן קצר של מה ה-worker ראה — הדף יכול לבקש אותו (sw-debug). שימושי
+// כשמישהו אומר "אצלי זה לא מתעדכן" ואי אפשר לפתוח לו DevTools.
+const swLog = [];
+const logPush = entry => { swLog.push(entry); if (swLog.length > 24) swLog.shift(); };
+async function notifyUpdated() {
+  if (notified) return;
+  notified = true;
+  const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  logPush({ t: "notify", clients: clients.length });
+  clients.forEach(c => c.postMessage({ type: "shell-updated" }));
+}
+
+self.addEventListener("message", event => {
+  if (event.data && event.data.type === "sw-debug") {
+    event.source.postMessage({ type: "sw-debug", log: swLog.slice(-12), notified });
+  }
+});
 const isTripData = url => /\/trips\/[^/]*\.json$|\/trips\/[^/]+\/trip\.json$|\/trips\/index\.json$/.test(url.pathname);
 const isTripAsset = url => url.pathname.includes("/trips/") && !isTripData(url) && !isAudio(url);
 
@@ -184,6 +214,10 @@ self.addEventListener("fetch", event => {
         if (res.status === 200) {
           const clone = res.clone();
           caches.open(CACHE).then(cache => cache.put(event.request, clone));
+          // המעטפת השתנתה מאז שנשמרה? מודיעים לדף, שמציע רענון. בלי זה
+          // הטעינה הראשונה אחרי כל עדכון מריצה קוד ישן ואף אחד לא יודע.
+          if (isShell(url)) logPush({ t: "shell", path: url.pathname, hadCached: !!cached, cLM: cached && cached.headers.get("last-modified"), fLM: res.headers.get("last-modified"), changed: cached ? changed(cached, res) : null });
+          if (cached && isShell(url) && changed(cached, res)) notifyUpdated();
         }
         return res;
       }).catch(() => cached);
