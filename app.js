@@ -576,7 +576,9 @@ function dayStopsHTML(day) {
 }
 
 function dayRouteLink(day) {
-  const stops = day.blocks.filter(b => b.address).map(b => b.address);
+  // תחנה שהיא הבסיס עצמו (Aqua Mundo בתוך הפארק, ערב הגעה) לא מצדיקה
+  // מסלול — בלעדיה היה נוצר כפתור שמנווט מהפארק אל הפארק.
+  const stops = day.blocks.filter(b => b.address && b.address !== TRIP.base.address).map(b => b.address);
   if (!stops.length) return null;
   const full = day.returnLeg
     ? [TRIP.base.address, ...stops, TRIP.base.address]

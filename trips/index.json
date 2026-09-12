@@ -9,6 +9,15 @@
       "start": "2026-08-17",
       "end": "2026-08-24",
       "status": "past"
+    },
+    {
+      "id": "allgau-2026",
+      "title": "אלגוי",
+      "subtitle": "18–25 בספטמבר 2026",
+      "icon": "route",
+      "start": "2026-09-18",
+      "end": "2026-09-25",
+      "status": "planned"
     }
   ]
 }
