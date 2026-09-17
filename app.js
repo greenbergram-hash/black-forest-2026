@@ -558,12 +558,15 @@ function stopCardHTML(day, block) {
 }
 
 // בלוק מידע נלווה (בלי כתובת/מפה/תמונה משלו).
+// גם בלוק כזה יכול לשאת פרק: יום בפארק כולו בלוקים בלי כתובת, ופרק
+// הפתיחה על האזור נתלה על "סיבוב היכרות בפארק".
 function infoItemHTML(day, block) {
   return `
     <div class="timeline-item">
       <div class="time">${timeLabel(block)}</div>
       <div class="body">
-        <h3>${escapeHTML(block.title)}</h3>
+        <h3>${podTitleHTML(block)}</h3>
+        ${podPanelHTML(block)}
         <p>${escapeHTML(block.desc)}</p>
         ${chipsHTML(block)}
         ${tipsHTML(block)}
