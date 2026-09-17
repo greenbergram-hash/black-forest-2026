@@ -41,7 +41,29 @@
     "לפי הלוח הרשמי LEGOLAND סגור ב-21–23 בספטמבר. לא מעבירים את הביקור ליום אחר בלי לבדוק פתיחה ותנאי כרטיס.",
     "שווייץ (למשל מפלי הריין) היא נסיעה ארוכה יותר משאר היעדים ולא נכללת בלוח הבסיסי."
   ],
-  "podcasts": {},
+  "podcasts": {
+    "centerparcs": {
+      "title": "האלגוי והפארק שנבנה על מחסן פצצות",
+      "file": "audio/centerparcs.m4a",
+      "minutes": 14,
+      "rev": 1,
+      "ready": true
+    },
+    "lindau": {
+      "title": "לינדאו — האי שהיה עיר, והאגם שאין לו גבולות",
+      "file": "audio/lindau.m4a",
+      "minutes": 10,
+      "rev": 1,
+      "ready": true
+    },
+    "eistobel": {
+      "title": "Eistobel — הערוץ שקרחון חפר בשבועות",
+      "file": "audio/eistobel.m4a",
+      "minutes": 22,
+      "rev": 1,
+      "ready": true
+    }
+  },
   "days": [
     {
       "date": "2026-09-18",
@@ -106,7 +128,8 @@
             "display": "40, Allgäuallee, Unteröschhöfe"
           },
           "wxPlace": "Leutkirch im Allgäu, Germany",
-          "infoUrl": "https://www.centerparcs.de/de-de/deutschland/fp_AL_ferienpark-park-allgau"
+          "infoUrl": "https://www.centerparcs.de/de-de/deutschland/fp_AL_ferienpark-park-allgau",
+          "area": "centerparcs"
         },
         {
           "start": "12:30",
@@ -194,7 +217,8 @@
             {
               "text": "חניה: לכוון ל-P4 Inselhalle (Zwanzigerstraße 10) ולבדוק זמינות ומחיר במקום. מהחניון כמה דקות הליכה לנמל."
             }
-          ]
+          ],
+          "area": "lindau"
         },
         {
           "start": "12:15",
@@ -304,7 +328,8 @@
             {
               "text": "בשבילים רטובים עדיף לוותר. נעליים סגורות."
             }
-          ]
+          ],
+          "area": "eistobel"
         },
         {
           "start": "12:00",
