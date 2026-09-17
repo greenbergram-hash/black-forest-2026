@@ -62,6 +62,20 @@
       "minutes": 22,
       "rev": 1,
       "ready": true
+    },
+    "neuschwanstein": {
+      "title": "נוישוונשטיין — הטירה של המלך שרצה לחיות בתוך אופרה",
+      "file": "audio/neuschwanstein.m4a",
+      "minutes": 23,
+      "rev": 1,
+      "ready": true
+    },
+    "alpsee": {
+      "title": "Alpsee Bergwelt ואימנשטאט — ההר, הפרות והגבינה",
+      "file": "audio/alpsee.m4a",
+      "minutes": 23,
+      "rev": 1,
+      "ready": true
     }
   },
   "days": [
@@ -418,7 +432,8 @@
               "text": "הפנים של הטירה נגיש בסיור מוזמן בלבד — להזמין מראש.",
               "warn": true
             }
-          ]
+          ],
+          "area": "neuschwanstein"
         },
         {
           "start": "11:00",
@@ -432,7 +447,8 @@
             "elev": 897,
             "display": "20, Neuschwansteinstraße, Hohenschwangau"
           },
-          "wxPlace": "Schwangau, Germany"
+          "wxPlace": "Schwangau, Germany",
+          "area": "neuschwanstein"
         },
         {
           "start": "13:00",
@@ -551,7 +567,8 @@
             {
               "text": "המגלשה והרכבל תלויים במזג האוויר — לבדוק באותו בוקר."
             }
-          ]
+          ],
+          "area": "alpsee"
         },
         {
           "start": "13:00",
